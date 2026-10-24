@@ -1,0 +1,91 @@
+---
+import Icon from "./Icon.astro";
+import products from "../data/products.json";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const home = lang === "ja" ? "/" : "/en/";
+const fict = lang === "ja"
+  ? { q: "Q. 今日いちばん良かったセッションは？", s: "セッション", foot: "回答 412 · 参加中 438（架空の例）", people: ["架空 一郎", "架空 花子", "架空 次郎", "架空 三郎"], rooms: ["第1会場", "第1会場", "第2会場", "第2会場"], st: ["投影中", "受付済", "受付済", "未受付"], head: ["演題", "演者", "会場", "状態"], days: ["月", "火", "水", "木", "金", "土", "日"], gear: ["スイッチャー #1", "カメラ #2", "LED 3m", "ミキサー #1"], book: "予約", hold: "仮押さえ", tname: "架空 太郎", ttitle: "架空大学 映像工学部 教授", mon: ["メイン配信 (SRT)", "予備配信 (RTMP)", "会場収録", "サブ会場 (HLS)"], silent: "無音 12秒" }
+  : { q: "Q. Best session today?", s: "Session ", foot: "412 answers · 438 joined (fictional)", people: ["Taro Example", "Hana Example", "Jiro Example", "Saburo Example"], rooms: ["Room 1", "Room 1", "Room 2", "Room 2"], st: ["On screen", "Checked in", "Checked in", "Waiting"], head: ["Talk", "Speaker", "Room", "Status"], days: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], gear: ["Switcher #1", "Camera #2", "LED 3m", "Mixer #1"], book: "Booked", hold: "Hold", tname: "Taro Example", ttitle: "Professor, Example University", mon: ["Main (SRT)", "Backup (RTMP)", "Recording", "Room B (HLS)"], silent: "Silent 12s" };
+const stCls = ["on", "ok", "ok", "no"];
+const gantt = [[0, 3, "var(--acc)"], [1, 2, "#7a5af8"], [2, 5, "var(--acc)"], [4, 6, "#f79009"]] as const;
+---
+<section class="section" id="products">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">{T.productsEyebrow}</span>
+      <h2>{T.productsTitle}</h2>
+      <p>{T.productsLead}</p>
+    </div>
+    {products.map((p, i) => {
+      const L = p[lang];
+      return (
+        <article class={`prod ${i % 2 ? "rev" : ""}`}>
+          <div class="prod-text reveal">
+            <span class="pill">{p.name}</span>
+            <h3>{L.catch[0]}<br />{L.catch[1]}</h3>
+            <p class="prod-kind">{L.kind}</p>
+            <ul class="feats">{L.feats.map((f) => <li><Icon name="check" />{f}</li>)}</ul>
+            <div class="big"><b>{L.big}</b><span>{L.bigSub}</span></div>
+            <div class="prod-actions">
+              <a class="btn" href={p.href}>{T.more}<Icon name="right" size={18} /></a>
+              <a class="btn" href={`${home}?topic=${p.id}#contact`} data-topic="work">{T.consultProduct}</a>
+            </div>
+          </div>
+          <div class="mock reveal" style="--rd:.1s" aria-hidden="true">
+            <div class="mock-in">
+              <p class="mock-label">{p.name} — {T.mockLabel}</p>
+              {p.mock === "poll" && (
+                <div>
+                  <p class="poll-q">{fict.q}</p>
+                  {[46, 31, 15, 8].map((v, k) => (
+                    <div class={`bar ${k === 0 ? "top" : ""}`}><i style={`--w:${v}%;--d:${k * 0.15}s`}></i><span><b>{fict.s}{"ABCD"[k]}</b><b class="mono">{v}%</b></span></div>
+                  ))}
+                  <p class="mock-label" style="margin:6px 0 0">{fict.foot}</p>
+                </div>
+              )}
+              {p.mock === "table" && (
+                <table class="mtable">
+                  <thead><tr>{fict.head.map((h) => <th>{h}</th>)}</tr></thead>
+                  <tbody>{fict.people.map((n, k) => (
+                    <tr><td class="mono">{["A-01", "A-02", "B-01", "B-02"][k]}</td><td>{n}</td><td>{fict.rooms[k]}</td><td><span class={`st ${stCls[k]}`}>{fict.st[k]}</span></td></tr>
+                  ))}</tbody>
+                </table>
+              )}
+              {p.mock === "gantt" && (
+                <div class="gantt">
+                  <span></span>{fict.days.map((d) => <span class="d">{d}</span>)}
+                  {fict.gear.map((g, r) => (
+                    <>
+                      <span class="r">{g}</span>
+                      {fict.days.map((_, c) => (
+                        <span class="slot">{c === gantt[r][0] && <span class="gb" style={`width:calc(${(gantt[r][1] - gantt[r][0] + 1) * 100}% - 6px);background:${gantt[r][2]};--d:${r * 0.2}s`}>{r === 3 ? fict.hold : fict.book}</span>}</span>
+                      ))}
+                    </>
+                  ))}
+                </div>
+              )}
+              {p.mock === "telop" && (
+                <div class="telop"><div class="telop-bar"><b>{fict.tname}</b><span>{fict.ttitle}</span></div></div>
+              )}
+              {p.mock === "monitor" && (
+                <div class="mon">
+                  {fict.mon.map((m, k) => (
+                    <div class={`mon-row ${k === 3 ? "alert" : ""}`}>
+                      <span class="st on" style={k === 3 ? "background:transparent;color:inherit" : ""}>{k === 3 ? "!" : "LIVE"}</span>
+                      <span>{m}</span>
+                      {k === 3 && <b class="mono" style="margin-left:8px;font-size:12px">{fict.silent}</b>}
+                      <span class="wave">{Array.from({ length: 14 }, (_, j) => <b style={`--t:${0.5 + ((j * 7) % 5) * 0.12}s`}></b>)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</section>

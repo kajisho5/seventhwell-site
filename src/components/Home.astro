@@ -1,0 +1,30 @@
+---
+import Base from "../layouts/Base.astro";
+import SiteHeader from "./SiteHeader.astro";
+import Hero from "./Hero.astro";
+import LiveBoard from "./LiveBoard.astro";
+import Services from "./Services.astro";
+import Products from "./Products.astro";
+import Works from "./Works.astro";
+import OpenSource from "./OpenSource.astro";
+import Equipment from "./Equipment.astro";
+import Contact from "./Contact.astro";
+import SiteFooter from "./SiteFooter.astro";
+import type { Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+---
+<Base lang={lang} path={lang === "ja" ? "/" : "/en/"}>
+  <SiteHeader lang={lang} />
+  <main id="main">
+    <Hero lang={lang} />
+    <LiveBoard lang={lang} />
+    <Services lang={lang} />
+    <Products lang={lang} />
+    <Works lang={lang} />
+    <OpenSource lang={lang} />
+    <Equipment lang={lang} />
+    <Contact lang={lang} />
+  </main>
+  <SiteFooter lang={lang} />
+</Base>

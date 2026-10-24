@@ -1,0 +1,48 @@
+---
+import Icon from "./Icon.astro";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const cues = Array.from({ length: 96 }, (_, k) => (k < 52 ? "done" : k === 52 ? "live" : "next"));
+---
+<div class="board-wrap">
+  <div class="wrap">
+    <figure class="board reveal" aria-label={T.boardTitle + " — " + T.boardNote} style="margin:0">
+      <div class="board-top">
+        <span class="brand-mark">7</span>
+        <span class="board-title">{T.boardTitle}</span>
+        <span class="board-clock" data-clock>DAY 2&nbsp;&nbsp;10:42:18</span>
+        <span class="onair"><i></i>ON AIR</span>
+      </div>
+      <dl class="board-sum">
+        {T.boardSummary.map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+      </dl>
+      <div class="board-cards">
+        {T.boardCards.map(([ic, title, sub, v1, v2], i) => (
+          <div class="bcard">
+            <span class="bcard-ic"><Icon name={ic} size={18} /></span>
+            <i class="lamp" style={`--d:${i * 0.4}s`}></i>
+            <h3>{title}</h3>
+            <span class="k">{sub}</span>
+            <span class="v" data-jitter={ic === "stream" ? "bitrate" : undefined}>{v1}</span>
+            <span class="s">{v2}</span>
+            {ic === "audio" && <span class="meter" aria-hidden="true">{[0.7, 0.9, 0.8, 1.1, 0.75, 0.95, 0.85, 1.05].map((d) => <b style={`--t:${d}s`}></b>)}</span>}
+          </div>
+        ))}
+      </div>
+      <div class="grid-cues">
+        <p>{T.progress}</p>
+        <div class="cues" aria-hidden="true">
+          {cues.map((c, k) => <i class={c} style={c === "done" ? `--d:${(k % 48) * 0.06}s` : undefined}></i>)}
+        </div>
+        <div class="cues-legend">
+          <span style="color:#8fb0ff">{T.done} 52</span>
+          <span style="color:#3dd68c">{T.live} 1</span>
+          <span style="color:var(--psub)">{T.next} 43</span>
+          <span class="note">{T.boardNote}</span>
+        </div>
+      </div>
+    </figure>
+  </div>
+</div>

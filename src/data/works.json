@@ -1,0 +1,8 @@
+[
+  { "year": 2026, "type": { "ja": "企業", "en": "Corporate" }, "ja": "企業周年記念パーティー — ホテル宴会場 映像スイッチング", "en": "Corporate anniversary party — hotel ballroom video switching" },
+  { "year": 2026, "type": { "ja": "配信", "en": "Streaming" }, "ja": "国際学会 — 大型展示会場 配信 / PinP / スクリーンSW", "en": "International conference — streaming / PinP / screen switching" },
+  { "year": 2026, "type": { "ja": "展示会", "en": "Expo" }, "ja": "大規模展示事務局 — 展示会場 AV技術オペレーション", "en": "Large expo office — AV technical operation" },
+  { "year": 2026, "type": { "ja": "配信", "en": "Streaming" }, "ja": "定期配信シリーズ — ライブ配信オペレーション", "en": "Recurring stream series — live streaming operation" },
+  { "year": 2025, "type": { "ja": "開発", "en": "Software" }, "ja": "SW-MULTISTREAM — 多トラック音声ライブ配信アプリ", "en": "SW-MULTISTREAM — multi-track audio streaming app" },
+  { "year": 2025, "type": { "ja": "開発", "en": "Software" }, "ja": "E2MAPPER v3 — Barco E2 PnP位置計算PWA", "en": "E2MAPPER v3 — Barco E2 PnP position calculator" }
+]

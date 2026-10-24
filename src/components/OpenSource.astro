@@ -1,0 +1,44 @@
+---
+import Icon from "./Icon.astro";
+import tools from "../data/tools.json";
+import repos from "../data/repos.json";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const gh = `https://github.com/${repos.account}`;
+---
+<section class="section" id="tools">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">{T.toolsEyebrow}</span>
+      <h2>{T.toolsTitle}</h2>
+      <p>{T.toolsLead}</p>
+    </div>
+    <div class="tools">
+      {tools.map((tl, i) => (
+        <a class="tool reveal" style={`--rd:${i * 0.05}s`} href={tl.href}><b>{tl.name}</b><span>{tl[lang]}</span><Icon name="arrow" /></a>
+      ))}
+    </div>
+    <div class="repo" id="code">
+      <div class="repo-feat reveal">
+        <span class="repo-name"><Icon name="github" size={22} />{repos.account}/{repos.featured.name}</span>
+        <h3>{T.featuredDesc}</h3>
+        <p>{T.featuredSub}</p>
+        <div class="repo-meta">
+          <span class="star"><Icon name="star" size={18} />{repos.featured.stars.toLocaleString("en-US")}</span>
+          <span style="color:var(--psub)">{repos.featured.language} · {repos.featured.license}</span>
+        </div>
+        <a class="btn" href={`${gh}/${repos.featured.name}`}>{T.viewGithub}<Icon name="arrow" size={18} /></a>
+      </div>
+      <div class="repo-groups">
+        {repos.groups.map((g, i) => (
+          <div class="rgroup reveal" style={`--rd:${i * 0.08}s`}>
+            <h4>{g[lang]}</h4>
+            <ul>{g.repos.map((r) => <li><a href={`${gh}/${r}`}>{r}</a></li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

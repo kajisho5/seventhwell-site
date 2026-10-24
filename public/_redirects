@@ -1,0 +1,3 @@
+# 請求書管理は作り直すまで旧サーバー（お名前.com）で動かす
+/invoice/* https://old.seventh-well.com/invoice/:splat 302
+/invoice https://old.seventh-well.com/invoice/ 302

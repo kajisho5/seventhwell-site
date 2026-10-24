@@ -1,0 +1,29 @@
+---
+import Icon from "./Icon.astro";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang; home?: string }
+const { lang, home = lang === "ja" ? "/" : "/en/" } = Astro.props;
+const T = t[lang];
+---
+<header class="header">
+  <div class="wrap header-in">
+    <a class="brand logo-font" href={home} aria-label="SEVENTHWELL"><span class="brand-mark">7</span>SEVENTHWELL</a>
+    <nav class="nav" aria-label="main">
+      {T.nav.map(([href, label]) => <a href={home + href}>{label}</a>)}
+    </nav>
+    <div class="header-right">
+      <a class="lang" href={T.langSwitch} hreflang={lang === "ja" ? "en" : "ja"}>{lang === "ja" ? "JA / EN" : "EN / JA"}</a>
+      <button class="theme-btn" type="button" data-theme-toggle aria-label={T.theme}>
+        <span><Icon name="sun" class="i-sun" /></span>
+      </button>
+      <a class="btn" href={home + "#contact"} data-topic="work">{T.consult}</a>
+      <a class="btn btn-primary" href={home + "#contact"} data-topic="estimate">{T.estimate}</a>
+      <button class="menu-btn" type="button" data-menu aria-expanded="false" aria-controls="drawer" aria-label={T.menu}><Icon name="menu" /></button>
+    </div>
+  </div>
+  <div class="drawer" id="drawer">
+    {T.nav.map(([href, label]) => <a href={home + href} data-close>{label}</a>)}
+    <a href={T.langSwitch} data-close>{T.langLabel}</a>
+    <a class="btn btn-primary" href={home + "#contact"} data-close data-topic="work">{T.consult}</a>
+  </div>
+</header>

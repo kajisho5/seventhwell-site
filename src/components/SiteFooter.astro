@@ -1,0 +1,44 @@
+---
+import { t, type Lang } from "../data/site";
+import repos from "../data/repos.json";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const home = lang === "ja" ? "/" : "/en/";
+const cols = lang === "ja"
+  ? [["サービス", [["映像処理", "#services"], ["ライブ配信", "#services"], ["音響", "#services"], ["AV設備", "#services"]]],
+     ["プロダクト", [["PULSE", "/pulse/"], ["Presync", "/presync/"], ["HOLDLINE", "/holdline/"], ["TELOPDECK", "/telopdeck/"], ["STREAMTALLY", "/streamtally/"]]],
+     ["リソース", [["無料ツール", "#tools"], ["GitHub", `https://github.com/${repos.account}`], ["SW-CATALOG", "/sw-catalog"]]],
+     ["会社", [["実績", "#works"], ["お問い合わせ", "#contact"], ["English", "/en/"]]]]
+  : [["Services", [["Video", "#services"], ["Streaming", "#services"], ["Audio", "#services"], ["AV install", "#services"]]],
+     ["Products", [["PULSE", "/pulse/"], ["Presync", "/presync/"], ["HOLDLINE", "/holdline/"], ["TELOPDECK", "/telopdeck/"], ["STREAMTALLY", "/streamtally/"]]],
+     ["Resources", [["Free tools", "#tools"], ["GitHub", `https://github.com/${repos.account}`], ["SW-CATALOG", "/sw-catalog"]]],
+     ["Company", [["Works", "#works"], ["Contact", "#contact"], ["日本語", "/"]]]];
+const built = new Date().toISOString().slice(0, 10);
+const link = (h: string) => (h.startsWith("#") ? home + h : h);
+---
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <a class="brand logo-font" href={home}><span class="brand-mark">7</span>SEVENTHWELL</a>
+        <p>{T.footerTag}</p>
+      </div>
+      {cols.map(([h, items]) => (
+        <div><h4>{h}</h4><ul>{(items as string[][]).map(([l, href]) => <li><a href={link(href)}>{l}</a></li>)}</ul></div>
+      ))}
+    </div>
+    <div class="footer-bottom">
+      <span>© {new Date().getFullYear()} SEVENTHWELL</span>
+      <span class="built"><i class="dot"></i>Built with Astro · Cloudflare Workers · {built}</span>
+      <label>
+        <span class="sr">{T.theme}</span>
+        <select class="theme-select" data-theme-select>
+          <option value="system">{T.theme}：{T.themeSystem}</option>
+          <option value="light">{T.theme}：{T.themeLight}</option>
+          <option value="dark">{T.theme}：{T.themeDark}</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</footer>

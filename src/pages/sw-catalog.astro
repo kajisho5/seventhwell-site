@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import equipment from "../data/equipment.json";
+---
+<Base title="SW-CATALOG — SEVENTHWELL 運用機材" description="SEVENTHWELLが自社で運用・管理している主要機材の一覧です。" path="/sw-catalog">
+  <SiteHeader lang="ja" />
+  <main id="main" class="section">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">SW-CATALOG</span>
+        <h2>運用・管理している機材</h2>
+        <p>主要機材 {equipment.total} 点。ケーブル・スタンド・消耗品は含めていません。</p>
+      </div>
+      <div class="services">
+        {equipment.categories.map((c) => (
+          <article class="svc">
+            <span class="pill">{c.ja} / {c.en}</span>
+            <ul class="feats" style="margin-top:18px">
+              {c.items.map((it) => <li><span class="mono" style="min-width:2.5em">×{it.count}</span>{it.name}</li>)}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </main>
+  <SiteFooter lang="ja" />
+</Base>

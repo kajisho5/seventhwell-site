@@ -1,0 +1,10 @@
+{
+  "note": "仮データ。実データは今の SW-CATALOG（equipment/sw-data）から移す。名前はすべて架空の例。",
+  "total": 41,
+  "categories": [
+    { "id": "video", "ja": "映像", "en": "Video", "items": [{ "name": "映像プロセッサ（例）", "count": 1 }, { "name": "スイッチャー（例）", "count": 2 }] },
+    { "id": "audio", "ja": "音響", "en": "Audio", "items": [{ "name": "デジタルミキサー（例）", "count": 1 }] },
+    { "id": "light", "ja": "照明", "en": "Lighting", "items": [{ "name": "LEDライト（例）", "count": 4 }] },
+    { "id": "install", "ja": "施工", "en": "Install", "items": [{ "name": "モニター金具（例）", "count": 6 }] }
+  ]
+}

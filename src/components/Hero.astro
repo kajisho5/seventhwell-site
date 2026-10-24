@@ -1,0 +1,34 @@
+---
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const stack = ["YouTube", "Zoom", "Teams", "Webex", "OBS", "vMix", "SRT", "RTMP", "NDI", "Dante", "SDI", "Barco E2", "HLS", "Wirecast"];
+// 1文字ずつせり上がる見出し。「、」「,」の後で行を分け、スマホでも変な所で折れないようにする
+const cut = T.heroTitle.search(/[、,]/) + 1;
+const parts = cut > 0 ? [T.heroTitle.slice(0, cut), T.heroTitle.slice(cut).trim()] : [T.heroTitle];
+const NBSP = " ";
+---
+<section class="hero">
+  <div class="wrap">
+    <span class="hero-badge reveal"><i class="dot"></i>{T.badge}</span>
+    <h1 aria-label={T.heroTitle}>
+      {parts.map((part, pi) => (
+        <span class="ln" aria-hidden="true">{[...part].map((c, i) => <span class="ch" style={`animation-delay:${0.15 + (pi * 12 + i) * 0.035}s`}>{c === " " ? NBSP : c}</span>)}{pi === 0 && lang === "en" ? NBSP : ""}</span>
+      ))}
+    </h1>
+    <p class="hero-sub reveal" style="--rd:.35s">{T.heroSub1}<br />{T.heroSub2}</p>
+    <div class="hero-cta reveal" style="--rd:.45s">
+      <a class="btn btn-primary btn-lg" href="#contact" data-topic="work">{T.heroCta}</a>
+      <span class="hero-note">{T.heroNote}</span>
+    </div>
+    <div class="marquee reveal" style="--rd:.55s">
+      <span class="marquee-label">{T.stackLabel}</span>
+      <div class="marquee-track" aria-label={stack.join(", ")}>
+        <div class="marquee-row" aria-hidden="true">
+          {[...stack, ...stack].map((s) => <span>{s}</span>)}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

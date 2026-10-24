@@ -1,0 +1,17 @@
+[
+  { "id": "pulse", "name": "PULSE", "href": "/pulse/", "mock": "poll",
+    "ja": { "kind": "QRで参加するリアルタイム投票", "catch": ["会場の反応を、", "その場で可視化する。"], "feats": ["QRを読むだけで参加", "1000人同時接続", "アンケート・クイズ"], "big": "1000人", "bigSub": "同時接続に対応" },
+    "en": { "kind": "Live audience response via QR", "catch": ["See the room react,", "in real time."], "feats": ["Join by scanning a QR", "1,000 concurrent users", "Polls and quizzes"], "big": "1,000", "bigSub": "concurrent users" } },
+  { "id": "presync", "name": "Presync", "href": "/presync/", "mock": "table",
+    "ja": { "kind": "PC受付・会場進行", "catch": ["演者の受付から投影まで、", "止めずにつなぐ。"], "feats": ["受付・会場・本部が同期", "会場LANで完結", "インターネット不要"], "big": "1,000演題・20台", "bigSub": "で実測" },
+    "en": { "kind": "Speaker reception & venue ops", "catch": ["From check-in to the screen,", "without stopping."], "feats": ["Reception, rooms and HQ in sync", "Runs on the venue LAN", "No internet needed"], "big": "1,000 talks / 20 PCs", "bigSub": "tested" } },
+  { "id": "holdline", "name": "HOLDLINE", "href": "/holdline/", "mock": "gantt",
+    "ja": { "kind": "機材と人の予約ボード", "catch": ["「この日これ空いてる？」に、", "一目で答える。"], "feats": ["予約ボード", "期限つき仮押さえ", "QRで出庫"], "big": "仮押さえ", "bigSub": "の期限を自動管理" },
+    "en": { "kind": "Gear & crew booking board", "catch": ["\"Is this free that day?\"", "Answered at a glance."], "feats": ["Booking board", "Holds with expiry", "QR check-out"], "big": "Holds", "bigSub": "expire automatically" } },
+  { "id": "telopdeck", "name": "TELOPDECK", "href": "/telopdeck/", "mock": "telop",
+    "ja": { "kind": "登壇者テロップ送出", "catch": ["Excelの登壇者一覧から、", "名前スーパーの送出まで。"], "feats": ["Excelから取り込み", "pptx・透過PNG書き出し", "OBSに透過で重ねる"], "big": "2行肩書き", "bigSub": "も自動で組版" },
+    "en": { "kind": "Speaker lower-thirds playout", "catch": ["From the speaker sheet", "to the lower third."], "feats": ["Import from Excel", "Export pptx / transparent PNG", "Overlay in OBS"], "big": "2-line titles", "bigSub": "typeset automatically" } },
+  { "id": "streamtally", "name": "STREAMTALLY", "href": "/streamtally/", "mock": "monitor",
+    "ja": { "kind": "配信の監視ダッシュボード", "catch": ["落ちた、無音、止まった。", "本番中に気づける。"], "feats": ["切断・無音・静止を検知", "確認まで鳴る警報", "報告書を書き出し"], "big": "HLS・RTMP・SRT", "bigSub": "に対応" },
+    "en": { "kind": "Stream monitoring dashboard", "catch": ["Dropped, silent, frozen —", "know during the show."], "feats": ["Detects drops, silence, freezes", "Alarm until acknowledged", "Exportable reports"], "big": "HLS · RTMP · SRT", "bigSub": "supported" } }
+]

@@ -1,0 +1,8 @@
+[
+  { "name": "TIMELINK", "href": "https://timer.sw-ars.com/", "ja": "残り時間とカンペ", "en": "Countdown & cue cards" },
+  { "name": "E2MAPPER", "href": "/e2mapper", "ja": "Barco E2 位置計算", "en": "Barco E2 positions" },
+  { "name": "SLIDESCAN", "href": "/pptx-analyzer", "ja": "pptx 解析", "en": "pptx analyzer" },
+  { "name": "COLORTEMP EYE", "href": "/colortemp", "ja": "色温度・レンズ計算", "en": "Color temp & lens" },
+  { "name": "METER", "href": "/meter/", "ja": "レベルメーター", "en": "Level meter" },
+  { "name": "SUMIDASHI", "href": "/sumidashi", "ja": "壁掛け位置計算", "en": "Wall-mount layout" }
+]

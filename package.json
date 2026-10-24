@@ -1,0 +1,23 @@
+{
+  "name": "seventhwell-site",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "engines": { "node": ">=22.23.4" },
+  "scripts": {
+    "dev": "astro dev",
+    "repos": "node tools/fetch-repos.mjs",
+    "build": "astro build",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "7.4.2",
+    "hono": "4.13.13"
+  },
+  "devDependencies": {
+    "wrangler": "4.152.0",
+    "typescript": "^5.8.3"
+  }
+}

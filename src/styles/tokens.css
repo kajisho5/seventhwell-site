@@ -1,0 +1,90 @@
+/* 色・余白・文字の変数。明るい／暗いは data-theme で切り替える */
+:root {
+  --bg: #ffffff;
+  --bg2: #f5f7fa;
+  --card: #ffffff;
+  --ink: #0b1220;
+  --sub: #4f5b6e;
+  --mute: #6b7689;
+  --line: #e4e8ee;
+  --line2: #ced5df;
+  --acc: #2b5cff;
+  --acc-ink: #ffffff;
+  --acc-bg: #ebf0ff;
+  --ok: #0f9d58;
+  --ok-bg: #e7f8ef;
+  --warn: #f79009;
+  --panel: #0b1220;
+  --panel2: #131c2e;
+  --ptxt: #e8edf5;
+  --psub: #8392aa;
+  --pline: #22304a;
+  --glow: rgba(43, 92, 255, 0.10);
+  --shadow: 0 20px 48px rgba(11, 18, 32, 0.12);
+
+  --f-logo: "Goodtimes", "Michroma", "Arial Black", sans-serif;
+  --f-mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-jp: "Noto Sans JP", system-ui, -apple-system, "Hiragino Sans", sans-serif;
+
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 18px;
+  --wrap: 1248px;
+  --gutter: clamp(16px, 5vw, 96px);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #020617;
+  --bg2: #0a1124;
+  --card: #0d152b;
+  --ink: #eef2f8;
+  --sub: #a3aec2;
+  --mute: #8a96ad;
+  --line: #1c2742;
+  --line2: #2a3858;
+  --acc: #5c84ff;
+  --acc-ink: #ffffff;
+  --acc-bg: #16224a;
+  --ok: #3dd68c;
+  --ok-bg: #0f2f24;
+  --panel: #0d152b;
+  --panel2: #121c36;
+  --pline: #22304a;
+  --glow: rgba(92, 132, 255, 0.16);
+  --shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+/* JavaScript が動かない時も端末の設定に合わせる */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --bg: #020617;
+  --bg2: #0a1124;
+  --card: #0d152b;
+  --ink: #eef2f8;
+  --sub: #a3aec2;
+  --mute: #8a96ad;
+  --line: #1c2742;
+  --line2: #2a3858;
+  --acc: #5c84ff;
+  --acc-ink: #ffffff;
+  --acc-bg: #16224a;
+  --ok: #3dd68c;
+  --ok-bg: #0f2f24;
+  --panel: #0d152b;
+  --panel2: #121c36;
+  --pline: #22304a;
+  --glow: rgba(92, 132, 255, 0.16);
+  --shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+}
+
+/* Goodtimes の woff2 を public/fonts/ に置いたら、下のコメントを外す（それまでは Michroma で表示）
+@font-face {
+  font-family: "Goodtimes";
+  src: url("/fonts/goodtimes.woff2") format("woff2");
+  font-display: swap;
+}
+*/

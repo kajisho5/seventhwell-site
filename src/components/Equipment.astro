@@ -1,0 +1,14 @@
+---
+import equipment from "../data/equipment.json";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+---
+<section class="wrap" id="equipment">
+  <div class="equip reveal">
+    <b data-count={String(equipment.total)}>{equipment.total}</b>
+    <div><h3>{T.equipTitle}</h3><p>{T.equipLead}</p></div>
+    <a class="btn" href="/sw-catalog">{T.equipOpen}</a>
+  </div>
+</section>

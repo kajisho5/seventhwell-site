@@ -1,0 +1,152 @@
+[
+  {
+    "icon": "video",
+    "ja": [
+      "映像処理・スイッチング",
+      "Barco・For-A 等でマルチスクリーンを制御。",
+      "大型LED・プロジェクションに対応。"
+    ],
+    "en": [
+      "Video processing & switching",
+      "Multi-screen control with Barco, For-A and more.",
+      "LED walls and projection."
+    ],
+    "tags": {
+      "ja": [
+        "Barco E2",
+        "4K",
+        "PinP"
+      ],
+      "en": [
+        "Barco E2",
+        "4K",
+        "PinP"
+      ]
+    }
+  },
+  {
+    "icon": "stream",
+    "ja": [
+      "ライブ配信",
+      "SRT / RTMP の多チャンネル同時配信。",
+      "低遅延・高品質な環境を構築します。"
+    ],
+    "en": [
+      "Live streaming",
+      "Multi-channel SRT / RTMP delivery.",
+      "Low latency, high quality."
+    ],
+    "tags": {
+      "ja": [
+        "SRT",
+        "RTMP",
+        "YouTube",
+        "Zoom"
+      ],
+      "en": [
+        "SRT",
+        "RTMP",
+        "YouTube",
+        "Zoom"
+      ]
+    }
+  },
+  {
+    "icon": "audio",
+    "ja": [
+      "音響オペレーション",
+      "コンサート・舞台・企業イベントの",
+      "PA / SR オペレーション。デジタル卓に対応。"
+    ],
+    "en": [
+      "Audio operation",
+      "PA / SR for concerts, stage",
+      "and corporate events. Digital consoles."
+    ],
+    "tags": {
+      "ja": [
+        "PA / SR",
+        "Dante",
+        "IFB"
+      ],
+      "en": [
+        "PA / SR",
+        "Dante",
+        "IFB"
+      ]
+    }
+  },
+  {
+    "icon": "broadcast",
+    "ja": [
+      "放送技術サポート",
+      "テレビ収録・中継の技術サポート。",
+      "ガンマイク・IFB運用も可能です。"
+    ],
+    "en": [
+      "Broadcast support",
+      "Technical support for TV recording and OB.",
+      "Boom mics and IFB."
+    ],
+    "tags": {
+      "ja": [
+        "収録",
+        "中継"
+      ],
+      "en": [
+        "Recording",
+        "OB"
+      ]
+    }
+  },
+  {
+    "icon": "install",
+    "ja": [
+      "AV設備の設計・施工",
+      "会議室・ホール・施設の常設設備を、",
+      "要件定義から運用マニュアルまで。"
+    ],
+    "en": [
+      "AV installation",
+      "Permanent AV for rooms, halls and venues,",
+      "from requirements to manuals."
+    ],
+    "tags": {
+      "ja": [
+        "設計",
+        "施工",
+        "マニュアル"
+      ],
+      "en": [
+        "Design",
+        "Install",
+        "Manuals"
+      ]
+    }
+  },
+  {
+    "icon": "code",
+    "ja": [
+      "ソフトウェア開発",
+      "タイマー・配信制御・機材管理など、",
+      "現場で使うソフトを開発します。"
+    ],
+    "en": [
+      "Software development",
+      "Timers, stream control, gear management —",
+      "software built for the field."
+    ],
+    "tags": {
+      "ja": [
+        "TypeScript",
+        "Python",
+        "Rust"
+      ],
+      "en": [
+        "TypeScript",
+        "Python",
+        "Rust"
+      ]
+    }
+  }
+]

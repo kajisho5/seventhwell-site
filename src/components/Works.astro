@@ -1,0 +1,32 @@
+---
+import works from "../data/works.json";
+import repos from "../data/repos.json";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const fmt = (n: number) => n.toLocaleString("en-US");
+const val = (v: string) => (v === "STARS" ? fmt(repos.featured.stars) : v === "REPOS" ? String(repos.totalRepos) : v);
+---
+<section class="section band" id="works">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">{T.worksEyebrow}</span>
+      <h2>{T.worksTitle}</h2>
+    </div>
+    <div class="stats">
+      {T.stats.map(([v, k, d], i) => (
+        <div class="stat reveal" style={`--rd:${i * 0.08}s`}>
+          <b data-count={val(v)}>{val(v)}</b>
+          <strong>{k}</strong>
+          <span>{d}</span>
+        </div>
+      ))}
+    </div>
+    <ul class="works reveal">
+      {works.map((w) => (
+        <li><span class="y">{w.year}</span><span class="pill">{w.type[lang]}</span><span class="t">{w[lang]}</span></li>
+      ))}
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,27 @@
+---
+import Icon from "./Icon.astro";
+import services from "../data/services.json";
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+---
+<section class="section" id="services">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">{T.servicesEyebrow}</span>
+      <h2>{T.servicesTitle}</h2>
+      <p>{T.servicesLead}</p>
+    </div>
+    <div class="services">
+      {services.map((s, i) => (
+        <article class="svc reveal" style={`--rd:${(i % 3) * 0.08}s`}>
+          <span class="icbox"><Icon name={s.icon} size={24} /></span>
+          <h3>{s[lang][0]}</h3>
+          <p>{s[lang][1]}<br />{s[lang][2]}</p>
+          <div class="tags">{s.tags[lang].map((tg) => <span class="tag">{tg}</span>)}</div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
