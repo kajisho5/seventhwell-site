@@ -1,7 +1,8 @@
 ---
 import Base from "../layouts/Base.astro";
 import SiteHeader from "./SiteHeader.astro";
-import Hero from "./Hero.astro";
+import HeroStage from "./HeroStage.astro";
+import OpsBento from "./OpsBento.astro";
 import LiveBoard from "./LiveBoard.astro";
 import Services from "./Services.astro";
 import Products from "./Products.astro";
@@ -17,7 +18,8 @@ const { lang } = Astro.props;
 <Base lang={lang} path={lang === "ja" ? "/" : "/en/"}>
   <SiteHeader lang={lang} />
   <main id="main">
-    <Hero lang={lang} />
+    <HeroStage lang={lang} />
+    <OpsBento lang={lang} />
     <LiveBoard lang={lang} />
     <Services lang={lang} />
     <Products lang={lang} />

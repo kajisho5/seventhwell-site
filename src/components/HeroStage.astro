@@ -1,0 +1,78 @@
+---
+// 最初の画面：規格名の壁がふわっと出る → スマホ（投票画面）と監視カードがせり出す → 数字が動き続ける
+import { t, type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const T = t[lang];
+const ja = lang === "ja";
+const wall = ["SDI", "NDI", "SRT", "RTMP", "HLS", "Dante", "MADI", "Barco E2", "vMix", "OBS", "YouTube", "Zoom", "Teams", "Webex", "Wirecast", "StreamYard", "ATEM", "QLab", "PIXERA", "Companion", "IFB", "TSL"];
+const cut = T.heroTitle.search(/[、,]/) + 1;
+const parts = cut > 0 ? [T.heroTitle.slice(0, cut), T.heroTitle.slice(cut).trim()] : [T.heroTitle];
+const NBSP = " ";
+const L = ja
+  ? { cmd: "$ seventhwell --on-air", event: "架空カンファレンス 2026", mon: "本番監視", audience: "参加中", rooms: "3会場 · 18ソース", reception: "受付済み演題", streams: "配信", poll: "Q. 次のセッション、どれを聞きたい？", opts: ["基調講演", "パネル", "ハンズオン"], live: "LIVE", strip1: "案件", strip2: "現場の数だけ、道具を作ってきました。" }
+  : { cmd: "$ seventhwell --on-air", event: "Fictional Conf 2026", mon: "Show monitor", audience: "joined", rooms: "3 rooms · 18 sources", reception: "Talks checked in", streams: "Streams", poll: "Q. Which session next?", opts: ["Keynote", "Panel", "Hands-on"], live: "LIVE", strip1: "projects", strip2: "We build a tool for every show we run." };
+---
+<section class="stage">
+  <div class="wrap stage-in">
+    <span class="stage-cmd mono">{L.cmd}<i class="caret"></i></span>
+    <h1 aria-label={T.heroTitle}>
+      {parts.map((part, pi) => (
+        <span class="ln" aria-hidden="true">{[...part].map((c, i) => <span class="ch" style={`animation-delay:${0.1 + (pi * 12 + i) * 0.03}s`}>{c === " " ? NBSP : c}</span>)}{pi === 0 && !ja ? NBSP : ""}</span>
+      ))}
+    </h1>
+    <p class="stage-sub">{T.heroSub1}<br />{T.heroSub2}</p>
+    <div class="stage-cta">
+      <a class="btn btn-glow btn-lg" href="#contact" data-topic="work">{T.heroCta}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6" /></svg></a>
+      <span class="stage-note">{T.heroNote}</span>
+    </div>
+
+    <div class="wall" aria-label={T.stackLabel}>
+      {wall.map((w, i) => <span style={`--i:${i}`} class={i % 7 === 2 ? "hot" : ""}>{w}</span>)}
+    </div>
+
+    <div class="collage" aria-hidden="true">
+      <!-- 左：本番監視 -->
+      <div class="glass card-l">
+        <div class="g-head"><span class="g-ic">7</span><div><b>{L.event}</b><small>{L.rooms}</small></div></div>
+        <div class="g-row">
+          <span class="ring"></span>
+          <div><small>{L.audience}</small><b class="mono" data-tick="438" data-tick-range="0,3" data-tick-ms="900">438</b></div>
+        </div>
+        <div class="g-two">
+          <div><small>{L.reception}</small><b class="mono"><span data-tick="212" data-tick-range="0,1" data-tick-ms="2600" data-tick-max="240">212</span> / 240</b></div>
+          <div><small>{L.mon}</small><b class="mono ok-t">0 err</b></div>
+        </div>
+      </div>
+      <!-- 中央：スマホ（PULSE 投票） -->
+      <div class="phone">
+        <div class="ph-bar mono"><span>9:41</span><span>●●● ▮</span></div>
+        <div class="ph-app">
+          <span class="ph-tag mono">PULSE · {L.live}</span>
+          <p class="ph-q">{L.poll}</p>
+          {L.opts.map((o, k) => (
+            <div class="ph-opt"><i style={`--k:${k}`}></i><span>{o}</span><b class="mono" data-pct={k}>{[48, 33, 19][k]}%</b></div>
+          ))}
+          <div class="ph-foot mono"><span data-tick="412" data-tick-range="1,4" data-tick-ms="1100">412</span> votes</div>
+        </div>
+      </div>
+      <!-- 右：配信 -->
+      <div class="glass card-r">
+        <div class="g-title"><b>{L.streams}</b><span class="spin"></span></div>
+        {[["YouTube", "SRT", "6.02"], ["Zoom", "RTMP", "4.50"], ["Teams", "RTMP", "3.98"], ["Archive", "ProRes", "147"]].map(([n, p, v], k) => (
+          <div class="g-line">
+            <div><b>{n}</b><small class="mono">{p}</small></div>
+            <span class="mono"><span data-jit={v}>{v}</span>{k === 3 ? " Mbps" : " Mbps"}</span>
+            <span class="spark" style={`--k:${k}`}></span>
+          </div>
+        ))}
+      </div>
+      <!-- 下：実績の帯 -->
+      <div class="glass strip">
+        <b class="mono"><span data-count="1000">1000</span>+</b><span>{L.strip1}</span>
+        <i></i>
+        <span>{L.strip2}</span>
+      </div>
+    </div>
+  </div>
+</section>

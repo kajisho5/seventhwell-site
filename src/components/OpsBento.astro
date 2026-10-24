@@ -1,0 +1,72 @@
+---
+// 細い線で区切ったマス目のレイアウト。受付の64マス、信号の流れ、本番ログが動き続ける
+import { type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ja = lang === "ja";
+const L = ja
+  ? { title: "本番を止めない仕組みを、現場の数だけ。", eyebrow: "Venue Operation", h: "受付から送出まで、ひと続き。", p: "PC受付、映像の切り替え、配信、収録。現場で使う道具を自分で作り、本番でそのまま使っています。", btn: "PC受付（Presync）を見る",
+      c1: "64演題を同時に受付", c1p: "演者のPCからのデータを受け取り、会場のPCへ配ります。", recv: "受付", pcs: "受付PC", pcsUnit: "台 接続中",
+      c2: "信号の流れが見える", c2p: "どこで何が流れているかを、一枚の図で共有します。",
+      c3: "本番ログ", c3p: "切り替えや警報を自動で記録し、報告書に使えます。" }
+  : { title: "Systems that keep the show running.", eyebrow: "Venue Operation", h: "From check-in to playout.", p: "Speaker reception, switching, streaming, recording — we build the tools ourselves and run them on real shows.", btn: "See Presync",
+      c1: "64 talks checked in at once", c1p: "Collect files from speakers and deliver them to every room PC.", recv: "Checked", pcs: "Reception PCs", pcsUnit: " online",
+      c2: "See the signal flow", c2p: "Share where every signal goes, on one diagram.",
+      c3: "Show log", c3p: "Switches and alarms are logged automatically for your report." };
+const logs = ja
+  ? ["PGM → CAM 2", "受付 B-14 完了", "配信 SRT 6.0 Mbps", "PGM → PC スライド", "音声 -14 LUFS", "受付 C-03 完了", "PGM → CAM 1", "収録 残り 3h10m"]
+  : ["PGM → CAM 2", "Check-in B-14 done", "Stream SRT 6.0 Mbps", "PGM → Slides", "Audio -14 LUFS", "Check-in C-03 done", "PGM → CAM 1", "Rec 3h10m left"];
+---
+<section class="section ops">
+  <div class="wrap">
+    <h2 class="ops-title reveal">{L.title}</h2>
+    <div class="bento">
+      <div class="b-side">
+        <span class="mono eyebrow2">{L.eyebrow}</span>
+        <h3>{L.h}</h3>
+        <p>{L.p}</p>
+        <a class="btn btn-sm" href="/presync/">{L.btn}</a>
+      </div>
+      <div class="b-cell b-wide">
+        <h4>{L.c1}</h4><p>{L.c1p}</p>
+        <div class="jobs-wrap">
+          <div class="jobs" data-jobs>
+            <span class="job head mono"><i class="sp"></i>{L.recv} <b data-jobs-count>0</b>/64</span>
+            {Array.from({ length: 63 }, (_, k) => <span class="job mono" data-job><i class="sp"></i><em>{String.fromCharCode(65 + Math.floor(k / 16))}-{String(k % 16 + 1).padStart(2, "0")}</em></span>)}
+          </div>
+          <div class="agent">
+            <small>{L.pcs}</small>
+            <b class="mono" data-tick="20" data-tick-range="0,0" data-tick-ms="999999">20</b><small>{L.pcsUnit}</small>
+            <span class="ring dark"></span>
+          </div>
+        </div>
+      </div>
+      <div class="b-cell">
+        <h4>{L.c2}</h4><p>{L.c2p}</p>
+        <svg class="flow" viewBox="0 0 320 120" aria-hidden="true">
+          <g class="fl-edges">
+            <path d="M58 30 C80 30 80 60 110 60" /><path d="M58 60 H110" /><path d="M58 90 C80 90 80 60 110 60" />
+            <path d="M178 60 C200 60 200 30 222 30" /><path d="M178 60 C200 60 200 90 222 90" />
+          </g>
+          <g class="fl-pulse">
+            <path d="M58 60 H110" /><path d="M178 60 C200 60 200 30 222 30" /><path d="M178 60 C200 60 200 90 222 90" />
+          </g>
+          <g class="fl-nodes">
+            <rect x="6" y="18" width="52" height="24" rx="6" /><text x="32" y="34">CAM1</text>
+            <rect x="6" y="48" width="52" height="24" rx="6" class="on" /><text x="32" y="64">CAM2</text>
+            <rect x="6" y="78" width="52" height="24" rx="6" /><text x="32" y="94">PC</text>
+            <rect x="110" y="44" width="68" height="32" rx="8" class="on" /><text x="144" y="64">SWITCH</text>
+            <rect x="222" y="18" width="92" height="24" rx="6" /><text x="268" y="34">STREAM</text>
+            <rect x="222" y="78" width="92" height="24" rx="6" /><text x="268" y="94">RECORD</text>
+          </g>
+        </svg>
+      </div>
+      <div class="b-cell">
+        <h4>{L.c3}</h4><p>{L.c3p}</p>
+        <div class="log mono" data-log={JSON.stringify(logs)}>
+          {logs.slice(0, 4).map((l, k) => <div><time>10:42:{String(10 + k * 3).padStart(2, "0")}</time><span>{l}</span></div>)}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

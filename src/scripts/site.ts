@@ -120,3 +120,66 @@ if (form) {
     }
   });
 }
+
+/* ===== v4：細かく動き続ける数字・マス目・ログ・投票 ===== */
+if (!reduce) {
+  // data-tick：数字が少しずつ増える（data-tick-range="最小,最大" の幅で）
+  document.querySelectorAll<HTMLElement>("[data-tick]").forEach((el) => {
+    let v = Number(el.dataset.tick);
+    const [lo, hi] = (el.dataset.tickRange || "0,2").split(",").map(Number);
+    const max = el.dataset.tickMax ? Number(el.dataset.tickMax) : Infinity;
+    const ms = Number(el.dataset.tickMs || 1000);
+    setInterval(() => {
+      v = Math.min(max, v + lo + Math.round(Math.random() * (hi - lo)));
+      el.textContent = v.toLocaleString("en-US");
+    }, ms + Math.random() * 300);
+  });
+  // data-jit：値が上下にゆらぐ（配信のビットレート）
+  document.querySelectorAll<HTMLElement>("[data-jit]").forEach((el) => {
+    const base = Number(el.dataset.jit);
+    const dec = (el.dataset.jit!.split(".")[1] || "").length;
+    setInterval(() => (el.textContent = (base * (0.97 + Math.random() * 0.06)).toFixed(dec)), 1200 + Math.random() * 600);
+  });
+  // 投票の割合がじわじわ動く
+  const opts = [...document.querySelectorAll<HTMLElement>(".ph-opt")];
+  if (opts.length) {
+    let p = [48, 33, 19];
+    const draw = () => opts.forEach((o, k) => { o.querySelector<HTMLElement>("i")!.style.setProperty("--w", p[k] + "%"); o.querySelector("b")!.textContent = p[k] + "%"; });
+    draw();
+    setInterval(() => {
+      const a = Math.floor(Math.random() * 3), b = (a + 1 + Math.floor(Math.random() * 2)) % 3;
+      if (p[b] > 6) { p[a]++; p[b]--; } draw();
+    }, 1400);
+  }
+  // 受付の64マス：受付中 → 完了 が1つずつ進み、全部終わったらやり直す
+  const grid = document.querySelector<HTMLElement>("[data-jobs]");
+  if (grid) {
+    const cells = [...grid.querySelectorAll<HTMLElement>("[data-job]")];
+    const count = grid.querySelector<HTMLElement>("[data-jobs-count]")!;
+    let order: HTMLElement[] = [];
+    const reset = () => { cells.forEach((c) => c.classList.remove("done")); order = [...cells].sort(() => Math.random() - 0.5); count.textContent = "0"; };
+    reset();
+    let started = false;
+    const run = () => {
+      const c = order.shift();
+      if (c) { c.classList.add("done"); count.textContent = String(64 - order.length - 1 + 1); setTimeout(run, 180 + Math.random() * 380); }
+      else setTimeout(() => { reset(); run(); }, 2500);
+    };
+    new IntersectionObserver((es, ob) => { if (es[0].isIntersecting && !started) { started = true; run(); ob.disconnect(); } }, { threshold: 0.2 }).observe(grid);
+  }
+  // 本番ログ：1行ずつ増える
+  const log = document.querySelector<HTMLElement>("[data-log]");
+  if (log) {
+    const lines: string[] = JSON.parse(log.dataset.log || "[]");
+    let i = 4, sec = 10 * 3600 + 42 * 60 + 22;
+    setInterval(() => {
+      sec += 2 + Math.floor(Math.random() * 5);
+      const tm = `${String(Math.floor(sec / 3600)).padStart(2, "0")}:${String(Math.floor(sec / 60) % 60).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
+      const row = document.createElement("div");
+      row.innerHTML = `<time>${tm}</time><span></span>`;
+      row.querySelector("span")!.textContent = lines[i++ % lines.length];
+      log.appendChild(row);
+      while (log.children.length > 6) log.firstElementChild?.remove();
+    }, 1600);
+  }
+}
