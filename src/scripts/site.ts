@@ -203,3 +203,62 @@ document.querySelectorAll<HTMLElement>("[data-poll]").forEach((box) => {
   const draw = () => bars.forEach((b, k) => { b.querySelector<HTMLElement>("i")!.style.setProperty("--w", p[k] + "%"); b.querySelectorAll("b")[1].textContent = p[k] + "%"; });
   if (!reduce) setInterval(() => { const a = Math.floor(Math.random() * 4), c = (a + 1 + Math.floor(Math.random() * 3)) % 4; if (p[c] > 4) { p[a]++; p[c]--; } draw(); }, 1300);
 });
+
+/* ===== 最初の画面：6.5秒ごとに場面を切り替える（タブを押しても切り替わる） ===== */
+const stage = document.querySelector<HTMLElement>("[data-stage]");
+if (stage) {
+  const scenes = [...stage.querySelectorAll<HTMLElement>("[data-scene]")];
+  const tabs = [...stage.querySelectorAll<HTMLElement>("[data-scene-tab]")];
+  const MS = 6500;
+  stage.style.setProperty("--scene-ms", MS + "ms");
+  let cur = 0, timer: number | undefined;
+  const show = (n: number) => {
+    cur = (n + scenes.length) % scenes.length;
+    scenes.forEach((s, i) => s.classList.toggle("on", i === cur));
+    tabs.forEach((t, i) => { t.classList.toggle("on", i === cur); t.setAttribute("aria-selected", String(i === cur)); });
+  };
+  const loop = () => { clearInterval(timer); if (!reduce) timer = window.setInterval(() => show(cur + 1), MS); };
+  tabs.forEach((t, i) => t.addEventListener("click", () => { show(i); loop(); }));
+  if (reduce) stage.classList.add("paused");
+  loop();
+  // スイッチャーの PGM / PVW が順に切り替わる
+  const sw = [...stage.querySelectorAll<HTMLElement>("[data-sw]")];
+  let pg = 1, pv = 3;
+  if (sw.length && !reduce) setInterval(() => {
+    pg = pv; pv = (pv + 1 + Math.floor(Math.random() * 4)) % sw.length; if (pv === pg) pv = (pv + 1) % sw.length;
+    sw.forEach((e, i) => { e.classList.toggle("pgm-t", i === pg); e.classList.toggle("pvw-t", i === pv); });
+  }, 1800);
+}
+
+/* ===== ヘッダー：最初の画面の上では透明、過ぎたら白い帯 ===== */
+const header = document.querySelector<HTMLElement>("[data-header]");
+if (header && header.classList.contains("on-dark") && stage) {
+  const upd = () => header.classList.toggle("on-dark", stage.getBoundingClientRect().bottom > 90 && !header.classList.contains("menu-open"));
+  addEventListener("scroll", upd, { passive: true }); upd();
+}
+/* 大きいメニュー（プロダクト） */
+const megaBtn = document.querySelector<HTMLButtonElement>("[data-mega]");
+if (header && megaBtn) {
+  const set = (open: boolean) => {
+    header.classList.toggle("menu-open", open);
+    megaBtn.setAttribute("aria-expanded", String(open));
+    if (open) header.classList.remove("on-dark"); else dispatchEvent(new Event("scroll"));
+  };
+  megaBtn.addEventListener("click", (e) => { e.stopPropagation(); set(!header.classList.contains("menu-open")); });
+  document.addEventListener("click", (e) => { if (!header.contains(e.target as Node)) set(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+}
+
+/* ===== 3つの話：画面の真ん中に来た行を濃くする ===== */
+const story = document.querySelector<HTMLElement>("[data-story]");
+if (story && !reduce) {
+  const rows = [...story.querySelectorAll<HTMLElement>("[data-story-row]")];
+  story.classList.add("js");
+  const pick = () => {
+    const mid = innerHeight * 0.45;
+    let best = rows[0], bestD = Infinity;
+    rows.forEach((r) => { const t = r.querySelector(".story-text")!.getBoundingClientRect(); const d = Math.abs(t.top + 40 - mid); if (d < bestD) { bestD = d; best = r; } });
+    rows.forEach((r) => r.classList.toggle("active", r === best));
+  };
+  addEventListener("scroll", pick, { passive: true }); pick();
+}

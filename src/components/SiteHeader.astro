@@ -1,28 +1,53 @@
 ---
 import Icon from "./Icon.astro";
+import products from "../data/products.json";
+import tools from "../data/tools.json";
 import { t, type Lang } from "../data/site";
-interface Props { lang: Lang; home?: string }
-const { lang, home = lang === "ja" ? "/" : "/en/" } = Astro.props;
+interface Props { lang: Lang; home?: string; dark?: boolean }
+const { lang, home = lang === "ja" ? "/" : "/en/", dark = false } = Astro.props;
 const T = t[lang];
+const ja = lang === "ja";
+const L = ja ? { prod: "プロダクト", cap: "自社プロダクト", tools: "無料ツール", oss: "公開しているソフトウェア", ossDesc: "コーディングエージェントに動画編集を持たせるスキル" }
+             : { prod: "Products", cap: "Our products", tools: "Free tools", oss: "Open source", ossDesc: "Give coding agents the power to edit video" };
+const navRest = T.nav.filter(([h]) => h !== "#products");
 ---
-<header class="header">
-  <div class="wrap header-in">
-    <a class="brand logo-font" href={home} aria-label="SEVENTHWELL"><span class="brand-mark">7</span>SEVENTHWELL</a>
-    <nav class="nav" aria-label="main">
-      {T.nav.map(([href, label]) => <a href={home + href}>{label}</a>)}
-    </nav>
-    <div class="header-right">
-      <a class="lang" href={T.langSwitch} hreflang={lang === "ja" ? "en" : "ja"}>{lang === "ja" ? "JA / EN" : "EN / JA"}</a>
-      <button class="theme-btn" type="button" data-theme-toggle aria-label={T.theme}>
-        <span><Icon name="sun" class="i-sun" /></span>
-      </button>
-      <a class="btn" href={home + "#contact"} data-topic="work">{T.consult}</a>
-      <a class="btn btn-primary" href={home + "#contact"} data-topic="estimate">{T.estimate}</a>
-      <button class="menu-btn" type="button" data-menu aria-expanded="false" aria-controls="drawer" aria-label={T.menu}><Icon name="menu" /></button>
+<header class={`header ${dark ? "on-dark" : ""}`} data-header>
+  <div class="wrap">
+    <div class="header-in">
+      <a class="brand logo-font" href={home} aria-label="SEVENTHWELL"><span class="brand-mark">7</span>SEVENTHWELL</a>
+      <nav class="nav" aria-label="main">
+        <button type="button" data-mega aria-expanded="false" aria-controls="mega">{L.prod}<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg></button>
+        {navRest.map(([href, label]) => <a href={home + href}>{label}</a>)}
+      </nav>
+      <div class="header-right">
+        <a class="lang" href={T.langSwitch} hreflang={ja ? "en" : "ja"}>{ja ? "EN" : "JA"}</a>
+        <a class="btn keep" href={home + "#contact"} data-topic="work">{T.consult}</a>
+        <a class="btn btn-primary" href={home + "#contact"} data-topic="estimate">{T.estimate}</a>
+        <button class="menu-btn" type="button" data-menu aria-expanded="false" aria-controls="drawer" aria-label={T.menu}><Icon name="menu" /></button>
+      </div>
+    </div>
+    <div class="mega" id="mega">
+      <div>
+        <h5>{L.cap}</h5>
+        <div class="mega-list">
+          {products.map((p) => <a class="mega-item" href={p.href}><span class="mega-ic">{p.name[0]}</span><div><b>{p.name}</b><span>{p[lang].kind}</span></div></a>)}
+        </div>
+      </div>
+      <div class="mega-tools">
+        <h5>{L.tools}</h5>
+        {tools.map((tl) => <a href={tl.href}>{tl.name} <span style="color:var(--mute);font-size:12px">— {tl[lang]}</span></a>)}
+      </div>
+      <a class="mega-card" href="https://github.com/kajisho5/ffmpeg-skill">
+        <b>{L.oss}</b><span>{L.ossDesc}</span>
+        <pre>$ ffmpeg-skill cut  --in talk.mp4
+$ ffmpeg-skill loud --target -14
+$ ffmpeg-skill qc   --deliver</pre>
+      </a>
     </div>
   </div>
   <div class="drawer" id="drawer">
-    {T.nav.map(([href, label]) => <a href={home + href} data-close>{label}</a>)}
+    <a href={home + "#products"} data-close>{L.prod}</a>
+    {navRest.map(([href, label]) => <a href={home + href} data-close>{label}</a>)}
     <a href={T.langSwitch} data-close>{T.langLabel}</a>
     <a class="btn btn-primary" href={home + "#contact"} data-close data-topic="work">{T.consult}</a>
   </div>

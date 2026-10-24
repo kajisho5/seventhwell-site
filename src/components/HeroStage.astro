@@ -1,21 +1,36 @@
 ---
-// 最初の画面：規格名の壁がふわっと出る → スマホ（投票画面）と監視カードがせり出す → 数字が動き続ける
+// 最初の画面：上の分類に下線が付き、6秒ごとに「学会 → ライブ配信 → 企業イベント」の場面が入れ替わる（Buildkite の Uber → Canva → Slack と同じ作り）
+// 何も動かない環境でも、1つ目の場面がそのまま見える
 import { t, type Lang } from "../data/site";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const T = t[lang];
 const ja = lang === "ja";
-const wall = ["SDI", "NDI", "SRT", "RTMP", "HLS", "Dante", "MADI", "Barco E2", "vMix", "OBS", "YouTube", "Zoom", "Teams", "Webex", "Wirecast", "StreamYard", "ATEM", "QLab", "PIXERA", "Companion", "IFB", "TSL"];
 const cut = T.heroTitle.search(/[、,]/) + 1;
 const parts = cut > 0 ? [T.heroTitle.slice(0, cut), T.heroTitle.slice(cut).trim()] : [T.heroTitle];
 const NBSP = " ";
-const L = ja
-  ? { cmd: "$ seventhwell --on-air", event: "架空カンファレンス 2026", mon: "本番監視", audience: "参加中", rooms: "3会場 · 18ソース", reception: "受付済み演題", streams: "配信", poll: "Q. 次のセッション、どれを聞きたい？", opts: ["基調講演", "パネル", "ハンズオン"], live: "LIVE", strip1: "案件", strip2: "現場の数だけ、道具を作ってきました。" }
-  : { cmd: "$ seventhwell --on-air", event: "Fictional Conf 2026", mon: "Show monitor", audience: "joined", rooms: "3 rooms · 18 sources", reception: "Talks checked in", streams: "Streams", poll: "Q. Which session next?", opts: ["Keynote", "Panel", "Hands-on"], live: "LIVE", strip1: "projects", strip2: "We build a tool for every show we run." };
+const tabs = ja ? ["学会", "ライブ配信", "企業イベント"] : ["Conferences", "Live streaming", "Corporate events"];
+const more = ja
+  ? ["展示会", "放送", "コンサート"]
+  : ["Expos", "Broadcast", "Concerts"];
+const stds = ["SDI", "NDI", "SRT", "RTMP", "HLS", "Dante", "MADI", "Barco E2", "vMix", "OBS", "ATEM", "QLab"];
+const S = ja
+  ? {
+      cmd: "$ seventhwell --on-air",
+      s1: { title: "架空医学会 2026", sub: "3会場 · 240演題", recv: "受付済み", rooms: [["第1会場", "A-07 投影中", "on"], ["第2会場", "B-03 準備中", "ok"], ["第3会場", "C-11 投影中", "on"]], q: "Q. 次のセッション、どれを聞きたい？", opts: ["基調講演", "パネル", "ハンズオン"], big: "1,000演題・20台", line: "Presync は 1,000演題・PC 20台の規模で実際に動かしています。" },
+      s2: { title: "STREAMTALLY", rows: [["メイン SRT", "6.02 Mbps", "ok"], ["予備 RTMP", "4.50 Mbps", "ok"], ["会場収録", "ProRes", "ok"], ["サブ会場 HLS", "無音 12秒", "ng"]], enc: "エンコーダー", program: "PROGRAM", name: "架空 太郎", role: "架空大学 映像工学部 教授", big: "HLS · RTMP · SRT", line: "落ちた・無音・止まった を、本番中に気づける仕組みで見張ります。" },
+      s3: { sw: "スイッチャー", hold: "HOLDLINE · 今週", gear: ["スイッチャー #1", "カメラ #2", "LED 3m", "ミキサー #1"], days: ["月", "火", "水", "木", "金"], telop: "TELOPDECK", names: ["架空 一郎", "架空 花子", "架空 次郎"], big: "1000+", line: "案件。ライブイベント・放送・学会・展示会の現場を担当してきました。" },
+    }
+  : {
+      cmd: "$ seventhwell --on-air",
+      s1: { title: "Fictional Medical Congress 2026", sub: "3 rooms · 240 talks", recv: "Checked in", rooms: [["Room 1", "A-07 on screen", "on"], ["Room 2", "B-03 standby", "ok"], ["Room 3", "C-11 on screen", "on"]], q: "Q. Which session next?", opts: ["Keynote", "Panel", "Hands-on"], big: "1,000 talks / 20 PCs", line: "Presync has run at the scale of 1,000 talks and 20 PCs." },
+      s2: { title: "STREAMTALLY", rows: [["Main SRT", "6.02 Mbps", "ok"], ["Backup RTMP", "4.50 Mbps", "ok"], ["Recording", "ProRes", "ok"], ["Room B HLS", "Silent 12s", "ng"]], enc: "Encoders", program: "PROGRAM", name: "Taro Example", role: "Professor, Example University", big: "HLS · RTMP · SRT", line: "Dropped, silent or frozen — we know during the show." },
+      s3: { sw: "Switcher", hold: "HOLDLINE · This week", gear: ["Switcher #1", "Camera #2", "LED 3m", "Mixer #1"], days: ["Mo", "Tu", "We", "Th", "Fr"], telop: "TELOPDECK", names: ["Taro Example", "Hana Example", "Jiro Example"], big: "1000+", line: "projects across live events, broadcast, conferences and expos." },
+    };
 ---
-<section class="stage">
+<section class="stage" data-stage>
   <div class="wrap stage-in">
-    <span class="stage-cmd mono">{L.cmd}<i class="caret"></i></span>
+    <span class="stage-cmd mono">{S.cmd}<i class="caret"></i></span>
     <h1 aria-label={T.heroTitle}>
       {parts.map((part, pi) => (
         <span class="ln" aria-hidden="true">{[...part].map((c, i) => <span class="ch" style={`animation-delay:${0.1 + (pi * 12 + i) * 0.03}s`}>{c === " " ? NBSP : c}</span>)}{pi === 0 && !ja ? NBSP : ""}</span>
@@ -24,54 +39,73 @@ const L = ja
     <p class="stage-sub">{T.heroSub1}<br />{T.heroSub2}</p>
     <div class="stage-cta">
       <a class="btn btn-glow btn-lg" href="#contact" data-topic="work">{T.heroCta}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6" /></svg></a>
-      <span class="stage-note">{T.heroNote}</span>
     </div>
 
-    <div class="wall" aria-label={T.stackLabel}>
-      {wall.map((w, i) => <span style={`--i:${i}`} class={i % 7 === 2 ? "hot" : ""}>{w}</span>)}
+    <div class="wall">
+      <div class="wall-tabs" role="tablist">
+        {tabs.map((tb, i) => <button type="button" role="tab" class={`wtab ${i === 0 ? "on" : ""}`} data-scene-tab={i} aria-selected={i === 0 ? "true" : "false"}>{tb}<i></i></button>)}
+        {more.map((m) => <span class="wmore">{m}</span>)}
+      </div>
+      <div class="wall-std" aria-hidden="true">{stds.map((s, i) => <span style={`--i:${i}`}>{s}</span>)}</div>
     </div>
 
-    <div class="collage" aria-hidden="true">
-      <!-- 左：本番監視 -->
-      <div class="glass card-l">
-        <div class="g-head"><span class="g-ic">7</span><div><b>{L.event}</b><small>{L.rooms}</small></div></div>
-        <div class="g-row">
-          <span class="ring"></span>
-          <div><small>{L.audience}</small><b class="mono" data-tick="438" data-tick-range="0,3" data-tick-ms="900">438</b></div>
-        </div>
-        <div class="g-two">
-          <div><small>{L.reception}</small><b class="mono"><span data-tick="212" data-tick-range="0,1" data-tick-ms="2600" data-tick-max="240">212</span> / 240</b></div>
-          <div><small>{L.mon}</small><b class="mono ok-t">0 err</b></div>
-        </div>
-      </div>
-      <!-- 中央：スマホ（PULSE 投票） -->
-      <div class="phone">
-        <div class="ph-bar mono"><span>9:41</span><span>●●● ▮</span></div>
-        <div class="ph-app">
-          <span class="ph-tag mono">PULSE · {L.live}</span>
-          <p class="ph-q">{L.poll}</p>
-          {L.opts.map((o, k) => (
-            <div class="ph-opt"><i style={`--k:${k}`}></i><span>{o}</span><b class="mono" data-pct={k}>{[48, 33, 19][k]}%</b></div>
-          ))}
-          <div class="ph-foot mono"><span data-tick="412" data-tick-range="1,4" data-tick-ms="1100">412</span> votes</div>
-        </div>
-      </div>
-      <!-- 右：配信 -->
-      <div class="glass card-r">
-        <div class="g-title"><b>{L.streams}</b><span class="spin"></span></div>
-        {[["YouTube", "SRT", "6.02"], ["Zoom", "RTMP", "4.50"], ["Teams", "RTMP", "3.98"], ["Archive", "ProRes", "147"]].map(([n, p, v], k) => (
-          <div class="g-line">
-            <div><b>{n}</b><small class="mono">{p}</small></div>
-            <span class="mono"><span data-jit={v}>{v}</span>{k === 3 ? " Mbps" : " Mbps"}</span>
-            <span class="spark" style={`--k:${k}`}></span>
+    <div class="collage-box">
+      <div class="collage" aria-hidden="true">
+        <!-- 場面1：学会 -->
+        <div class="scene on" data-scene="0">
+          <div class="dev phone">
+            <div class="ph-bar mono"><span>9:41</span><span>●●● ▮</span></div>
+            <div class="ph-app">
+              <span class="ph-tag mono">PULSE · LIVE</span>
+              <p class="ph-q">{S.s1.q}</p>
+              {S.s1.opts.map((o, k) => <div class="ph-opt"><i style={`--w:${[48, 33, 19][k]}%`}></i><span>{o}</span><b class="mono">{[48, 33, 19][k]}%</b></div>)}
+              <div class="ph-foot mono"><span data-tick="412" data-tick-range="1,4" data-tick-ms="1100">412</span> votes</div>
+            </div>
           </div>
-        ))}
-      </div>
-      <!-- 下：実績の帯 -->
-      <div class="glass strip">
-        <b class="mono">1000+</b><span>{L.strip1}</span>
-        <i></i>
-        <span>{L.strip2}</span>
+          <div class="glass side-l">
+            <div class="g-head"><span class="g-ic">7</span><div><b>{S.s1.title}</b><small>{S.s1.sub}</small></div></div>
+            <div class="g-row"><span class="ring"></span><div><small>{S.s1.recv}</small><b><span data-tick="212" data-tick-range="0,1" data-tick-ms="2400" data-tick-max="240">212</span> / 240</b></div></div>
+          </div>
+          <div class="glass side-r">
+            {S.s1.rooms.map(([r, s, st]) => <div class="g-line"><div><b>{r}</b></div><span class={`chip ${st}`}>{s}</span></div>)}
+          </div>
+          <div class="glass strip"><b class="mono">{S.s1.big}</b><i></i><span>{S.s1.line}</span></div>
+        </div>
+        <!-- 場面2：ライブ配信 -->
+        <div class="scene" data-scene="1">
+          <div class="dev win">
+            <div class="win-bar"><i></i><i></i><i></i><span class="mono">{S.s2.program}</span><em class="mono">● REC 01:12:44</em></div>
+            <div class="pgm"><div class="lt"><b>{S.s2.name}</b><span>{S.s2.role}</span></div><span class="tally mono">LIVE</span></div>
+          </div>
+          <div class="glass side-l">
+            <div class="g-title"><b>{S.s2.title}</b><span class="spin"></span></div>
+            {S.s2.rows.map(([n, v, st]) => <div class={`g-line ${st === "ng" ? "alarm" : ""}`}><div><b>{n}</b></div><span class="mono">{v}</span></div>)}
+          </div>
+          <div class="glass side-r">
+            <div class="g-title"><b>{S.s2.enc}</b></div>
+            {[["YouTube", "6.02"], ["Zoom", "4.50"], ["Teams", "3.98"]].map(([n, v], k) => <div class="g-line"><div><b>{n}</b></div><span class="mono"><span data-jit={v}>{v}</span> Mbps</span><span class="spark" style={`--k:${k}`}></span></div>)}
+          </div>
+          <div class="glass strip"><b class="mono">{S.s2.big}</b><i></i><span>{S.s2.line}</span></div>
+        </div>
+        <!-- 場面3：企業イベント -->
+        <div class="scene" data-scene="2">
+          <div class="dev win light">
+            <div class="win-bar"><i></i><i></i><i></i><span class="mono">{S.s3.hold}</span></div>
+            <div class="mini-gantt">
+              <span></span>{S.s3.days.map((d) => <span class="d">{d}</span>)}
+              {S.s3.gear.map((g, r) => (<><span class="r">{g}</span>{S.s3.days.map((_, c) => <span class="slot">{c === [0, 1, 2, 3][r] && <i style={`width:calc(${[3, 2, 3, 2][r] * 100}% - 4px);background:${["#6c2bd9", "#a742ed", "#6c2bd9", "#e08a00"][r]}`}></i>}</span>)}</>))}
+            </div>
+          </div>
+          <div class="glass side-l">
+            <div class="g-title"><b>{S.s3.sw}</b><span class="mono" style="font-size:11px;color:#c7c3dd">PGM / PVW</span></div>
+            <div class="sw-grid">{["CAM1", "CAM2", "CAM3", "PC1", "PC2", "VTR"].map((c, k) => <span class={`mono ${k === 1 ? "pgm-t" : k === 3 ? "pvw-t" : ""}`} data-sw={k}>{c}</span>)}</div>
+          </div>
+          <div class="glass side-r">
+            <div class="g-title"><b>{S.s3.telop}</b></div>
+            {S.s3.names.map((n, k) => <div class={`g-line ${k === 0 ? "cue" : ""}`}><div><b>{n}</b></div><span class="mono">{k === 0 ? "ON AIR" : `NEXT ${k}`}</span></div>)}
+          </div>
+          <div class="glass strip"><b class="mono">{S.s3.big}</b><i></i><span>{S.s3.line}</span></div>
+        </div>
       </div>
     </div>
   </div>

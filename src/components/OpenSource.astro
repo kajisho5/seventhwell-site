@@ -1,5 +1,7 @@
 ---
+// Buildkite の「Customers」と同じ作り：大きいグラデーションのカード1枚＋カード3枚。中身は実績（架空の数字は入れない）
 import Icon from "./Icon.astro";
+import works from "../data/works.json";
 import tools from "../data/tools.json";
 import repos from "../data/repos.json";
 import { type Lang } from "../data/site";
@@ -7,45 +9,47 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ja = lang === "ja";
 const gh = `https://github.com/${repos.account}`;
-const O = ja
-  ? { eb: "Open Source", h: "作った道具は、公開しています。", ft: "コーディングエージェントに「動画編集」を持たせるスキル。", fp: "ローカルの FFmpeg で動く42のツール。クラウドも API キーも不要。Claude Code・Cursor・Codex・MCP に対応しています。", view: "GitHub で見る", d: [["42 のツール", "カット・字幕・ラウドネス・マルチカム・納品チェックまで。"], ["完全にローカル", "映像を外に出さずに処理できます。"], ["スター数は毎日更新", `最終更新 ${repos.updatedAt}`]], toolsEb: "Free Tools", toolsH: "現場の小道具は、無料で。", more: "開く →" }
-  : { eb: "Open Source", h: "The tools we build are public.", ft: "Give coding agents the power to edit video.", fp: "42 tools running on local FFmpeg. No cloud, no API keys. Works with Claude Code, Cursor, Codex and MCP.", view: "View on GitHub", d: [["42 tools", "Cuts, subtitles, loudness, multicam and delivery QC."], ["Fully local", "Your footage never leaves the machine."], ["Stars updated daily", `Last updated ${repos.updatedAt}`]], toolsEb: "Free Tools", toolsH: "Field tools, free to use.", more: "Open →" };
+const C = ja
+  ? { eb: "Works", h: "現場で、こう支えています。", tag: "国際学会", fh: "大型展示会場の国際学会で、配信・PinP・スクリーン切り替えを担当。", fp: "複数の会場の映像をまとめて配信しながら、会場のスクリーンには登壇者とスライドを並べて表示しました。", btn: "相談する", d: [["配信", "会場の映像を、そのままオンラインの参加者へ届けました。"], ["PinP", "登壇者とスライドを1画面に重ねて表示しました。"], ["スクリーン切り替え", "進行に合わせて、会場のスクリーンを切り替えました。"]], more: "詳しく相談する →",
+      toolsEb: "Free Tools & Open Source", toolsH: "現場の小道具は、無料で。", toolsP: "ブラウザで動く無料のツールと、GitHub で公開しているソフトウェアです。", gh: "GitHub を見る", open: "開く →" }
+  : { eb: "Works", h: "How we support the show.", tag: "International conference", fh: "Streaming, PinP and screen switching for an international conference at a large expo hall.", fp: "We streamed several rooms while showing speakers and slides side by side on the venue screens.", btn: "Get in touch", d: [["Streaming", "Delivered the room feed to online attendees."], ["PinP", "Speaker and slides on one screen."], ["Screen switching", "Switched the venue screens with the program."]], more: "Talk to us →",
+      toolsEb: "Free Tools & Open Source", toolsH: "Field tools, free to use.", toolsP: "Free browser tools and open-source software on GitHub.", gh: "View GitHub", open: "Open →" };
+const cards = works.filter((_, i) => i !== 1).slice(0, 3);
 const looks = ["a", "b", "c"];
 ---
-<section id="code">
+<section id="cases">
   <div class="wrap">
-    <div style="text-align:center;margin-top:96px"><span class="eyebrow">{O.eb}</span><h2 class="big-title" style="margin:8px auto 0">{O.h}</h2></div>
+    <div style="text-align:center;margin-top:96px"><span class="eyebrow">{C.eb}</span><h2 class="big-title" style="margin:8px auto 0">{C.h}</h2></div>
     <article class="feature">
       <div>
-        <span class="feature-logo"><Icon name="github" size={20} />{repos.featured.name}</span>
-        <h3>{O.ft}</h3>
-        <p>{O.fp}</p>
-        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-          <a class="btn btn-primary" href={`${gh}/${repos.featured.name}`}>{O.view}</a>
-          <span class="star-count"><Icon name="star" size={16} />{repos.featured.stars.toLocaleString("en-US")} stars</span>
-        </div>
+        <span class="feature-logo">{C.tag}</span>
+        <h3>{C.fh}</h3>
+        <p>{C.fp}</p>
+        <a class="btn btn-primary" href="#contact" data-topic="work">{C.btn}</a>
       </div>
-      <dl>{O.d.map(([a, b]) => <div><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
+      <dl>{C.d.map(([a, b]) => <div><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
     </article>
     <div class="cards3">
-      {repos.groups.map((g, i) => (
-        <a class="c3" href={`${gh}/${g.repos[0]}`}>
-          <div class={`c3-img ${looks[i]}`}><code>{g.repos[0]}</code></div>
-          <h4>{g[lang]}</h4>
-          <span>{g.repos.slice(0, 3).join(" · ")}</span>
+      {cards.map((w, i) => (
+        <a class="c3" href="#contact" data-topic="work">
+          <div class={`c3-img ${looks[i]}`}><code>{w.year} · {w.type[lang]}</code></div>
+          <h4>{w[lang]}</h4>
+          <span>{C.more}</span>
         </a>
       ))}
     </div>
-    <div class="bento three" id="tools" style="margin-top:72px">
+    <div class="bento three" id="tools" style="margin-top:96px">
       <div class="b-side" style="grid-row: span 2">
-        <span class="eyebrow">{O.toolsEb}</span>
-        <h3>{O.toolsH}</h3>
+        <span class="eyebrow">{C.toolsEb}</span>
+        <h3>{C.toolsH}</h3>
+        <p>{C.toolsP}</p>
+        <a class="btn" href={gh}><Icon name="github" size={16} />{C.gh}</a>
       </div>
       {tools.map((t) => (
         <a class="b-cell" href={t.href}>
           <h4 class="mono" style="font-size:15px">{t.name}</h4>
           <p style="margin:0 0 10px">{t[lang]}</p>
-          <span style="font-size:13px;color:var(--acc)">{O.more}</span>
+          <span style="font-size:13px;color:var(--acc)">{C.open}</span>
         </a>
       ))}
     </div>

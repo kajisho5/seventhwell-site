@@ -1,30 +1,37 @@
 ---
-import works from "../data/works.json";
+// Buildkite の「Scale without limits / Adapt dynamically / Boost developer impact」と同じ作り
+// 左の見出しがスクロールに合わせて順に濃くなり、右のカードが重なって入れ替わる
 import repos from "../data/repos.json";
 import equipment from "../data/equipment.json";
 import { type Lang } from "../data/site";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const ja = lang === "ja";
-const W = ja
-  ? { eb: "Works", h: "現場の数だけ、経験がある。", p: "ライブイベント・放送・学会・展示会。映像と音響の両方を担当してきました。", stats: [["1000+", "案件"], ["10+", "年の現場経験"], [String(equipment.total), "自社で管理する主要機材"], [String(repos.totalRepos), "公開しているリポジトリ"]], cat: "SW-CATALOG で機材を見る →" }
-  : { eb: "Works", h: "Experience from every show.", p: "Live events, broadcast, conferences and expos — both video and audio.", stats: [["1000+", "projects"], ["10+", "years on site"], [String(equipment.total), "main items of gear we own"], [String(repos.totalRepos), "public repositories"]], cat: "See our gear in SW-CATALOG →" };
+const gh = `https://github.com/${repos.account}`;
+const rows = ja
+  ? [
+      { h: "現場の数だけ、経験がある。", p: "ライブイベント・放送・学会・展示会。映像と音響の両方を担当してきました。", ic: "7", who: "SEVENTHWELL", q: "映像の切り替えから配信、音響まで。一人の窓口で、本番の技術をまとめて受けます。", btn: ["実績を見る", "#cases"], stats: [["1000+", "案件"], ["10+", "年の現場経験"], [String(equipment.total), "自社で管理する主要機材"], ["全国", "出張対応（東京拠点）"]] },
+      { h: "必要な道具は、自分で作る。", p: "現場で困ったことは、ソフトにして次の本番から使います。", ic: "P", who: "Presync", q: "演者の受付から会場での投影まで。会場LANの中だけで、受付・会場PC・本部を同期させます。", btn: ["Presync を見る", "/presync/"], stats: [["1,000", "演題で実測"], ["20", "台のPCで実測"], ["0", "必要なインターネット接続"], ["3", "役割（受付・会場・本部）"]] },
+      { h: "作った物は、公開する。", p: "道具の一部は GitHub で誰でも使えるようにしています。", ic: "★", who: "ffmpeg-skill", q: "コーディングエージェントに「動画編集」を持たせるスキル。ローカルの FFmpeg で動き、クラウドも API キーも要りません。", btn: ["GitHub で見る", `${gh}/ffmpeg-skill`], stats: [[repos.featured.stars.toLocaleString("en-US"), "GitHub スター"], [String(repos.totalRepos), "公開リポジトリ"], ["42", "収録しているツール"], ["MIT", "ライセンス"]] },
+    ]
+  : [
+      { h: "Experience from every show.", p: "Live events, broadcast, conferences and expos — both video and audio.", ic: "7", who: "SEVENTHWELL", q: "Switching, streaming and audio — one point of contact for the whole show.", btn: ["See our work", "#cases"], stats: [["1000+", "projects"], ["10+", "years on site"], [String(equipment.total), "main items of gear"], ["Japan", "nationwide, based in Tokyo"]] },
+      { h: "We build the tools we need.", p: "Every problem on site becomes software for the next show.", ic: "P", who: "Presync", q: "From speaker check-in to the screen. Reception, room PCs and HQ stay in sync on the venue LAN.", btn: ["Explore Presync", "/presync/"], stats: [["1,000", "talks tested"], ["20", "PCs tested"], ["0", "internet needed"], ["3", "roles: desk, room, HQ"]] },
+      { h: "What we build, we share.", p: "Some of our tools are open source on GitHub.", ic: "★", who: "ffmpeg-skill", q: "Give coding agents the power to edit video. Runs on local FFmpeg — no cloud, no API keys.", btn: ["View on GitHub", `${gh}/ffmpeg-skill`], stats: [[repos.featured.stars.toLocaleString("en-US"), "GitHub stars"], [String(repos.totalRepos), "public repositories"], ["42", "tools included"], ["MIT", "license"]] },
+    ];
 ---
-<section id="works">
-  <div class="wrap proof">
-    <div>
-      <span class="eyebrow">{W.eb}</span>
-      <h2>{W.h}</h2>
-      <p>{W.p}</p>
-      <p style="margin-top:20px" id="equipment"><a class="btn" href="/sw-catalog">{W.cat}</a></p>
-    </div>
-    <div class="proof-card">
-      <div class="stats">
-        {W.stats.map(([v, k]) => <div class="stat"><b data-count={v}>{v}</b><span>{k}</span></div>)}
+<section class="story" id="works" data-story>
+  <div class="wrap">
+    {rows.map((r) => (
+      <div class="story-row" data-story-row>
+        <div class="story-text"><h3>{r.h}</h3><p>{r.p}</p></div>
+        <div class="story-card">
+          <div class="who"><i>{r.ic}</i>{r.who}</div>
+          <blockquote>{r.q}</blockquote>
+          <a class="btn btn-primary" href={r.btn[1]}>{r.btn[0]} →</a>
+          <div class="stats">{r.stats.map(([v, k]) => <div class="stat"><b>{v}</b><span>{k}</span></div>)}</div>
+        </div>
       </div>
-      <ul class="works">
-        {works.map((w) => <li><span class="y">{w.year}</span><span class="k">{w.type[lang]}</span><span class="t">{w[lang]}</span></li>)}
-      </ul>
-    </div>
+    ))}
   </div>
 </section>

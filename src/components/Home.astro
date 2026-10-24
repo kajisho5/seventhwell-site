@@ -13,7 +13,7 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 ---
 <Base lang={lang} path={lang === "ja" ? "/" : "/en/"}>
-  <SiteHeader lang={lang} />
+  <SiteHeader lang={lang} dark />
   <main id="main">
     <HeroStage lang={lang} />
     <Platform lang={lang} />

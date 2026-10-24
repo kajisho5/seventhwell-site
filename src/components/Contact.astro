@@ -7,11 +7,28 @@ const T = t[lang];
 // Turnstile のサイトキー（公開してよい値）。未設定ならテスト用キー
 const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 ---
-<section class="close" id="contact">
+<section id="contact">
+  <div class="cta-band">
+    <div class="wrap">
+      <div class="cta-in">
+        <div>
+          <h2>{T.closeTitle}</h2>
+          <p>{T.closeLead}</p>
+          <a class="btn btn-primary btn-lg" href="#contact-form" data-topic="work">{T.consult} →</a>
+        </div>
+        <div class="cta-shot" aria-hidden="true">
+          <div class="win-bar"><i></i><i></i><i></i><span class="mono">STREAMTALLY</span></div>
+          <div class="cta-rows">
+            {(lang === "ja" ? [["メイン配信", "SRT · 6.0 Mbps"], ["予備配信", "RTMP · 4.5 Mbps"], ["会場収録", "ProRes 422"], ["サブ会場", "HLS · 3.2 Mbps"]] : [["Main stream", "SRT · 6.0 Mbps"], ["Backup", "RTMP · 4.5 Mbps"], ["Recording", "ProRes 422"], ["Room B", "HLS · 3.2 Mbps"]]).map(([a, b], k) => (
+              <div><span>{a}<small class="mono">{b}</small></span><span class="st on">LIVE</span><span class="cta-bars">{Array.from({ length: 12 }, (_, j) => <i style={`--t:${0.5 + ((j * 7 + k) % 5) * 0.12}s`}></i>)}</span></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="wrap">
-    <h2 class="reveal">{T.closeTitle}</h2>
-    <p class="reveal" style="--rd:.1s">{T.closeLead}</p>
-    <form class="form-card reveal" style="--rd:.15s" data-contact data-ok={T.fOk} data-ng={T.fNg} data-sending={T.fSending} novalidate>
+    <form id="contact-form" class="form-card" data-contact data-ok={T.fOk} data-ng={T.fNg} data-sending={T.fSending} novalidate>
       <h3>{T.formTitle}</h3>
       <p>{T.formLead}</p>
       <div class="field">
