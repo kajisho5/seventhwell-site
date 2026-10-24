@@ -1,90 +1,80 @@
-/* 色・余白・文字の変数。明るい／暗いは data-theme で切り替える */
+/* 色・文字の変数。Buildkite と同じく、紫の濃淡＋細い薄紫の線で組む */
 :root {
-  --bg: #ffffff;
-  --bg2: #f5f7fa;
+  --bg: #fdfdff;
+  --bg2: #f4f2fc;
   --card: #ffffff;
-  --ink: #0b1220;
-  --sub: #4f5b6e;
-  --mute: #6b7689;
-  --line: #e4e8ee;
-  --line2: #ced5df;
-  --acc: #2b5cff;
+  --ink: #140d30;
+  --sub: #4f4870;
+  --mute: #7a7398;
+  --line: #e2dff1;
+  --line2: #cfc9e8;
+  --acc: #6c2bd9;
   --acc-ink: #ffffff;
-  --acc-bg: #ebf0ff;
-  --ok: #0f9d58;
-  --ok-bg: #e7f8ef;
-  --warn: #f79009;
-  --panel: #0b1220;
-  --panel2: #131c2e;
-  --ptxt: #e8edf5;
-  --psub: #8392aa;
-  --pline: #22304a;
-  --glow: rgba(43, 92, 255, 0.10);
-  --shadow: 0 20px 48px rgba(11, 18, 32, 0.12);
+  --acc-bg: #f1eaff;
+  --mark: #a742ed;
+  --ok: #079455;
+  --ok-bg: #ecfdf3;
+  --warn: #b54708;
+  --warn-bg: #fff7e0;
+  --panel: #0c0926;
+  --panel2: #171239;
+  --ptxt: #f3f1ff;
+  --psub: #a7a0cf;
+  --pline: #2c2560;
+  --shadow: 0 1px 2px rgba(20,13,48,.06), 0 8px 24px rgba(20,13,48,.08);
+  --shadow-btn: 0 1px 0 rgba(255,255,255,.8) inset, 0 1px 2px rgba(20,13,48,.12), 0 0 0 1px rgba(20,13,48,.08);
 
   --f-logo: "Goodtimes", "Michroma", "Arial Black", sans-serif;
-  --f-mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --f-jp: "Noto Sans JP", system-ui, -apple-system, "Hiragino Sans", sans-serif;
-
-  --r-s: 8px;
-  --r-m: 12px;
-  --r-l: 18px;
-  --wrap: 1248px;
-  --gutter: clamp(16px, 5vw, 96px);
+  --f-sans: "Geist", "Noto Sans JP", system-ui, -apple-system, "Hiragino Sans", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --wrap: 1200px;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --bg: #020617;
-  --bg2: #0a1124;
-  --card: #0d152b;
-  --ink: #eef2f8;
-  --sub: #a3aec2;
-  --mute: #8a96ad;
-  --line: #1c2742;
-  --line2: #2a3858;
-  --acc: #5c84ff;
-  --acc-ink: #ffffff;
-  --acc-bg: #16224a;
+  --bg: #0b0920;
+  --bg2: #120f2c;
+  --card: #151133;
+  --ink: #f3f1ff;
+  --sub: #bdb6e0;
+  --mute: #8f88b6;
+  --line: #262056;
+  --line2: #352e6e;
+  --acc: #9d6bff;
+  --acc-bg: #241a52;
+  --mark: #c08bff;
   --ok: #3dd68c;
   --ok-bg: #0f2f24;
-  --panel: #0d152b;
-  --panel2: #121c36;
-  --pline: #22304a;
-  --glow: rgba(92, 132, 255, 0.16);
-  --shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  --warn: #f5c84b;
+  --warn-bg: #2a2210;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+  --shadow-btn: 0 1px 0 rgba(255,255,255,.06) inset, 0 0 0 1px rgba(255,255,255,.12);
   color-scheme: dark;
 }
 
-/* JavaScript が動かない時も端末の設定に合わせる */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-  --bg: #020617;
-  --bg2: #0a1124;
-  --card: #0d152b;
-  --ink: #eef2f8;
-  --sub: #a3aec2;
-  --mute: #8a96ad;
-  --line: #1c2742;
-  --line2: #2a3858;
-  --acc: #5c84ff;
-  --acc-ink: #ffffff;
-  --acc-bg: #16224a;
-  --ok: #3dd68c;
-  --ok-bg: #0f2f24;
-  --panel: #0d152b;
-  --panel2: #121c36;
-  --pline: #22304a;
-  --glow: rgba(92, 132, 255, 0.16);
-  --shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
-  color-scheme: dark;
-}
+    --bg: #0b0920;
+    --bg2: #120f2c;
+    --card: #151133;
+    --ink: #f3f1ff;
+    --sub: #bdb6e0;
+    --mute: #8f88b6;
+    --line: #262056;
+    --line2: #352e6e;
+    --acc: #9d6bff;
+    --acc-bg: #241a52;
+    --mark: #c08bff;
+    --ok: #3dd68c;
+    --ok-bg: #0f2f24;
+    --warn: #f5c84b;
+    --warn-bg: #2a2210;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+    --shadow-btn: 0 1px 0 rgba(255,255,255,.06) inset, 0 0 0 1px rgba(255,255,255,.12);
+    color-scheme: dark;
+  }
 }
 
 /* Goodtimes の woff2 を public/fonts/ に置いたら、下のコメントを外す（それまでは Michroma で表示）
-@font-face {
-  font-family: "Goodtimes";
-  src: url("/fonts/goodtimes.woff2") format("woff2");
-  font-display: swap;
-}
+@font-face { font-family: "Goodtimes"; src: url("/fonts/goodtimes.woff2") format("woff2"); font-display: swap; }
 */

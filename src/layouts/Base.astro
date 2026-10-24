@@ -27,12 +27,12 @@ const url = new URL(path, Astro.site).toString();
   <meta property="og:image" content={new URL("/ogp.png", Astro.site)} />
   <meta property="og:locale" content={lang === "ja" ? "ja_JP" : "en_US"} />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#fdfdff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b0920" media="(prefers-color-scheme: dark)" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;600&family=Michroma&family=Noto+Sans+JP:wght@400;500;700&display=swap" />
   <script is:inline>
     // 明るい／暗いを、描画前に決める（保存した選択 → 端末の設定）
     (function () {

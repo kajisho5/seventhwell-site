@@ -2,43 +2,52 @@
 import Icon from "./Icon.astro";
 import tools from "../data/tools.json";
 import repos from "../data/repos.json";
-import { t, type Lang } from "../data/site";
+import { type Lang } from "../data/site";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const T = t[lang];
+const ja = lang === "ja";
 const gh = `https://github.com/${repos.account}`;
+const O = ja
+  ? { eb: "Open Source", h: "作った道具は、公開しています。", ft: "コーディングエージェントに「動画編集」を持たせるスキル。", fp: "ローカルの FFmpeg で動く42のツール。クラウドも API キーも不要。Claude Code・Cursor・Codex・MCP に対応しています。", view: "GitHub で見る", d: [["42 のツール", "カット・字幕・ラウドネス・マルチカム・納品チェックまで。"], ["完全にローカル", "映像を外に出さずに処理できます。"], ["スター数は毎日更新", `最終更新 ${repos.updatedAt}`]], toolsEb: "Free Tools", toolsH: "現場の小道具は、無料で。", more: "開く →" }
+  : { eb: "Open Source", h: "The tools we build are public.", ft: "Give coding agents the power to edit video.", fp: "42 tools running on local FFmpeg. No cloud, no API keys. Works with Claude Code, Cursor, Codex and MCP.", view: "View on GitHub", d: [["42 tools", "Cuts, subtitles, loudness, multicam and delivery QC."], ["Fully local", "Your footage never leaves the machine."], ["Stars updated daily", `Last updated ${repos.updatedAt}`]], toolsEb: "Free Tools", toolsH: "Field tools, free to use.", more: "Open →" };
+const looks = ["a", "b", "c"];
 ---
-<section class="section" id="tools">
+<section id="code">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">{T.toolsEyebrow}</span>
-      <h2>{T.toolsTitle}</h2>
-      <p>{T.toolsLead}</p>
-    </div>
-    <div class="tools">
-      {tools.map((tl, i) => (
-        <a class="tool reveal" style={`--rd:${i * 0.05}s`} href={tl.href}><b>{tl.name}</b><span>{tl[lang]}</span><Icon name="arrow" /></a>
+    <div style="text-align:center;margin-top:96px"><span class="eyebrow">{O.eb}</span><h2 class="big-title" style="margin:8px auto 0">{O.h}</h2></div>
+    <article class="feature">
+      <div>
+        <span class="feature-logo"><Icon name="github" size={20} />{repos.featured.name}</span>
+        <h3>{O.ft}</h3>
+        <p>{O.fp}</p>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <a class="btn btn-primary" href={`${gh}/${repos.featured.name}`}>{O.view}</a>
+          <span class="star-count"><Icon name="star" size={16} />{repos.featured.stars.toLocaleString("en-US")} stars</span>
+        </div>
+      </div>
+      <dl>{O.d.map(([a, b]) => <div><dt>{a}</dt><dd>{b}</dd></div>)}</dl>
+    </article>
+    <div class="cards3">
+      {repos.groups.map((g, i) => (
+        <a class="c3" href={`${gh}/${g.repos[0]}`}>
+          <div class={`c3-img ${looks[i]}`}><code>{g.repos[0]}</code></div>
+          <h4>{g[lang]}</h4>
+          <span>{g.repos.slice(0, 3).join(" · ")}</span>
+        </a>
       ))}
     </div>
-    <div class="repo" id="code">
-      <div class="repo-feat reveal">
-        <span class="repo-name"><Icon name="github" size={22} />{repos.account}/{repos.featured.name}</span>
-        <h3>{T.featuredDesc}</h3>
-        <p>{T.featuredSub}</p>
-        <div class="repo-meta">
-          <span class="star"><Icon name="star" size={18} />{repos.featured.stars.toLocaleString("en-US")}</span>
-          <span style="color:var(--psub)">{repos.featured.language} · {repos.featured.license}</span>
-        </div>
-        <a class="btn" href={`${gh}/${repos.featured.name}`}>{T.viewGithub}<Icon name="arrow" size={18} /></a>
+    <div class="bento three" id="tools" style="margin-top:72px">
+      <div class="b-side" style="grid-row: span 2">
+        <span class="eyebrow">{O.toolsEb}</span>
+        <h3>{O.toolsH}</h3>
       </div>
-      <div class="repo-groups">
-        {repos.groups.map((g, i) => (
-          <div class="rgroup reveal" style={`--rd:${i * 0.08}s`}>
-            <h4>{g[lang]}</h4>
-            <ul>{g.repos.map((r) => <li><a href={`${gh}/${r}`}>{r}</a></li>)}</ul>
-          </div>
-        ))}
-      </div>
+      {tools.map((t) => (
+        <a class="b-cell" href={t.href}>
+          <h4 class="mono" style="font-size:15px">{t.name}</h4>
+          <p style="margin:0 0 10px">{t[lang]}</p>
+          <span style="font-size:13px;color:var(--acc)">{O.more}</span>
+        </a>
+      ))}
     </div>
   </div>
 </section>

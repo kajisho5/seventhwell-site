@@ -1,0 +1,179 @@
+---
+// Buildkite の製品紹介と同じ型：左に説明、右に細い線で区切ったマス目。マスの中の小さな画面が動き続ける
+import Icon from "./Icon.astro";
+import { type Lang } from "../data/site";
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const ja = lang === "ja";
+const home = ja ? "/" : "/en/";
+const T = ja
+  ? {
+      title: "本番を止めない仕組みを、現場の数だけ。",
+      ops: { eb: "Venue Operation", h: "Presync", p: "演者の受付から会場での投影まで。会場LANの中だけで、受付・会場PC・本部が同期します。", btn: "Presync を見る" },
+      c1: ["64演題を同時に受付", "受付PCから会場PCへ、発表データを自動で配ります。"], recv: "受付", pcs: "受付PC", pcsUnit: "台 接続中",
+      c2: ["信号の流れが見える", "どこで何が流れているかを、一枚の図で共有します。"],
+      c3: ["本番ログ", "切り替えや警報を自動で記録し、報告書に使えます。"],
+      pulse: { eb: "Live Audience Response", h: "PULSE", p: "QRを読むだけで参加できる、会場のリアルタイム投票。1000人同時接続まで対応します。", btn: "PULSE を見る" },
+      p1: ["その場で集計", "投票の結果が、スクリーンにすぐ反映されます。"], q: "Q. 今日いちばん良かったセッションは？", s: "セッション",
+      p2: ["QRで参加", "アプリは不要。読み取ってすぐ回答できます。"], joined: "人が参加中",
+      p3: ["自由回答もまとめる", "多い言葉ほど大きく表示します。"],
+      words: ["わかりやすい", "配信", "音がいい", "質疑", "資料", "時間", "また参加", "現場"],
+      hold: { eb: "Gear & Crew Booking", h: "HOLDLINE", p: "「この日これ空いてる？」に一目で答える、機材と人の予約ボード。", btn: "HOLDLINE を見る" },
+      h1: ["予約ボード", "機材ごとに、いつ誰が押さえているかが並びます。"], days: ["月", "火", "水", "木", "金", "土", "日"], gear: ["スイッチャー #1", "カメラ #2", "LED 3m", "ミキサー #1"], book: "予約", holdw: "仮押さえ",
+      h2: ["期限つき仮押さえ", "期限が来たら自動で外れます。"], holdLabel: "ミキサー #1 の仮押さえ 残り",
+      play: { eb: "Playout & Monitoring", h: "TELOPDECK / STREAMTALLY", p: "名前スーパーの送出と、配信の監視。本番中に「出し間違い」と「気づかない」をなくします。", btn: "TELOPDECK を見る" },
+      t1: ["Excelから名前スーパーへ", "長い所属や2行の肩書きも自動で組みます。"], tname: "架空 太郎", ttitle: "架空大学 映像工学部 教授",
+      t2: ["落ちた・無音・止まった を検知", "確認するまで警報を鳴らします。"], mon: ["メイン配信 SRT", "予備配信 RTMP", "会場収録", "サブ会場 HLS"], silent: "無音 12秒",
+    }
+  : {
+      title: "Systems that keep the show running.",
+      ops: { eb: "Venue Operation", h: "Presync", p: "From speaker check-in to the screen. Reception, room PCs and HQ stay in sync on the venue LAN.", btn: "Explore Presync" },
+      c1: ["64 talks checked in at once", "Files move from reception to every room PC automatically."], recv: "Checked", pcs: "Reception PCs", pcsUnit: " online",
+      c2: ["See the signal flow", "Share where every signal goes, on one diagram."],
+      c3: ["Show log", "Switches and alarms are logged for your report."],
+      pulse: { eb: "Live Audience Response", h: "PULSE", p: "Real-time polling the audience joins with a QR code. Up to 1,000 concurrent users.", btn: "Explore PULSE" },
+      p1: ["Results in real time", "Votes show on the big screen instantly."], q: "Q. Best session today?", s: "Session ",
+      p2: ["Join by QR", "No app. Scan and answer."], joined: "joined",
+      p3: ["Open answers, summarized", "The more often a word appears, the bigger it gets."],
+      words: ["clear", "stream", "great audio", "Q&A", "slides", "timing", "again", "on site"],
+      hold: { eb: "Gear & Crew Booking", h: "HOLDLINE", p: "A booking board for gear and crew that answers \"is this free that day?\" at a glance.", btn: "Explore HOLDLINE" },
+      h1: ["Booking board", "See who holds each item, and when."], days: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], gear: ["Switcher #1", "Camera #2", "LED 3m", "Mixer #1"], book: "Booked", holdw: "Hold",
+      h2: ["Holds that expire", "Released automatically when time runs out."], holdLabel: "Hold on Mixer #1 expires in",
+      play: { eb: "Playout & Monitoring", h: "TELOPDECK / STREAMTALLY", p: "Lower-third playout and stream monitoring — no wrong names, no missed outages.", btn: "Explore TELOPDECK" },
+      t1: ["From the sheet to the lower third", "Long affiliations and two-line titles are typeset for you."], tname: "Taro Example", ttitle: "Professor, Example University",
+      t2: ["Dropped, silent, frozen — detected", "The alarm keeps ringing until someone checks."], mon: ["Main SRT", "Backup RTMP", "Recording", "Room B HLS"], silent: "Silent 12s",
+    };
+const logs = ja
+  ? ["PGM → CAM 2", "受付 B-14 完了", "配信 SRT 6.0 Mbps", "PGM → PC スライド", "音声 -14 LUFS", "受付 C-03 完了", "PGM → CAM 1", "収録 残り 3h10m"]
+  : ["PGM → CAM 2", "Check-in B-14 done", "Stream SRT 6.0 Mbps", "PGM → Slides", "Audio -14 LUFS", "Check-in C-03 done", "PGM → CAM 1", "Rec 3h10m left"];
+// QRっぽい模様（決まった並び）
+const qr = Array.from({ length: 81 }, (_, k) => { const r = Math.floor(k / 9), c = k % 9; const corner = (r < 3 && c < 3) || (r < 3 && c > 5) || (r > 5 && c < 3); return corner ? !((r % 3 === 1 && c % 3 === 1)) : ((r * 7 + c * 3 + r * c) % 3 === 0); });
+const gantt = [[0, 3, "#6c2bd9"], [1, 2, "#a742ed"], [2, 5, "#6c2bd9"], [4, 6, "#e08a00"]] as const;
+---
+<section id="products">
+  <div class="wrap">
+    <h2 class="big-title">{T.title}</h2>
+
+    <!-- Presync -->
+    <div class="bento">
+      <div class="b-side">
+        <span class="eyebrow">{T.ops.eb}</span>
+        <h3>{T.ops.h}</h3>
+        <p>{T.ops.p}</p>
+        <a class="btn" href="/presync/">{T.ops.btn}</a>
+      </div>
+      <div class="b-cell b-wide">
+        <h4>{T.c1[0]}</h4><p>{T.c1[1]}</p>
+        <div class="jobs-wrap">
+          <div class="jobs" data-jobs>
+            <span class="job head"><i class="sp"></i>{T.recv} <b data-jobs-count>0</b>/64</span>
+            {Array.from({ length: 63 }, (_, k) => <span class="job" data-job><i class="sp"></i><em>{String.fromCharCode(65 + Math.floor(k / 16))}-{String((k % 16) + 1).padStart(2, "0")}</em></span>)}
+          </div>
+          <div class="agent"><small>{T.pcs}</small><b>20</b><small>{T.pcsUnit}</small><span class="ring dark"></span></div>
+        </div>
+      </div>
+      <div class="b-cell">
+        <h4>{T.c2[0]}</h4><p>{T.c2[1]}</p>
+        <svg class="flow" viewBox="0 0 320 120" aria-hidden="true">
+          <g class="fl-edges"><path d="M58 30 C80 30 80 60 110 60" /><path d="M58 60 H110" /><path d="M58 90 C80 90 80 60 110 60" /><path d="M178 60 C200 60 200 30 222 30" /><path d="M178 60 C200 60 200 90 222 90" /></g>
+          <g class="fl-pulse"><path d="M58 60 H110" /><path d="M178 60 C200 60 200 30 222 30" /><path d="M178 60 C200 60 200 90 222 90" /></g>
+          <g class="fl-nodes">
+            <rect x="6" y="18" width="52" height="24" rx="6" /><text x="32" y="34">CAM1</text>
+            <rect x="6" y="48" width="52" height="24" rx="6" class="on" /><text x="32" y="64">CAM2</text>
+            <rect x="6" y="78" width="52" height="24" rx="6" /><text x="32" y="94">PC</text>
+            <rect x="110" y="44" width="68" height="32" rx="8" class="on" /><text x="144" y="64">SWITCH</text>
+            <rect x="222" y="18" width="92" height="24" rx="6" /><text x="268" y="34">STREAM</text>
+            <rect x="222" y="78" width="92" height="24" rx="6" /><text x="268" y="94">RECORD</text>
+          </g>
+        </svg>
+      </div>
+      <div class="b-cell">
+        <h4>{T.c3[0]}</h4><p>{T.c3[1]}</p>
+        <div class="log" data-log={JSON.stringify(logs)}>
+          {logs.slice(0, 4).map((l, k) => <div><time>10:42:{String(10 + k * 3).padStart(2, "0")}</time><span>{l}</span></div>)}
+        </div>
+      </div>
+    </div>
+
+    <!-- PULSE -->
+    <div class="bento">
+      <div class="b-side">
+        <span class="eyebrow">{T.pulse.eb}</span>
+        <h3>{T.pulse.h}</h3>
+        <p>{T.pulse.p}</p>
+        <a class="btn" href="/pulse/">{T.pulse.btn}</a>
+      </div>
+      <div class="b-cell b-wide">
+        <h4>{T.p1[0]}</h4><p>{T.p1[1]}</p>
+        <div class="ui" data-poll>
+          <div class="ui-title"><span>{T.q}</span><span class="mono"><span data-tick="412" data-tick-range="1,3" data-tick-ms="1100">412</span> votes</span></div>
+          {[46, 31, 15, 8].map((v, k) => <div class={`bar ${k === 0 ? "top" : ""}`}><i style={`--w:${v}%`}></i><span><b>{T.s}{"ABCD"[k]}</b><b class="mono">{v}%</b></span></div>)}
+        </div>
+      </div>
+      <div class="b-cell">
+        <h4>{T.p2[0]}</h4><p>{T.p2[1]}</p>
+        <div class="qr">
+          <div class="qr-code" aria-hidden="true">{qr.map((on) => <i class={on ? "" : "o"}></i>)}</div>
+          <div><span class="big-num" data-tick="438" data-tick-range="0,2" data-tick-ms="900">438</span><div style="font-size:13px;color:var(--sub)">{T.joined}</div></div>
+        </div>
+      </div>
+      <div class="b-cell">
+        <h4>{T.p3[0]}</h4><p>{T.p3[1]}</p>
+        <div class="cloud">{T.words.map((w, k) => <span style={`--k:${k};font-size:${[26, 20, 22, 15, 17, 14, 18, 13][k]}px`}>{w}</span>)}</div>
+      </div>
+    </div>
+
+    <!-- HOLDLINE -->
+    <div class="bento three">
+      <div class="b-side">
+        <span class="eyebrow">{T.hold.eb}</span>
+        <h3>{T.hold.h}</h3>
+        <p>{T.hold.p}</p>
+        <a class="btn" href="/holdline/">{T.hold.btn}</a>
+      </div>
+      <div class="b-cell" style="grid-column: span 2">
+        <h4>{T.h1[0]}</h4><p>{T.h1[1]}</p>
+        <div class="ui">
+          <div class="gantt">
+            <span></span>{T.days.map((d) => <span class="d">{d}</span>)}
+            {T.gear.map((g, r) => (
+              <>
+                <span class="r">{g}</span>
+                {T.days.map((_, c) => <span class="slot">{c === gantt[r][0] && <span class="gb" style={`width:calc(${(gantt[r][1] - gantt[r][0] + 1) * 100}% - 4px);background:${gantt[r][2]};--d:${r * 0.25}s`}>{r === 3 ? T.holdw : T.book}</span>}</span>)}
+              </>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div class="b-cell">
+        <h4>{T.h2[0]}</h4><p>{T.h2[1]}</p>
+        <div class="hold"><span>{T.holdLabel}</span><b data-countdown="86000">23:53:20</b></div>
+      </div>
+    </div>
+
+    <!-- TELOPDECK / STREAMTALLY -->
+    <div class="bento three">
+      <div class="b-side">
+        <span class="eyebrow">{T.play.eb}</span>
+        <h3>{T.play.h}</h3>
+        <p>{T.play.p}</p>
+        <a class="btn" href="/telopdeck/">{T.play.btn}</a>
+      </div>
+      <div class="b-cell" style="grid-column: span 2">
+        <h4>{T.t1[0]}</h4><p>{T.t1[1]}</p>
+        <div class="telop" aria-hidden="true"><div class="telop-bar"><b>{T.tname}</b><span>{T.ttitle}</span></div></div>
+      </div>
+      <div class="b-cell">
+        <h4>{T.t2[0]}</h4><p>{T.t2[1]}</p>
+        <div class="mon" aria-hidden="true">
+          {T.mon.map((m, k) => (
+            <div class={`mon-row ${k === 3 ? "alert" : ""}`}>
+              <span>{m}</span>{k === 3 && <b class="mono" style="font-size:11px">{T.silent}</b>}
+              <span class="wave">{Array.from({ length: 10 }, (_, j) => <b style={`--t:${0.5 + ((j * 7) % 5) * 0.12}s`}></b>)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

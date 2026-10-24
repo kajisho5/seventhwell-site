@@ -1,26 +1,30 @@
 ---
 import Icon from "./Icon.astro";
 import services from "../data/services.json";
-import { t, type Lang } from "../data/site";
+import { type Lang } from "../data/site";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const T = t[lang];
+const ja = lang === "ja";
+const S = ja
+  ? { eb: "Services", h: "現場のことは、まるごと。", p: "企画の相談から本番のオペレーション、専用ソフトの開発まで、一人の窓口で対応します。", btn: "相談する" }
+  : { eb: "Services", h: "Everything the show needs.", p: "From planning to on-site operation and custom software — one point of contact.", btn: "Get in touch" };
 ---
-<section class="section" id="services">
+<section id="services">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">{T.servicesEyebrow}</span>
-      <h2>{T.servicesTitle}</h2>
-      <p>{T.servicesLead}</p>
-    </div>
-    <div class="services">
-      {services.map((s, i) => (
-        <article class="svc reveal" style={`--rd:${(i % 3) * 0.08}s`}>
-          <span class="icbox"><Icon name={s.icon} size={24} /></span>
-          <h3>{s[lang][0]}</h3>
-          <p>{s[lang][1]}<br />{s[lang][2]}</p>
+    <div class="bento three" style="margin-top:96px">
+      <div class="b-side" style="grid-row: span 2">
+        <span class="eyebrow">{S.eb}</span>
+        <h3>{S.h}</h3>
+        <p>{S.p}</p>
+        <a class="btn" href="#contact" data-topic="work">{S.btn}</a>
+      </div>
+      {services.map((s) => (
+        <div class="b-cell">
+          <span class="icon-sm"><Icon name={s.icon} size={20} /></span>
+          <h4>{s[lang][0]}</h4>
+          <p style="margin:0">{s[lang][1]}{s[lang][2]}</p>
           <div class="tags">{s.tags[lang].map((tg) => <span class="tag">{tg}</span>)}</div>
-        </article>
+        </div>
       ))}
     </div>
   </div>

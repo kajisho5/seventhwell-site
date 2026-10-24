@@ -188,3 +188,18 @@ if (!reduce) {
     }, 1600);
   }
 }
+
+/* 仮押さえの残り時間（1秒ずつ減る） */
+document.querySelectorAll<HTMLElement>("[data-countdown]").forEach((el) => {
+  let s = Number(el.dataset.countdown);
+  const draw = () => { const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; el.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(x).padStart(2, "0")}`; };
+  draw();
+  if (!reduce) setInterval(() => { s = s > 0 ? s - 1 : 86000; draw(); }, 1000);
+});
+/* PULSE の投票バーがじわじわ動く */
+document.querySelectorAll<HTMLElement>("[data-poll]").forEach((box) => {
+  const bars = [...box.querySelectorAll<HTMLElement>(".bar")];
+  let p = [46, 31, 15, 8];
+  const draw = () => bars.forEach((b, k) => { b.querySelector<HTMLElement>("i")!.style.setProperty("--w", p[k] + "%"); b.querySelectorAll("b")[1].textContent = p[k] + "%"; });
+  if (!reduce) setInterval(() => { const a = Math.floor(Math.random() * 4), c = (a + 1 + Math.floor(Math.random() * 3)) % 4; if (p[c] > 4) { p[a]++; p[c]--; } draw(); }, 1300);
+});

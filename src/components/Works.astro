@@ -1,32 +1,30 @@
 ---
 import works from "../data/works.json";
 import repos from "../data/repos.json";
-import { t, type Lang } from "../data/site";
+import equipment from "../data/equipment.json";
+import { type Lang } from "../data/site";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const T = t[lang];
-const fmt = (n: number) => n.toLocaleString("en-US");
-const val = (v: string) => (v === "STARS" ? fmt(repos.featured.stars) : v === "REPOS" ? String(repos.totalRepos) : v);
+const ja = lang === "ja";
+const W = ja
+  ? { eb: "Works", h: "現場の数だけ、経験がある。", p: "ライブイベント・放送・学会・展示会。映像と音響の両方を担当してきました。", stats: [["1000+", "案件"], ["10+", "年の現場経験"], [String(equipment.total), "自社で管理する主要機材"], [String(repos.totalRepos), "公開しているリポジトリ"]], cat: "SW-CATALOG で機材を見る →" }
+  : { eb: "Works", h: "Experience from every show.", p: "Live events, broadcast, conferences and expos — both video and audio.", stats: [["1000+", "projects"], ["10+", "years on site"], [String(equipment.total), "main items of gear we own"], [String(repos.totalRepos), "public repositories"]], cat: "See our gear in SW-CATALOG →" };
 ---
-<section class="section band" id="works">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">{T.worksEyebrow}</span>
-      <h2>{T.worksTitle}</h2>
+<section id="works">
+  <div class="wrap proof">
+    <div>
+      <span class="eyebrow">{W.eb}</span>
+      <h2>{W.h}</h2>
+      <p>{W.p}</p>
+      <p style="margin-top:20px" id="equipment"><a class="btn" href="/sw-catalog">{W.cat}</a></p>
     </div>
-    <div class="stats">
-      {T.stats.map(([v, k, d], i) => (
-        <div class="stat reveal" style={`--rd:${i * 0.08}s`}>
-          <b data-count={val(v)}>{val(v)}</b>
-          <strong>{k}</strong>
-          <span>{d}</span>
-        </div>
-      ))}
+    <div class="proof-card">
+      <div class="stats">
+        {W.stats.map(([v, k]) => <div class="stat"><b data-count={v}>{v}</b><span>{k}</span></div>)}
+      </div>
+      <ul class="works">
+        {works.map((w) => <li><span class="y">{w.year}</span><span class="k">{w.type[lang]}</span><span class="t">{w[lang]}</span></li>)}
+      </ul>
     </div>
-    <ul class="works reveal">
-      {works.map((w) => (
-        <li><span class="y">{w.year}</span><span class="pill">{w.type[lang]}</span><span class="t">{w[lang]}</span></li>
-      ))}
-    </ul>
   </div>
 </section>
