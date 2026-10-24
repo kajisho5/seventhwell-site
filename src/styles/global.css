@@ -389,7 +389,7 @@ fieldset.field { border: 0; margin: 0 0 20px; padding: 0; }
 @keyframes wallIn { to { opacity: .28; } }
 @keyframes wallGlow { 0%, 12%, 100% { opacity: .28; text-shadow: none; } 5% { opacity: 1; text-shadow: 0 0 18px rgba(167,139,255,.9); } }
 
-.collage { position: relative; height: 470px; margin: -40px auto 0; max-width: 1120px; }
+.collage { position: relative; height: 500px; margin: 24px auto 0; max-width: 1120px; }
 .glass { position: absolute; background: var(--s-glass); border: 1px solid var(--s-line); border-radius: 16px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 30px 60px rgba(0,0,0,.45); text-align: left; }
 .glass small { display: block; font-size: 11px; color: var(--s-sub); }
 .glass b { font-weight: 700; }
@@ -490,4 +490,32 @@ fieldset.field { border: 0; margin: 0 0 20px; padding: 0; }
   .bento { grid-template-columns: 1fr; }
   .b-cell { border-right: 0; padding: 22px 0; }
   .agent { position: static; width: auto; margin-top: 12px; }
+}
+
+/* ---- 狭い幅：重ねずに縦に並べる ---- */
+@media (max-width: 1080px) {
+  .collage { height: auto; margin: 32px auto 0; padding-bottom: 72px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .collage .phone, .collage .glass { position: relative; left: auto; right: auto; top: auto; bottom: auto; margin: 0; transform: none; }
+  .collage .phone { order: 1; }
+  .collage .card-l { order: 2; width: min(420px, 100%); }
+  .collage .card-r { order: 3; width: min(420px, 100%); }
+  .collage .strip { order: 4; }
+  .wall { gap: 8px 22px; }
+}
+@media (max-width: 640px) {
+  .collage .phone { width: 260px; height: auto; padding-bottom: 8px; }
+  .collage .card-r { display: block; }
+  .collage .strip { white-space: normal; }
+  .wall span:nth-child(n+13) { display: none; }
+  .jobs .job:nth-child(n+26) { display: none; }
+  .jobs { grid-template-columns: repeat(4, 1fr); mask-image: none; -webkit-mask-image: none; }
+  .job.head { grid-column: span 2; }
+  .agent { position: relative; }
+  .ops-title { margin-bottom: 24px; }
+}
+
+@media (max-width: 640px) {
+  .stage-sub { font-size: 13.5px; }
+  .ops-title { font-size: 22px; }
+  .sec-head p, .hero-sub { font-size: 14px; }
 }
