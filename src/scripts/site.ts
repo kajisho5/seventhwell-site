@@ -37,7 +37,12 @@ drawer?.querySelectorAll("[data-close]").forEach((a) => a.addEventListener("clic
 const io = new IntersectionObserver((es) => es.forEach((e) => {
   if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
 }), { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
-document.querySelectorAll(".reveal").forEach((el) => (reduce ? el.classList.add("in") : io.observe(el)));
+// 最初から画面内にある物には動きを付けない（見えている物が一瞬消えないように）
+document.querySelectorAll(".reveal").forEach((el) => {
+  if (reduce) return;
+  const r = el.getBoundingClientRect();
+  if (r.top > innerHeight) io.observe(el);
+});
 
 /* ---- いま見ている章をナビで強調 ---- */
 const links = [...document.querySelectorAll<HTMLAnchorElement>(".nav a")];
