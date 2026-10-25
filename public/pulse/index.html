@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PULSE — リアルタイム会場参加型アンケート・クイズシステム | SEVENTHWELL</title>
+<meta name="description" content="PULSEは、QRを読むだけで参加できるリアルタイムARS（会場参加型アンケート・クイズシステム）です。講演会・セミナー・研修・カンファレンスの投票・クイズ・アンケートを、1000人規模でも安定して回します。">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#efeee9">
+<link rel="canonical" href="https://seventh-well.com/pulse/">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://seventh-well.com/pulse/">
+<meta property="og:image" content="https://seventh-well.com/pulse/img/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="PULSE — リアルタイム会場参加型アンケート・クイズシステム">
+<meta property="og:description" content="会場の反応を、その場で可視化する。QRを読むだけで参加できるリアルタイムARS。">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="/goodtimes.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="/site.css?v=e953ad92">
+<script>document.documentElement.classList.add('js')</script>
+<!--
+  ★このページの出どころ★
+  文言・数字・料金・機能はすべて PULSE の公式サイト https://sw-ars.com/ （2026-09-27 時点）から。
+  画面の絵は sw-ars.com に載っている画面イメージ（図）を切り出したもの＝実画面のスクリーンショットではない → 「画面イメージ」と書く。
+  ロゴ：アプリアイコン（sw-ars.com /icon-512.png）＋「PULSE」の文字（本家ヘッダーと同じ Noto Sans JP 800、比率 アイコン30:文字21:間隔9）。
+  料金は sw-ars.com の表示どおり税別・「〜」付き。変わったらここも直す。
+-->
+</head>
+<body class="page-pulse">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="../" aria-label="SEVENTHWELL トップへ">SEVENTHWELL</a>
+    <nav class="nav" aria-label="メインメニュー">
+      <a href="../#about">About</a>
+      <a href="../#services">Services</a>
+      <a href="../#works">Works</a>
+      <a href="../#products" aria-current="true">Products</a>
+      <a href="../#tools">Tools</a>
+      <a href="../#code">Code</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <div class="onair" aria-hidden="true"><span class="lamp"></span><span class="lbl">On Air</span><span class="tc" data-tc></span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ja" aria-pressed="true">JA</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><i></i>Menu</button>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="メニュー">
+  <div class="wrap menu-top">
+    <span class="logo">SEVENTHWELL</span>
+    <button class="menu-close" type="button" aria-label="閉じる"></button>
+  </div>
+  <nav class="wrap" aria-label="メニュー">
+    <a href="#numbers"><small>CH 01</small><span>Numbers</span></a>
+    <a href="#features"><small>CH 02</small><span>Features</span></a>
+    <a href="#operation"><small>CH 03</small><span>Operation</span></a>
+    <a href="#qa"><small>CH 04</small><span>Q&amp;A</span></a>
+    <a href="#start"><small>CH 05</small><span>Start</span></a>
+    <a href="#plans"><small>CH 06</small><span>Plans</span></a>
+    <a href="../"><small>TOP</small><span>SEVENTHWELL</span></a>
+  </nav>
+  <div class="wrap menu-foot">
+    <div class="onair" aria-hidden="true"><span class="lamp"></span><span class="tc" data-tc></span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ja" aria-pressed="true">JA</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero wrap" id="top">
+  <p style="margin-bottom:18px"><a class="back" href="../#products"><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M17 10H4M9 5l-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>SEVENTHWELL / Products</a></p>
+  <div class="meta">
+    <div>Live ARS<span>Polls · Quizzes · Q&amp;A</span></div>
+    <div>Join by QR<span>No App Required</span></div>
+    <div>1,000+ Concurrent<span>Planning to Live Ops</span></div>
+  </div>
+  <h1 class="p-hero-lockup" aria-label="PULSE"><img src="../img/pulse/p-icon-512.webp" alt="" width="512" height="512"><span aria-hidden="true">PULSE</span></h1>
+  <p class="p-cat" data-en="Real-time audience response system for venues — polls and quizzes">リアルタイム会場参加型アンケート・クイズシステム</p>
+  <div class="hero-foot">
+    <p class="lead" data-en="See the room&#39;s reaction,<br>right there and then.">会場の反応を、<br>その場で可視化する。</p>
+    <div class="cta">
+      <a class="btn btn-red" href="https://sw-ars.com/#demo" target="_blank" rel="noopener"><span data-en="Try the demo (no sign-up)">デモを試す（登録不要）</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 14L15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+      <a class="btn" href="../?topic=pulse#contact"><span data-en="Talk to us">導入の相談</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+    </div>
+  </div>
+  <div class="p-intro">
+    <p data-en="PULSE is a real-time ARS that participants join just by scanning a QR code. It runs polls, quizzes and surveys for lectures, seminars, training and conferences — stable even at a scale of 1,000 people. SEVENTHWELL supports you from planning to live operation.">QRを読むだけで参加できるリアルタイムARS「PULSE」。講演会・セミナー・研修・カンファレンスの投票・クイズ・アンケートを、1000人規模でも安定して回します。SEVENTHWELLが企画から本番運用までサポートします。</p>
+    <figure class="shot bare"><img src="img/hero.webp" alt="スクリーン表示のイメージ。質問と、A・B・Cの回答の割合が棒グラフで出ている" width="988" height="644"><figcaption><b>Screen</b><span data-en="Screen (illustration)">スクリーン表示（画面イメージ）</span></figcaption></figure>
+  </div>
+</section>
+
+<!-- ═══════════ CH01 NUMBERS（夜） ═══════════ -->
+<div class="night">
+<section class="sec wrap" id="numbers">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 01</span>
+    <span class="sh-note" data-en="PULSE in numbers">数字で見る PULSE</span>
+    <h2 class="sh-title">Numbers</h2>
+  </header>
+  <div class="big-nums rv">
+    <div><b>1000<small>+</small></b><span>Concurrent<small data-en="Stable with 1,000+ connected at once">人同時接続でも安定動作</small></span></div>
+    <div><b>0<small data-en="JPY">円</small></b><span>No App<small data-en="No app for participants — QR only">参加者アプリ不要・QRのみ</small></span></div>
+    <div><b>11<small data-en="types">種</small></b><span>Designs<small data-en="Chart and timer designs">グラフ・タイマーのデザイン</small></span></div>
+    <div><b>&lt;1<small data-en="s">秒</small></b><span>Latency<small data-en="From vote to result on screen">投票から結果反映まで</small></span></div>
+  </div>
+</section>
+</div>
+
+<!-- ═══════════ CH02 FEATURES ═══════════ -->
+<section class="sec wrap" id="features">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 02</span>
+    <span class="sh-note" data-en="From a one-question clicker to full event production">1問1答のクリッカーから、本格的なイベント演出まで</span>
+    <h2 class="sh-title">Features</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot bare"><img src="img/f-admin.webp" alt="管理画面のイメージ。進行・レイアウト・設定のタブと、質問Q3の回答の棒グラフ" width="1048" height="464" loading="lazy"><figcaption><b>01 · Admin</b><span data-en="Admin (illustration)">管理画面（画面イメージ）</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Admin">管理画面</p>
+      <h3 data-en="An admin screen that keeps the show on track">管理画面は、進行に迷わない設計</h3>
+      <p class="txt-lead" data-en="Script mode, question cards, draft locks — packed with safeguards against mistakes during the live show.">台本モード・質問カード・下書きロックなど、本番中の操作ミスを防ぐ工夫を詰め込みました。</p>
+      <ul class="pts">
+        <li><b data-en="Single choice, multiple choice, free text, star rating and quizzes">選択式・複数選択・自由記述・★評価・クイズに対応</b></li>
+        <li><b data-en="Double-tap confirmation against mis-operation">誤操作防止のダブルタップ確認</b></li>
+        <li><b data-en="Several operators can run it at the same time">複数オペレーターでの同時運用も可能</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot bare"><img src="img/f-screen.webp" alt="スクリーンのイメージ。暗い背景に選択肢ごとの棒グラフ" width="1048" height="378" loading="lazy"><figcaption><b>02 · Screen</b><span data-en="Screen (illustration)">スクリーン（画面イメージ）</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Screen">スクリーン</p>
+      <h3 data-en="Lay out the screen down to the details">スクリーンは、細部までレイアウト自由</h3>
+      <p class="txt-lead" data-en="Drag the title, chart, logo, timer, QR and background into place. Each question can have its own look.">題名・グラフ・ロゴ・タイマー・QR・背景をドラッグで配置。質問ごとに個別の見た目を持たせることもできます。</p>
+      <ul class="pts">
+        <li><b data-en="Bar chart / donut / word cloud">棒グラフ／ドーナツ／ワードクラウド</b></li>
+        <li><b data-en="Timers in 10 designs">タイマーは10デザインから選択</b></li>
+        <li><b data-en="Effects like confetti and a podium">紙吹雪・表彰台などの演出つき</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rv">
+    <figure class="shot bare"><img src="img/f-preview.webp" alt="設定画面のイメージ。拡大・縮小、文字サイズ、音量のスライダー" width="1048" height="518" loading="lazy"><figcaption><b>03 · Settings</b><span data-en="Settings (illustration)">設定（画面イメージ）</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Settings">設定</p>
+      <h3 data-en="Adjust each setting while watching a preview">設定は、ひとつずつプレビューしながら</h3>
+      <p class="txt-lead" data-en="Tune text size, position, colour and design while watching a preview identical to the real screen — no back-and-forth of typing numbers and checking.">文字サイズ・位置・色・デザインを、実際の画面と同じプレビューを見ながら調整できます。数値を入力して確認、の手戻りがありません。</p>
+      <ul class="pts">
+        <li><b data-en="QR codes with an embedded logo and custom colours">QRはロゴ埋め込み・色カスタムに対応</b></li>
+        <li><b data-en="Freely adjustable option text size">選択肢の文字サイズも自由に調整</b></li>
+        <li><b data-en="Per-question layout overrides">質問ごとのレイアウト個別上書きも可能</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot bare"><img src="img/f-report.webp" alt="レポートのイメージ。NPS、満足度、参加率" width="1048" height="438" loading="lazy"><figcaption><b>04 · Report</b><span data-en="Report (illustration)">レポート（画面イメージ）</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Report">レポート</p>
+      <h3 data-en="When it&#39;s over, the report is already done">終わった後は、レポートが自動でできている</h3>
+      <p class="txt-lead" data-en="After the event, one button produces a report with NPS, sentiment analysis and cross-tabulation. Save or print it as PDF and share it with your client as is.">イベント終了後、ボタンひとつでNPS・感情分析・クロス集計まで入ったレポートが完成。PDFで保存・印刷してそのままクライアントに共有できます。</p>
+      <ul class="pts">
+        <li><b data-en="Engagement and average response rates totalled automatically">エンゲージメント率・平均回答率を自動集計</b></li>
+        <li><b data-en="NPS score and sentiment analysis of free text">NPS（推奨度）スコア・自由記述の感情分析つき</b></li>
+        <li><b data-en="Cross-tabulation such as attribute × satisfaction in one tap">属性×満足度などのクロス集計もワンタップ</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH03 OPERATION ═══════════ -->
+<section class="sec wrap" id="operation">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 03</span>
+    <span class="sh-note" data-en="Operations covered, too">運用まわりも、抜かりなく</span>
+    <h2 class="sh-title">Operation</h2>
+  </header>
+  <div class="cells cells-4 rv">
+    <article class="cell"><p class="in">01</p><h3 class="jh" data-en="Scores &amp; rankings">スコア・ランキング</h3><p data-en="Quiz mode scores automatically by correctness and speed, with a prize draw from correct answerers or all respondents.">クイズモードは正誤・回答速度で自動採点。正解者/回答者からの抽選機能も搭載。</p></article>
+    <article class="cell"><p class="in">02</p><h3 class="jh" data-en="Multiple venues">複数会場運用</h3><p data-en="Run separate rooms per event at the same time, and monitor every venue from one dashboard.">イベントごとに部屋を分けて同時運用。ダッシュボードで全会場を横断監視。</p></article>
+    <article class="cell"><p class="in">03</p><h3 class="jh" data-en="Automatic backup">自動バックアップ</h3><p data-en="Backed up automatically every 30 minutes. The whole event can also be exported as JSON.">30分おきに自動でバックアップ。イベント全体のデータをまるごとJSONで書き出すこともできます。</p></article>
+    <article class="cell"><p class="in">04</p><h3 class="jh" data-en="Easy late joining">途中参加もスムーズ</h3><p data-en="The QR can stay on screen, so latecomers can scan and join on the spot.">画面にQRを常時表示可能。読み込み忘れた参加者もその場でスキャンして合流できます。</p></article>
+    <article class="cell"><p class="in">05</p><h3 class="jh" data-en="Phone only">スマホだけで完結</h3><p data-en="No PC needed — run questions, closing and results from a single phone as a podium remote.">PCがなくても、進行から出題・締切・結果表示までスマホの演台リモート1台で運用可能。</p></article>
+    <article class="cell"><p class="in">06</p><h3 class="jh" data-en="Q&amp;A, approval, NG words">Q&amp;A・事前承認・NGワード</h3><p data-en="Question posting with likes, approval mode, automatic masking of NG words and manual pick-up.">参加者からの質問投稿＆いいね。承認制モード・NGワード自動伏字・質問の手動ピックアップに対応。</p></article>
+    <article class="cell"><p class="in">07</p><h3 class="jh" data-en="Brand kit">ブランドキット</h3><p data-en="Save colours, backgrounds, fonts and logos together and recall them for other events in one tap.">配色・背景・フォント・ロゴをまとめて保存し、他のイベントでもワンタップで呼び出せます。</p></article>
+    <article class="cell"><p class="in">08</p><h3 class="jh" data-en="English display, haptics">多言語表示・触覚フィードバック</h3><p data-en="The participant page can switch to English. Changes can also be signalled by vibration (Android).">参加者ページはEN表示に切り替え可能（任意）。変化をスマホの振動でも伝えられます（Android）。</p></article>
+    <article class="cell"><p class="in">09</p><h3 class="jh" data-en="View-only links">閲覧専用リンク</h3><p data-en="Issue a link that can only view results — for sharing with clients or managers on the spot.">操作は一切できず結果だけを見られるリンクを発行。クライアントや上長へのその場共有に。</p></article>
+    <article class="cell"><p class="in">10</p><h3 class="jh" data-en="NPS &amp; cross-tabulation">NPS・属性クロス集計</h3><p data-en="NPS is calculated automatically; cross two questions such as attribute × satisfaction in one tap.">推奨度アンケートはNPSスコアを自動計算。2つの設問を掛け合わせた集計もワンタップ。</p></article>
+    <article class="cell"><p class="in">11</p><h3 class="jh" data-en="Sound">サウンド演出</h3><p data-en="Loop BGM while waiting, a fanfare at the answer reveal, with volumes adjusted together.">待機中はBGMをループ再生、正解発表の瞬間はファンファーレ。音量もまとめて調整。</p></article>
+    <article class="cell"><p class="in">12</p><h3 class="jh" data-en="Questions from PPTX">PPTXから質問を自動作成</h3><p data-en="Upload an existing deck to extract candidate questions and options from its slides.">既存のプレゼン資料をアップロードするだけで、質問文・選択肢の候補を自動で抽出できます。</p></article>
+    <article class="cell"><p class="in">13</p><h3 class="jh" data-en="Webhooks">Webhook連携</h3><p data-en="JSON notifications to a URL of your choice on each question, close, result and Q&amp;A post.">出題・締切・結果確定・Q&amp;A投稿のたびに、指定したURLへJSON形式で通知。</p></article>
+    <article class="cell"><p class="in">14</p><h3 class="jh" data-en="No lost answers offline">オフラインでも回答を取りこぼさない</h3><p data-en="Answers are held on the device when the signal drops and resent automatically on recovery.">電波が不安定でも回答は端末側で保持され、通信が回復すると自動で再送信されます。</p></article>
+    <article class="cell"><p class="in">15</p><h3 class="jh" data-en="Dark mode, text size">ダークモード・文字サイズ調整</h3><p data-en="The participant page supports dark mode for dark venues and adjustable text size.">参加者ページは暗い会場でもまぶしくないダークモード、文字サイズの拡大縮小に対応。</p></article>
+    <article class="cell"><p class="in">16</p><h3 class="jh" data-en="Cross-venue comparison">会場間の比較分析</h3><p data-en="Compare results of several venues side by side from the dashboard.">ダッシュボードから複数会場の結果を横並びで比較できます。</p></article>
+  </div>
+</section>
+
+<!-- ═══════════ CH04 Q&A ═══════════ -->
+<section class="sec wrap" id="qa">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 04</span>
+    <span class="sh-note" data-en="Catching the questions people hesitate to ask">聞きにくい質問こそ、拾える仕組みを</span>
+    <h2 class="sh-title">Q&amp;A</h2>
+  </header>
+  <p class="rv" style="max-width:46em;margin-bottom:28px" data-en="Questions for speakers come in because they&#39;re anonymous — yet with a large audience you may want to see posts first. PULSE&#39;s Q&amp;A handles everything from casual receptions to medical and pharmaceutical lectures that require prior checks, with the same features.">登壇者への質問は、匿名だからこそ集まる。とはいえ、大人数の場では投稿内容を事前に見ておきたい場面もあります。PULSEのQ&amp;Aは、カジュアルな懇親会から、医薬系の学術講演のような事前チェックが必須の現場まで、同じ機能で対応できます。</p>
+  <div class="cells cells-4 rv">
+    <article class="cell"><p class="in" data-en="Approval">承認</p><h3 class="jh" data-en="Approval mode">承認制モード</h3><p data-en="When on, posted questions stay hidden from other participants until approved. Switch between instant and approval in one tap.">ONにすると、投稿された質問は「承認」を押すまで他の参加者には表示されません。即時公開と承認制はワンタップで切り替え可能です。</p></article>
+    <article class="cell"><p class="in" data-en="Mask">伏字</p><h3 class="jh" data-en="Automatic NG-word masking">NGワード自動伏字</h3><p data-en="A built-in template of about 60 words, freely editable. Matching parts are replaced with ●●●, while operators still see the original.">約60語の組み込みテンプレートに加え、単語は自由に追加・削除可能。該当部分だけが●●●に自動置換され、運営側には元の文章が見えます。</p></article>
+    <article class="cell"><p class="in" data-en="Pick">固定</p><h3 class="jh" data-en="Question pick-up">質問のピックアップ</h3><p data-en="Pin the question you want to take to the top regardless of likes. Changes in order animate smoothly.">いいね数に関係なく、拾いたい質問を運営側の判断で一番上に固定表示。順位の入れ替わりはアニメーションでなめらかに。</p></article>
+    <article class="cell"><p class="in" data-en="Link">権限</p><h3 class="jh" data-en="Q&amp;A-only link">Q&amp;A操作専用リンク</h3><p data-en="A link limited to approve, pick up, hide and delete — so clients can do their own prior checks without touching other settings.">承認・ピックアップ・非表示・削除だけができるリンクを発行。他の設定には触れられないので、事前チェックだけをクライアントにお願いできます。</p></article>
+  </div>
+</section>
+
+<!-- ═══════════ CH05 START ═══════════ -->
+<section class="sec wrap" id="start">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 05</span>
+    <span class="sh-note" data-en="How to get started">はじめ方</span>
+    <h2 class="sh-title">Start</h2>
+  </header>
+  <ol class="flow f3 rv">
+    <li><b data-en="1 — Create">1 — 作成</b><em data-en="Create an event">イベントを作成</em><p data-en="Just name the event in the admin screen. Preparation takes a few minutes.">管理画面からイベント名を決めるだけ。準備は数分で完了します。</p></li>
+    <li class="hot"><b data-en="2 — Show the QR">2 — QR</b><em data-en="Put the QR on screen">QRを会場に表示</em><p data-en="Show the QR on a slide or screen. Participants join just by scanning — no app.">スライドやスクリーンにQRを表示。参加者はアプリ不要、読み取るだけで参加できます。</p></li>
+    <li><b data-en="3 — Show results">3 — 結果</b><em data-en="Results on the spot">その場で結果を表示</em><p data-en="Answers are totalled instantly and reflected on screen in real time.">回答は即座に集計され、スクリーンにリアルタイムで反映されます。</p></li>
+  </ol>
+</section>
+
+<!-- ═══════════ CH06 PLANS ═══════════ -->
+<section class="sec wrap" id="plans">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 06</span>
+    <span class="sh-note" data-en="Clear pricing (excl. tax)">料金は、明快に（税別）</span>
+    <h2 class="sh-title">Plans</h2>
+  </header>
+  <div class="plans p4 rv">
+    <article class="plan"><p class="in">Pocket</p><h3 data-en="Up to 100">〜100名</h3><p data-en="No screen projection — a survey and Q&amp;A plan that runs on phones alone.">スクリーン投影なし、スマホだけで完結するアンケート・Q&amp;A専用プラン。</p><p class="price">¥12,000〜<span data-en="Excl. tax">税別</span></p></article>
+    <article class="plan"><p class="in">Self</p><h3 data-en="Up to 300">〜300名</h3><p data-en="A self-run plan where you operate the admin screen yourself.">管理画面をご自身で操作いただくセルフ運用プラン。</p><p class="price">¥40,000〜<span data-en="Excl. tax">税別</span></p></article>
+    <article class="plan"><p class="in">Pro</p><h3 data-en="Up to 500">〜500名</h3><p data-en="A one-day package with one dedicated operator and full equipment.">専任オペレーター1名派遣、機材一式込みの1日完結パッケージ。</p><p class="price">¥200,000〜<span data-en="Excl. tax">税別</span></p></article>
+    <article class="plan"><p class="in">Full-Support</p><h3 data-en="Up to 1,000">〜1,000名</h3><p data-en="For large events: rehearsal support the day before and two operators.">前日リハ対応、オペレーター2名体制の大規模向けプラン。</p><p class="price">¥400,000〜<span data-en="Excl. tax">税別</span></p></article>
+  </div>
+  <p class="rv" style="margin-top:22px;color:var(--mute)" data-en="See sw-ars.com for pricing details.">料金の詳細は <a href="https://sw-ars.com/pricing" target="_blank" rel="noopener">sw-ars.com/pricing</a> をご覧ください。</p>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="sec wrap" id="demo">
+  <div class="cta-band rv">
+    <p class="big" data-en="Seeing is believing.<br>Try it yourself.">百聞は一見にしかず。<br>触ってみてください。</p>
+    <p data-en="One button creates a demo venue just for you — admin, screen and participant pages, exactly as they look and work.">ボタンひとつで、あなた専用のデモ会場が作られます。管理画面・スクリーン表示・参加者ページまで、実際の見た目と操作感をそのまま試せます。</p>
+    <div class="cta">
+      <a class="btn btn-red" href="https://sw-ars.com/#demo" target="_blank" rel="noopener"><span data-en="Try the demo (no sign-up)">デモを試す（登録不要）</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 14L15 5M7 5h8v8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+      <a class="btn" href="../?topic=pulse#contact"><span data-en="Talk to us">導入の相談</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="eop">End of<br>Program</p>
+    <div class="foot-row">
+      <span>© SEVENTHWELL</span>
+      <nav aria-label="フッターメニュー">
+        <a href="../">Top</a><a href="../#products">Products</a><a href="#features">Features</a><a href="#plans">Plans</a><a href="https://sw-ars.com/" target="_blank" rel="noopener">sw-ars.com</a><a href="../#contact">Contact</a>
+      </nav>
+      <span class="tc" data-tc></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/site.js?v=fc20da72"></script>
+</body>
+</html>

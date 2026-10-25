@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TELOPDECK — 登壇者テロップ送出ツール | SEVENTHWELL</title>
+<meta name="description" content="TELOPDECK（テロップデッキ）は、講演会・学会・配信で登壇者の名前テロップを出し入れするツールです。Excelの登壇者一覧を読み込み、OBSのブラウザソースで映像に重ねて送出。同じ見た目のpptx・透過PNGも書き出せます。">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#efeee9">
+<link rel="canonical" href="https://seventh-well.com/telopdeck/">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://seventh-well.com/telopdeck/">
+<meta property="og:image" content="https://seventh-well.com/telopdeck/img/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="TELOPDECK — 登壇者テロップ送出ツール">
+<meta property="og:description" content="名前スーパーを、出し間違えない。Excelの登壇者一覧から、本番送出・pptxまで。">
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/goodtimes.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="/site.css?v=e953ad92">
+<script>document.documentElement.classList.add('js')</script>
+<!--
+  ★このページの出どころ★
+  文言・機能・ロゴ・画面はすべて TELOPDECK ブランドキット（TELOPDECK_brand-kit_2026-09-27、README.md）から。
+  README の約束（確かめた範囲だけ書く）：
+   ・OBS は OBS Studio 32.2.0（Linux）で確認済み。vMix は未確認 → 書かない。
+   ・PowerPoint では未確認（確認は LibreOffice Impress 24.2 のみ）→「PowerPointで開ける」とは書かず「pptx」と書く。
+   ・送出の動きはフェードのみ確認（スライド・カットは未確認）→ フェードだけ書く。
+   ・登壇者・団体名はすべて架空。
+  商標（J-PlatPat）は 2026-09-27 時点で未確認。
+-->
+</head>
+<body class="page-telopdeck">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="../" aria-label="SEVENTHWELL トップへ">SEVENTHWELL</a>
+    <nav class="nav" aria-label="メインメニュー">
+      <a href="../#about">About</a>
+      <a href="../#services">Services</a>
+      <a href="../#works">Works</a>
+      <a href="../#products" aria-current="true">Products</a>
+      <a href="../#tools">Tools</a>
+      <a href="../#code">Code</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <div class="onair" aria-hidden="true"><span class="lamp"></span><span class="lbl">On Air</span><span class="tc" data-tc></span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ja" aria-pressed="true">JA</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><i></i>Menu</button>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="メニュー">
+  <div class="wrap menu-top">
+    <span class="logo">SEVENTHWELL</span>
+    <button class="menu-close" type="button" aria-label="閉じる"></button>
+  </div>
+  <nav class="wrap" aria-label="メニュー">
+    <a href="#import"><small>CH 01</small><span>Import</span></a>
+    <a href="#design"><small>CH 02</small><span>Design</span></a>
+    <a href="#playout"><small>CH 03</small><span>Playout</span></a>
+    <a href="#export"><small>CH 04</small><span>Export</span></a>
+    <a href="#features"><small>CH 05</small><span>Features</span></a>
+    <a href="../"><small>TOP</small><span>SEVENTHWELL</span></a>
+  </nav>
+  <div class="wrap menu-foot">
+    <div class="onair" aria-hidden="true"><span class="lamp"></span><span class="tc" data-tc></span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ja" aria-pressed="true">JA</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero wrap" id="top">
+  <p style="margin-bottom:18px"><a class="back" href="../#products"><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M17 10H4M9 5l-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>SEVENTHWELL / Products</a></p>
+  <div class="meta">
+    <div>Telop Playout<span>Name Supers · Lower Thirds</span></div>
+    <div>Excel · CSV Import<span>Column Mapping on Screen</span></div>
+    <div>PPTX · PNG Export<span>Same Look as On-Air</span></div>
+  </div>
+  <h1 class="p-hero-logo"><img src="img/logo-light.svg" alt="TELOPDECK" width="716" height="120"></h1>
+  <p class="p-cat" data-en="Speaker telops — from your Excel list to live playout and PPTX">登壇者テロップを、Excelの一覧から本番送出・pptxまで。</p>
+  <div class="hero-foot">
+    <p class="lead" data-en="Name supers,<br>without a wrong take.">名前スーパーを、<br>出し間違えない。</p>
+    <div class="cta">
+      <a class="btn btn-red" href="../?topic=telopdeck#contact"><span data-en="Talk to us">導入の相談</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+      <a class="btn" href="#import"><span data-en="See the screens">画面と機能を見る</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v13M5 11l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+    </div>
+  </div>
+  <figure class="shot shot-video hero-shot"><video src="img/demo.mp4" poster="img/demo-poster.webp" width="1600" height="900" muted loop playsinline controls preload="none" data-inview aria-label="TELOPDECKの製品デモ。操作画面で IN・次の人・OUT を押すと出力にテロップが出る様子、動画テンプレート、Fill & Key 出力"></video><figcaption><b>Demo</b><span data-en="Product demo (about 41 s, no sound)">製品デモ（約41秒・音なし）</span></figcaption></figure>
+  <p class="shot-note" data-en="All speakers and organisations shown on the screens are fictional.">画面に写っている登壇者・団体名はすべて架空です。</p>
+</section>
+
+<!-- ═══════════ CH01 IMPORT ═══════════ -->
+<section class="sec wrap" id="import">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 01</span>
+    <span class="sh-note" data-en="Start from the speaker list you already have">手元の登壇者一覧から始める</span>
+    <h2 class="sh-title">Import</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/import.webp" alt="Excelの登壇者一覧の取り込み画面。見出しから列の対応を推測している" width="1600" height="1000" loading="lazy"><figcaption><b>Import</b><span data-en="Importing a speaker list">登壇者一覧の取り込み</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Excel · CSV">Excel・CSV</p>
+      <h3 data-en="Read the Excel list as it is">Excelの一覧を、そのまま読み込む</h3>
+      <ul class="pts">
+        <li><b data-en="Excel (.xlsx), CSV and paste">Excel（.xlsx）・CSV・貼り付け</b><span data-en="CSV in UTF-8 or Shift_JIS, or paste straight from Excel.">CSV は UTF-8 / Shift_JIS のどちらでも。Excel からの貼り付けにも対応します。</span></li>
+        <li><b data-en="Column mapping on screen">列の対応は画面で選べる</b><span data-en="Columns are guessed from the headers and can be changed on screen.">見出しから列の対応を推測し、画面で選び直せます。</span></li>
+        <li><b data-en="Title rows are skipped">表の上のタイトル行は読み飛ばす</b><span data-en="Title rows above the table are skipped automatically.">表の上にあるタイトル行は、自動で読み飛ばします。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot"><img src="img/edit.webp" alt="一覧・編集画面。登壇者を選ぶと右でテロップの見た目を確かめながら直せる" width="1600" height="1000" loading="lazy"><figcaption><b>Edit</b><span data-en="List &amp; edit">一覧・編集</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="List &amp; edit">一覧・編集</p>
+      <h3 data-en="Fix it while you look at the telop">テロップを見ながら直す</h3>
+      <ul class="pts">
+        <li><b data-en="Add, duplicate, delete, reorder">追加・複製・削除・並べ替え</b><span data-en="Reorder by drag or buttons.">並べ替えはドラッグでもボタンでも。</span></li>
+        <li><b data-en="Warnings before it overflows">はみ出しそうなものには注意</b><span data-en="Long affiliations shrink automatically, and ones likely to overflow are flagged.">長い所属は自動で縮み、はみ出しそうなものには注意が出ます。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH02 DESIGN ═══════════ -->
+<section class="sec wrap" id="design">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 02</span>
+    <span class="sh-note" data-en="Typesetting for talks and conferences">学会・講演会の日本語組版</span>
+    <h2 class="sh-title">Design</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/design.webp" alt="デザイン画面。ジャンル別に並んだテンプレートと、選んだテンプレートの見本" width="1600" height="1000" loading="lazy"><figcaption><b>Design</b><span data-en="Design screen">デザイン画面</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Templates">テンプレート</p>
+      <h3 data-en="25 templates in 8 genres">25種類のテンプレート・8ジャンル</h3>
+      <ul class="pts">
+        <li><b data-en="Conference, corporate, ceremony, streaming, sports, esports, subtitles and more">学会・企業・式典・配信・スポーツ・eスポーツ・字幕など</b></li>
+        <li><b data-en="Duplicate and change">複製して変えられる</b><span data-en="Colour, position, size, typeface and logo.">色・位置・大きさ・書体・ロゴを変更できます。</span></li>
+        <li><b data-en="Safe area display">セーフエリアの表示</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rv">
+    <figure class="shot shot-video"><video src="img/video-templates.mp4" poster="img/video-poster.webp" width="1600" height="900" muted loop playsinline controls preload="none" data-inview aria-label="動画テンプレート8種を順に出したところ。帯と飾りが動き、名前と所属がその上に出る"></video><figcaption><b>Video</b><span data-en="8 video templates">動画テンプレート 8 種</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Video templates">動画テンプレート</p>
+      <h3 data-en="Bands in 60fps transparent video">帯・飾りは 60fps の透過動画</h3>
+      <ul class="pts">
+        <li><b data-en="8 video templates">動画テンプレート 8 種</b><span data-en="Bands and decorations are 60fps transparent video, with names and affiliations layered on top.">帯・飾りは 60fps の透過動画で、名前・所属はその上に重ねて出します。</span></li>
+        <li><b data-en="Your own videos too">自分で作った動画も</b><span data-en="You can load videos you made yourself.">自分で作った動画も読み込めます。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot shot-video"><video src="img/motion-templates.mp4" poster="img/motion-poster.webp" width="1600" height="900" muted loop playsinline controls preload="none" data-inview aria-label="動きのあるテンプレート8種を順に出したところ"></video><figcaption><b>Motion</b><span data-en="8 motion templates">動きのあるテンプレート 8 種</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Motion">動き</p>
+      <h3 data-en="Templates that move in and out">入りと抜けに動きのあるテンプレート</h3>
+      <ul class="pts">
+        <li><b data-en="8 motion templates">動きのあるテンプレート 8 種</b><span data-en="Wipes, slants and more, for streams, sports and corporate events.">ワイプ・スラントなど。配信・スポーツ・企業イベント向けにも。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sub rv">
+    <p class="kicker" data-en="Japanese typesetting handled automatically">日本語の組版を、自動で</p>
+    <div class="cells">
+      <article class="cell"><p class="in" data-en="Shrink">縮小</p><h3 style="font-family:var(--jp);font-weight:700;font-size:18px" data-en="Long affiliations fit">長い所属を幅に合わせる</h3><p data-en="Long affiliations shrink automatically to fit the width.">長い所属は、幅に合わせて自動で縮小します。</p></article>
+      <article class="cell"><p class="in" data-en="Lines">2行</p><h3 style="font-family:var(--jp);font-weight:700;font-size:18px" data-en="Two-line titles and English names">肩書き2行・英語名の併記</h3><p data-en="Two-line titles, English names alongside, and line-break rules.">肩書きの2行組み、英語名の併記、禁則処理に対応します。</p></article>
+      <article class="cell"><p class="in" data-en="Badge">バッジ</p><h3 style="font-family:var(--jp);font-weight:700;font-size:18px" data-en="Role badges">役割バッジ</h3><p data-en="Badges such as chair and speaker.">座長・演者などの役割をバッジで表示します。</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH03 PLAYOUT ═══════════ -->
+<section class="sec wrap" id="playout">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 03</span>
+    <span class="sh-note" data-en="Preview and program, side by side">次に出すものと、いま出ているもの</span>
+    <h2 class="sh-title">Playout</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/live.webp" alt="送出画面。左に一覧、右にプレビュー（緑）と本線（赤）、大きなINとOUTのボタン" width="1600" height="1000" loading="lazy"><figcaption><b>Playout</b><span data-en="Playout screen">送出画面</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Playout">送出</p>
+      <h3 data-en="See the next and the current at once">次に出すものと、いま出ているものを分けて表示</h3>
+      <ul class="pts">
+        <li><b data-en="Preview (PVW) and program (PGM)">プレビュー（PVW）と本線（PGM）</b><span data-en="Green for preview, red for program — the same convention as vision switchers.">プレビューは緑、本線は赤。映像スイッチャーと同じ見分け方です。</span></li>
+        <li><b data-en="IN / OUT / Next, from the keyboard too">IN / OUT / 次へ、キーボードでも</b><span data-en="Large buttons, plus Enter, Esc and arrow keys. Telops fade in and out.">大きなボタンに加えて、Enter・Esc・矢印キーで操作できます。出し入れはフェードで。</span></li>
+        <li><b data-en="Real-time sync">リアルタイム同期</b><span data-en="Several control and output screens stay in the same state at once.">複数の操作画面・出力画面が、同時に同じ状態になります。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot"><img src="img/obs.webp" alt="OBS Studioで、色の背景の上にブラウザソースとして出力画面を重ねたところ" width="1600" height="900" loading="lazy"><figcaption><b>OBS</b><span data-en="In OBS Studio 32.2.0">OBS Studio 32.2.0 で重ねたところ</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Transparent output">透過の出力画面</p>
+      <h3 data-en="Paste the URL into an OBS browser source">OBSのブラウザソースにURLを入れるだけ</h3>
+      <ul class="pts">
+        <li><b data-en="Transparent background">背景が透明の出力画面</b><span data-en="It sits over your video as is — semi-transparent parts of the band show the picture beneath.">そのまま映像に重なります。帯の半透明部分からは下の映像が透けます。</span></li>
+        <li><b data-en="Checked with OBS Studio 32.2.0">OBS Studio 32.2.0 で確認</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/output-layers.webp" alt="出力画面。上にスコア、下に名前テロップが別々の層で重なっている（背景の市松模様は透明の部分）" width="1600" height="900" loading="lazy"><figcaption><b>Layers</b><span data-en="Score and name telop on separate layers">スコアと名前テロップを別の層で</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Front layer">前面の層</p>
+      <h3 data-en="Countdowns, clocks and scores on their own layer">カウントダウン・時計・スコアを、別の層で</h3>
+      <ul class="pts">
+        <li><b data-en="Separate from the name telops">名前テロップとは別の層</b><span data-en="Countdown, clock, score, QR code and member list can be overlaid on a layer separate from the name telops.">カウントダウン・時計・スコア・QR コード・メンバー一覧を、名前テロップとは別の層で重ねて出せます。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot"><img src="img/fill-key.webp" alt="Fill & Key 出力。左に文字と帯（Fill）、右に白黒の抜き（Key）を横並びで描いたところ" width="1600" height="450" loading="lazy"><figcaption><b>Fill &amp; Key</b><span data-en="Fill on the left, key on the right">左が Fill、右が Key</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Fill &amp; Key">Fill &amp; Key 出力</p>
+      <h3 data-en="Two HDMI feeds for your switcher's keyer">スイッチャーのキーヤーへ、<wbr>HDMI&nbsp;2本で</h3>
+      <ul class="pts">
+        <li><b data-en="Same frame on both feeds">2 本が同じコマで動く</b><span data-en="Fill and key are drawn side by side on one screen, so both feeds move on the same frame.">1 つの画面に横並びで描くので、2 本が同じコマで動きます。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH04 EXPORT ═══════════ -->
+<section class="sec wrap" id="export">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 04</span>
+    <span class="sh-note" data-en="The same look as on-air, as files">送出と同じ見た目を、ファイルでも</span>
+    <h2 class="sh-title">Export</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/export.webp" alt="書き出し画面。pptxの背景色と透過PNGの書き出し" width="1600" height="1000" loading="lazy"><figcaption><b>Export</b><span data-en="Export screen">書き出し画面</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="PPTX · PNG">pptx・PNG</p>
+      <h3 data-en="PPTX with the text kept as text">文字はテキストのままのpptx</h3>
+      <ul class="pts">
+        <li><b data-en="One telop per slide, 16:9">1テロップ1スライド・16:9</b><span data-en="Text stays editable, not an image.">文字は画像にせず、テキストのまま書き出します。</span></li>
+        <li><b data-en="Black, green or white background">背景は 黒／グリーン／白</b><span data-en="For keying on a switcher, or for sending to clients to check beforehand.">スイッチャーでキーをかける運用や、事前にクライアントへ確認用に送る用途に。</span></li>
+        <li><b data-en="Transparent PNGs in one go">透過PNGの一括書き出し</b><span data-en="1920×1080 with a transparent background, zipped together.">1920×1080・背景透明で、zip にまとめて書き出します。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show rev rv">
+    <figure class="shot"><img src="img/pptx.webp" alt="書き出したpptxをLibreOffice Impressで開いたところ（黒背景）" width="1600" height="900" loading="lazy"><figcaption><b>PPTX</b><span data-en="Opened in LibreOffice Impress 24.2">LibreOffice Impress 24.2 で開いたところ</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Same look">同じ見た目</p>
+      <h3 data-en="Matches the playout screen">送出画面と見た目がそろう</h3>
+      <ul class="pts">
+        <li><b data-en="Pixel-compared with the output screen">出力画面と画素で比べて確認</b><span data-en="Rendered in LibreOffice Impress 24.2 and compared with the output screen: within about ±1px.">LibreOffice Impress 24.2 で描画して出力画面と比べ、ずれは ±1px 程度でした。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH05 FEATURES ═══════════ -->
+<section class="sec wrap" id="features">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 05</span>
+    <span class="sh-note" data-en="Only features that have been checked">確かめた機能だけ</span>
+    <h2 class="sh-title">Features</h2>
+  </header>
+  <table class="req rv">
+    <thead><tr><th scope="col" data-en="Feature">機能</th><th scope="col" data-en="What it does">内容</th></tr></thead>
+    <tbody>
+      <tr><th scope="row" data-en="Import">登壇者一覧の取り込み</th><td data-en="Excel (.xlsx), CSV (UTF-8 / Shift_JIS) and paste from Excel. Column mapping on screen; title rows skipped.">Excel（.xlsx）・CSV（UTF-8 / Shift_JIS）・Excelからの貼り付け。列の対応は画面で選べる。表の上のタイトル行は自動で飛ばす</td></tr>
+      <tr><th scope="row" data-en="Edit">手入力・並べ替え・複製</th><td data-en="Add, duplicate and delete in the list; reorder by drag or buttons.">一覧で追加・複製・削除、ドラッグ／ボタンで並べ替え</td></tr>
+      <tr><th scope="row" data-en="Typesetting">日本語の組版</th><td data-en="Auto-shrinking long affiliations, two-line titles, English names, line-break rules, role badges.">長い所属は幅に合わせて自動縮小、肩書き2行、英語名の併記、禁則、役割バッジ（座長・演者）</td></tr>
+      <tr><th scope="row" data-en="Templates">テンプレート25種</th><td data-en="8 genres: conference, corporate, ceremony, streaming, sports, esports, subtitles and more. Duplicate to change colour, position, size, typeface and logo.">8ジャンル（学会・企業・式典・配信・スポーツ・eスポーツ・字幕など）。複製して色・位置・大きさ・書体・ロゴを変更</td></tr>
+      <tr><th scope="row" data-en="Video templates">動画テンプレート8種</th><td data-en="Bands and decorations in 60fps transparent video, names and affiliations on top. Load your own videos too.">帯・飾りは 60fps の透過動画、名前・所属はその上に重ねる。自分で作った動画も読み込める</td></tr>
+      <tr><th scope="row" data-en="Playout">送出</th><td data-en="Preview and program shown separately. IN / OUT / Next, keyboard control, fade.">プレビュー（次に出すもの）と本線（いま出ているもの）を分けて表示。IN / OUT / 次へ、キーボード操作、フェード</td></tr>
+      <tr><th scope="row" data-en="Transparent output">透過の出力画面</th><td data-en="Paste the URL into an OBS browser source to overlay your video (checked with OBS Studio 32.2.0).">OBSのブラウザソースにURLを入れて映像に重ねる（OBS Studio 32.2.0 で確認）</td></tr>
+      <tr><th scope="row" data-en="Fill &amp; Key">Fill &amp; Key 出力</th><td data-en="Two HDMI feeds to a switcher's keyer; drawn side by side on one screen so both move on the same frame.">スイッチャーのキーヤーへ HDMI 2 本で。1 つの画面に横並びで描くので、2 本が同じコマで動く</td></tr>
+      <tr><th scope="row" data-en="Front layer">前面の層</th><td data-en="Countdown, clock, score, QR code and member list on a layer separate from the name telops.">カウントダウン・時計・スコア・QR コード・メンバー一覧を、名前テロップとは別の層で重ねる</td></tr>
+      <tr><th scope="row" data-en="Real-time sync">リアルタイム同期</th><td data-en="Several control and output screens stay in the same state.">複数の操作画面・出力画面が同時に同じ状態になる</td></tr>
+      <tr><th scope="row" data-en="PPTX export">pptx書き出し</th><td data-en="One telop per slide, 16:9, text kept as text, black / green / white background.">1テロップ1スライド・16:9、文字はテキストのまま、背景は黒／グリーン／白</td></tr>
+      <tr><th scope="row" data-en="PNG export">透過PNG一括書き出し</th><td data-en="1920×1080, transparent, zipped together.">1920×1080・背景透明、zipでまとめて</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="sec wrap" id="demo">
+  <div class="cta-band rv">
+    <p class="big" data-en="Bring your<br>speaker list.">登壇者の一覧を、<br>お持ちください。</p>
+    <p data-en="With your own Excel list, we&#39;ll show everything from import to playout and PPTX.">お手元のExcelの一覧で、取り込みから送出・pptx書き出しまでをお見せします。</p>
+    <div class="cta">
+      <a class="btn btn-red" href="../?topic=telopdeck#contact"><span data-en="Talk to us">導入の相談</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+      <a class="btn" href="../#products"><span data-en="Other products">他のプロダクト</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="eop">End of<br>Program</p>
+    <div class="foot-row">
+      <span>© SEVENTHWELL</span>
+      <nav aria-label="フッターメニュー">
+        <a href="../">Top</a><a href="../#products">Products</a><a href="#playout">Playout</a><a href="#export">Export</a><a href="#features">Features</a><a href="../#contact">Contact</a>
+      </nav>
+      <span class="tc" data-tc></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/site.js?v=fc20da72"></script>
+<script>
+(() => {
+  const vs = document.querySelectorAll('video[data-inview]');
+  if (!vs.length || matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.play().catch(() => {}); else e.target.pause(); }), { threshold: .25 });
+  vs.forEach(v => io.observe(v));
+})();
+</script>
+</body>
+</html>

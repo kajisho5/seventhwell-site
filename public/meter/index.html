@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SW-METER</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap');
+
+  :root {
+    --bg: #050505;
+    --panel: #0d0d0d;
+    --panel2: #111111;
+    --border: #1e1e1e;
+    --white: #f0f0f0;
+    --dim: #555;
+    --green: #00e676;
+    --yellow: #ffea00;
+    --orange: #ff6d00;
+    --red: #ff1744;
+    --vu-bg: #1a1400;
+    --vu-face: #c8a84b;
+    --vu-needle: #1a1400;
+    --lufs-color: #c8a84b;
+    --peak-green: #00c853;
+    --peak-yellow: #ffd600;
+    --peak-red: #ff1744;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Space Mono', monospace;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+  }
+  .tool-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.15em;
+    color: var(--white);
+  }
+  .tool-name span { color: var(--dim); font-size: 14px; }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--dim);
+    transition: background 0.3s;
+  }
+  .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .status-dot.error { background: var(--red); }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    overflow-y: auto;
+  }
+
+  /* ── INPUT SELECTOR ── */
+  .input-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .input-btn {
+    flex: 1;
+    padding: 7px 4px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .input-btn.active {
+    border-color: var(--white);
+    color: var(--white);
+    background: #1a1a1a;
+  }
+  select.device-select {
+    flex: 2;
+    padding: 7px 6px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    border-radius: 2px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  select.device-select.active { border-color: #444; color: var(--white); }
+
+  /* ── VU METERS ── */
+  .vu-row {
+    display: flex;
+    gap: 6px;
+  }
+  .vu-panel {
+    flex: 1;
+    background: var(--vu-bg);
+    border: 1px solid #2a2000;
+    border-radius: 3px;
+    padding: 6px 6px 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .vu-label {
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: #888;
+    margin-bottom: 3px;
+  }
+  canvas.vu-canvas {
+    width: 100%;
+    display: block;
+    border-radius: 1px;
+  }
+  .vu-readout {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+    font-size: 10px;
+    color: var(--vu-face);
+    font-family: 'Space Mono', monospace;
+  }
+  .vu-peak { color: #888; font-size: 9px; }
+
+  /* ── PEAK METERS ── */
+  .peak-row {
+    display: flex;
+    gap: 6px;
+  }
+  .peak-panel {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 6px;
+  }
+  .peak-label {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .peak-ch-label { font-size: 9px; color: #666; }
+  .peak-bars {
+    display: flex;
+    gap: 3px;
+    align-items: flex-end;
+    height: 80px;
+    position: relative;
+  }
+  .peak-track {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    background: #0a0a0a;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  canvas.peak-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .peak-scale {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 0 2px 0;
+    pointer-events: none;
+  }
+  .peak-scale span {
+    font-size: 7px;
+    color: #444;
+    text-align: right;
+    line-height: 1;
+  }
+  .peak-val {
+    font-size: 10px;
+    color: var(--white);
+    margin-top: 4px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .peak-hold-val {
+    font-size: 8px;
+    color: #555;
+    text-align: center;
+  }
+
+  /* ── CORRELATION ── */
+  .corr-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 6px;
+  }
+  .corr-label {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .corr-meter-wrap {
+    position: relative;
+    height: 22px;
+  }
+  canvas.corr-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 1px;
+  }
+  .corr-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+    font-size: 7px;
+    color: #444;
+    padding: 0 2px;
+  }
+
+  /* ── LISSAJOUS ── */
+  .lissa-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 6px;
+  }
+  .lissa-label {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    margin-bottom: 4px;
+  }
+  canvas.lissa-canvas {
+    width: 100%;
+    aspect-ratio: 1;
+    display: block;
+    border-radius: 1px;
+  }
+
+  /* ── LOUDNESS ── */
+  .loudness-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px;
+  }
+  .loudness-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .loudness-label {
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+  }
+  .lufs-mode-btns {
+    display: flex;
+    gap: 4px;
+  }
+  .lufs-btn {
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    cursor: pointer;
+    border-radius: 1px;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+  .lufs-btn.active {
+    border-color: var(--lufs-color);
+    color: var(--lufs-color);
+    background: rgba(200,168,75,0.08);
+  }
+  .loudness-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  canvas.lufs-bars-canvas {
+    height: 70px;
+    flex: 0 0 80px;
+    display: block;
+  }
+  .lufs-big {
+    flex: 1;
+    text-align: right;
+  }
+  .lufs-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 54px;
+    color: var(--lufs-color);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transition: color 0.3s;
+  }
+  .lufs-value.warn { color: var(--orange); }
+  .lufs-value.over { color: var(--red); }
+  .lufs-unit {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    text-align: right;
+    margin-top: 2px;
+  }
+  .lufs-sub {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 4px;
+    font-size: 9px;
+    color: #555;
+  }
+  .lufs-sub span { color: #888; }
+
+  /* ── BOTTOM ROW ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  /* ── START OVERLAY ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,5,5,0.96);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    gap: 20px;
+  }
+  .overlay.hidden { display: none; }
+  .overlay-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 0.15em;
+    color: var(--white);
+  }
+  .overlay-sub {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    text-align: center;
+    line-height: 2;
+  }
+  .start-btn {
+    padding: 14px 40px;
+    border: 1px solid var(--white);
+    background: transparent;
+    color: var(--white);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .start-btn:active { background: rgba(255,255,255,0.1); }
+  .seventhwell-mark {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #333;
+    position: absolute;
+    bottom: 20px;
+  }
+
+  /* ── RESET BTN ── */
+  .ctrl-row {
+    display: flex;
+    gap: 6px;
+  }
+  .ctrl-btn {
+    flex: 1;
+    padding: 7px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .ctrl-btn:active { background: #1a1a1a; color: var(--white); }
+</style>
+<!-- SEVENTHWELL Tools：アイコンと共有画像（2026-09-27 追加。元は release/tools-live/） -->
+<link rel="icon" type="image/svg+xml" href="/img/tools/meter.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/tools/meter-32.png">
+<link rel="apple-touch-icon" href="/img/tools/meter-180.png">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="METER (SW-METER) — SEVENTHWELL">
+<meta property="og:description" content="レベルメーター">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://seventh-well.com/meter/">
+<meta property="og:image" content="https://seventh-well.com/img/tools/meter-ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+
+<!-- START OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="overlay-title">SW-METER</div>
+  <div class="overlay-sub">
+    VU · PEAK · CORRELATION · LUFS<br>
+    マイク / USB オーディオ 対応
+  </div>
+  <button class="start-btn" id="startBtn">START</button>
+  <div class="seventhwell-mark">SEVENTHWELL</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="brand">SEVENTHWELL</div>
+    <div class="tool-name">SW-METER <span>v1.0</span></div>
+  </div>
+  <div class="status-dot" id="statusDot"></div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- Input selector -->
+  <div class="input-bar">
+    <button class="input-btn active" id="btnMic" onclick="switchInput('default')">MIC</button>
+    <select class="device-select" id="deviceSelect" onchange="switchInput(this.value)">
+      <option value="">デバイス選択...</option>
+    </select>
+  </div>
+
+  <!-- VU Meters -->
+  <div class="vu-row">
+    <div class="vu-panel">
+      <div class="vu-label">VU — L</div>
+      <canvas class="vu-canvas" id="vuL" height="110"></canvas>
+      <div class="vu-readout">
+        <span id="vuLval">—</span>
+        <span class="vu-peak" id="vuLpeak">pk: —</span>
+      </div>
+    </div>
+    <div class="vu-panel">
+      <div class="vu-label">VU — R</div>
+      <canvas class="vu-canvas" id="vuR" height="110"></canvas>
+      <div class="vu-readout">
+        <span id="vuRval">—</span>
+        <span class="vu-peak" id="vuRpeak">pk: —</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Peak Meters + Lissajous -->
+  <div class="bottom-row">
+    <!-- Peak -->
+    <div class="peak-panel">
+      <div class="peak-label">
+        <span>PEAK · dBFS</span>
+      </div>
+      <div class="peak-bars">
+        <div class="peak-track"><canvas class="peak-canvas" id="peakL"></canvas></div>
+        <div class="peak-track"><canvas class="peak-canvas" id="peakR"></canvas></div>
+        <div class="peak-scale">
+          <span>0</span>
+          <span>-6</span>
+          <span>-12</span>
+          <span>-18</span>
+          <span>-24</span>
+          <span>-40</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:3px">
+        <div style="flex:1;text-align:center">
+          <div class="peak-val" id="peakLval">—</div>
+          <div class="peak-hold-val" id="peakLhold">—</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div class="peak-val" id="peakRval">—</div>
+          <div class="peak-hold-val" id="peakRhold">—</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;margin-top:1px">
+        <div style="flex:1;text-align:center;font-size:8px;color:#444">L</div>
+        <div style="flex:1;text-align:center;font-size:8px;color:#444">R</div>
+      </div>
+    </div>
+
+    <!-- Lissajous -->
+    <div class="lissa-panel">
+      <div class="lissa-label">LISSAJOUS / PHASE</div>
+      <canvas class="lissa-canvas" id="lissa"></canvas>
+    </div>
+  </div>
+
+  <!-- Correlation -->
+  <div class="corr-panel">
+    <div class="corr-label">
+      <span>CORRELATION</span>
+      <span id="corrVal" style="font-size:10px;color:var(--white)">—</span>
+    </div>
+    <div class="corr-meter-wrap">
+      <canvas class="corr-canvas" id="corrMeter"></canvas>
+    </div>
+    <div class="corr-scale">
+      <span>-1</span><span>-0.5</span><span>0</span><span>+0.5</span><span>+1</span>
+    </div>
+  </div>
+
+  <!-- Loudness -->
+  <div class="loudness-panel">
+    <div class="loudness-header">
+      <span class="loudness-label">LOUDNESS · LUFS</span>
+      <div class="lufs-mode-btns">
+        <button class="lufs-btn active" id="btnM" onclick="setLufsMode('M')">M</button>
+        <button class="lufs-btn" id="btnS" onclick="setLufsMode('S')">S</button>
+        <button class="lufs-btn" id="btnI" onclick="setLufsMode('I')">I</button>
+      </div>
+    </div>
+    <div class="loudness-main">
+      <canvas class="lufs-bars-canvas" id="lufsBars" width="80" height="70"></canvas>
+      <div class="lufs-big">
+        <div class="lufs-value" id="lufsDisplay">—</div>
+        <div class="lufs-unit">LKFS</div>
+        <div class="lufs-sub">
+          TP: <span id="tpVal">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="ctrl-row">
+    <button class="ctrl-btn" onclick="resetPeaks()">RESET PEAKS</button>
+    <button class="ctrl-btn" onclick="resetLoudness()">RESET LUFS</button>
+  </div>
+
+</main>
+
+<script>
+// ── Audio Engine ──────────────────────────────────────────────
+let audioCtx = null;
+let analyserL = null, analyserR = null;
+let splitter = null;
+let stream = null;
+let source = null;
+let rafId = null;
+let isRunning = false;
+
+// State
+const STATE = {
+  vuL: 0, vuR: 0,
+  vuLSmooth: 0, vuRSmooth: 0,
+  vuLPeak: -Infinity, vuRPeak: -Infinity,
+  peakL: -Infinity, peakR: -Infinity,
+  peakLHold: -Infinity, peakRHold: -Infinity,
+  peakLHoldTimer: 0, peakRHoldTimer: 0,
+  corrValue: 0,
+  lufsM: -Infinity, lufsS: -Infinity, lufsI: -Infinity,
+  lufsMode: 'M',
+  lufsHistory: [], // short-term blocks
+  integratedSum: 0, integratedCount: 0,
+  tpL: -Infinity, tpR: -Infinity,
+  // Lissajous buffer
+  lissaBuffer: [],
+  frameCount: 0
+};
+
+// ── Canvas Setup ──────────────────────────────────────────────
+function resizeCanvas(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+  canvas.width = rect.width * dpr;
+  canvas.height = canvas.height || rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return ctx;
+}
+
+// ── VU Meter Draw — Realistic Analog ─────────────────────────
+function drawVU(canvasId, level, peakLevel) {
+  const canvas = document.getElementById(canvasId);
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.getBoundingClientRect().width;
+  const H = 110;
+  if (W === 0) return;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const cx = W / 2;
+  const cy = H * 1.06;
+  const r  = H * 1.02;
+
+  function vuAng(vu) {
+    const pct = Math.max(0, Math.min(1, (vu + 20) / 23));
+    const a0 = Math.PI * (218 / 180);
+    const a1 = Math.PI * (322 / 180);
+    return a0 + (a1 - a0) * pct;
+  }
+
+  // 1. Outer bezel
+  const bevelGrad = ctx.createLinearGradient(0, 0, W, H);
+  bevelGrad.addColorStop(0,   '#454545');
+  bevelGrad.addColorStop(0.35,'#606060');
+  bevelGrad.addColorStop(0.65,'#303030');
+  bevelGrad.addColorStop(1,   '#1c1c1c');
+  ctx.fillStyle = bevelGrad;
+  ctx.beginPath(); ctx.roundRect(0, 0, W, H, 4); ctx.fill();
+
+  // 2. Face clip region
+  const fi = 4;
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(fi, fi, W - fi*2, H - fi, 3); ctx.clip();
+
+  // 2a. Cream base
+  const faceGrad = ctx.createRadialGradient(cx, cy * 0.45, r * 0.05, cx, cy * 0.4, r * 1.15);
+  faceGrad.addColorStop(0,   '#f8f3e3');
+  faceGrad.addColorStop(0.45,'#f0e9d0');
+  faceGrad.addColorStop(0.8, '#e5dab8');
+  faceGrad.addColorStop(1,   '#d4c99a');
+  ctx.fillStyle = faceGrad; ctx.fillRect(0, 0, W, H);
+
+  // 2b. Grain texture (subtle noise)
+  for (let i = 0; i < 600; i++) {
+    const gx = Math.random() * W, gy = Math.random() * H;
+    const a = Math.random() * 0.045;
+    ctx.fillStyle = `rgba(80,60,20,${a})`;
+    ctx.fillRect(gx, gy, 1, 1);
+  }
+
+  // 2c. Vignette
+  const vig = ctx.createRadialGradient(cx, H * 0.35, r * 0.25, cx, H * 0.35, r * 1.05);
+  vig.addColorStop(0,   'rgba(0,0,0,0)');
+  vig.addColorStop(0.65,'rgba(0,0,0,0)');
+  vig.addColorStop(1,   'rgba(0,0,0,0.22)');
+  ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+
+  // 3. Red zone fill sector
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, r * 0.92, vuAng(0), vuAng(3));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(195,25,15,0.10)'; ctx.fill();
+
+  // 3b. Red zone thick arc line
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.91, vuAng(0), vuAng(3));
+  ctx.lineWidth = 3.5;
+  ctx.strokeStyle = 'rgba(185,15,10,0.60)'; ctx.stroke();
+
+  // 4. Scale guide arc (thin printed line)
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.92, vuAng(-20), vuAng(3));
+  ctx.lineWidth = 0.7;
+  ctx.strokeStyle = 'rgba(40,25,5,0.30)'; ctx.stroke();
+
+  // 5. Ticks
+  const ticks = [
+    {v:-20,t:'long', lbl:'-20'},{v:-10,t:'long', lbl:'-10'},
+    {v:-7, t:'mid',  lbl:'-7'}, {v:-5, t:'mid',  lbl:'-5'},
+    {v:-3, t:'mid',  lbl:'-3'}, {v:-2, t:'short',lbl:null},
+    {v:-1, t:'short',lbl:null}, {v:0,  t:'long', lbl:'0'},
+    {v:1,  t:'short',lbl:null}, {v:2,  t:'short',lbl:null},
+    {v:3,  t:'long', lbl:'+3'},
+  ];
+  [-18,-16,-14,-12,-9,-8,-6,-4].forEach(v => ticks.push({v,t:'tiny',lbl:null}));
+
+  ticks.forEach(t => {
+    const ang = vuAng(t.v);
+    const c = Math.cos(ang), s = Math.sin(ang);
+    const isRed = t.v >= 0;
+    const r2 = r * 0.92;
+    const r1 = t.t==='long'?r*0.77: t.t==='mid'?r*0.83: t.t==='short'?r*0.87: r*0.89;
+    ctx.beginPath();
+    ctx.moveTo(cx+c*r1, cy+s*r1);
+    ctx.lineTo(cx+c*r2, cy+s*r2);
+    ctx.lineWidth = t.t==='long'?1.6: t.t==='tiny'?0.55: 1.0;
+    ctx.strokeStyle = isRed ? 'rgba(175,10,10,0.88)' : 'rgba(30,18,4,0.80)';
+    ctx.stroke();
+
+    if (t.lbl) {
+      const rl = t.t==='long' ? r*0.68 : r*0.73;
+      const fs = W < 155 ? (t.t==='long'?7:6) : (t.t==='long'?9:7);
+      ctx.font = `bold ${fs}px Arial, sans-serif`;
+      ctx.fillStyle = isRed ? 'rgba(165,10,5,0.92)' : 'rgba(30,18,4,0.88)';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(t.lbl, cx+c*rl, cy+s*rl);
+    }
+  });
+
+  // 6. "VU" label
+  const vuFs = W < 155 ? 9 : 11;
+  ctx.font = `bold ${vuFs}px Arial, sans-serif`;
+  ctx.fillStyle = 'rgba(30,18,4,0.72)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('VU', cx, cy - r * 0.52);
+  ctx.font = `${W<155?5:6}px Arial, sans-serif`;
+  ctx.fillStyle = 'rgba(30,18,4,0.38)';
+  ctx.fillText('-20         dB', cx, cy - r * 0.42);
+
+  // 7. Needle
+  const na = vuAng(Math.max(-20, Math.min(3, level)));
+  const nc = Math.cos(na), ns = Math.sin(na);
+  const nLen = r * 0.89, nTail = r * 0.09;
+  const pw = 2.0;
+  const px = -ns, py = nc; // perpendicular
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)';
+  ctx.shadowBlur = 4; ctx.shadowOffsetX = 1.5; ctx.shadowOffsetY = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx + px*pw - nc*nTail, cy + py*pw - ns*nTail);
+  ctx.lineTo(cx - px*pw - nc*nTail, cy - py*pw - ns*nTail);
+  ctx.lineTo(cx + nc*nLen*0.99,     cy + ns*nLen*0.99);
+  ctx.closePath();
+  ctx.fillStyle = '#18080a'; ctx.fill();
+  ctx.restore();
+
+  // Needle centre shine
+  ctx.beginPath();
+  ctx.moveTo(cx + px*0.4 - nc*nTail*0.3, cy + py*0.4 - ns*nTail*0.3);
+  ctx.lineTo(cx + nc*nLen*0.82,           cy + ns*nLen*0.82);
+  ctx.lineWidth = 0.5;
+  ctx.strokeStyle = 'rgba(255,210,140,0.28)'; ctx.stroke();
+
+  // 8. Pivot
+  const pg = ctx.createRadialGradient(cx-1, cy-1.5, 0.3, cx, cy, 5.5);
+  pg.addColorStop(0,'#aaa'); pg.addColorStop(0.5,'#555'); pg.addColorStop(1,'#111');
+  ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI*2);
+  ctx.fillStyle = pg; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI*2);
+  ctx.fillStyle = '#ddd'; ctx.fill();
+
+  // 9. Peak hold
+  if (isFinite(peakLevel) && peakLevel > -20) {
+    const pa = vuAng(Math.max(-20, Math.min(3, peakLevel)));
+    const pc = Math.cos(pa), ps = Math.sin(pa);
+    ctx.beginPath();
+    ctx.moveTo(cx+pc*r*0.75, cy+ps*r*0.75);
+    ctx.lineTo(cx+pc*r*0.92, cy+ps*r*0.92);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = peakLevel>=0 ? 'rgba(220,20,10,0.92)' : 'rgba(255,100,0,0.88)';
+    ctx.stroke();
+  }
+
+  ctx.restore(); // end face clip
+
+  // 10. Glass reflection
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(fi, fi, W-fi*2, H-fi, 3); ctx.clip();
+  const glare = ctx.createLinearGradient(fi, fi, W*0.55, H*0.42);
+  glare.addColorStop(0,   'rgba(255,255,255,0.20)');
+  glare.addColorStop(0.25,'rgba(255,255,255,0.08)');
+  glare.addColorStop(1,   'rgba(255,255,255,0.00)');
+  ctx.fillStyle = glare; ctx.fillRect(fi, fi, W-fi*2, H*0.5);
+  // Lower rim glow
+  const rimGlow = ctx.createLinearGradient(0, H*0.78, 0, H);
+  rimGlow.addColorStop(0, 'rgba(255,255,255,0.00)');
+  rimGlow.addColorStop(1, 'rgba(255,255,255,0.07)');
+  ctx.fillStyle = rimGlow; ctx.fillRect(fi, H*0.78, W-fi*2, H*0.22);
+  ctx.restore();
+
+  // 11. Bezel inset shadow
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(fi, fi, W-fi*2, H-fi, 3);
+  ctx.lineWidth = 1.5;
+  const bsh = ctx.createLinearGradient(0, 0, W, H);
+  bsh.addColorStop(0,   'rgba(0,0,0,0.55)');
+  bsh.addColorStop(0.5, 'rgba(0,0,0,0.08)');
+  bsh.addColorStop(1,   'rgba(255,255,255,0.12)');
+  ctx.strokeStyle = bsh; ctx.stroke();
+  ctx.restore();
+}
+
+// ── Peak Meter Draw ───────────────────────────────────────────
+function drawPeak(canvasId, dbVal, holdDb) {
+  const canvas = document.getElementById(canvasId);
+  const W = canvas.offsetWidth || 30;
+  const H = canvas.offsetHeight || 80;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, W, H);
+
+  function dbToY(db) {
+    // Map: 0dB -> top, -60dB -> bottom
+    const pct = Math.max(0, Math.min(1, (db + 60) / 60));
+    return H * (1 - pct);
+  }
+
+  // Segment count
+  const segs = 30;
+  const segH = H / segs - 1;
+
+  const levelY = dbToY(isFinite(dbVal) ? dbVal : -100);
+
+  for (let i = 0; i < segs; i++) {
+    const segDb = 0 - (i / segs) * 60;
+    const y = (i / segs) * H;
+    const active = y >= levelY;
+    let color;
+    if (segDb >= -3) color = active ? '#ff1744' : '#3a0010';
+    else if (segDb >= -9) color = active ? '#ffd600' : '#2a2000';
+    else color = active ? '#00c853' : '#002a10';
+    ctx.fillStyle = color;
+    ctx.fillRect(1, y + 0.5, W - 2, segH);
+  }
+
+  // Hold line
+  if (isFinite(holdDb)) {
+    const hy = dbToY(holdDb);
+    ctx.fillStyle = holdDb >= -3 ? '#ff6d00' : '#fff';
+    ctx.fillRect(1, hy - 1, W - 2, 2);
+  }
+}
+
+// ── Correlation Meter ─────────────────────────────────────────
+function drawCorr(value) {
+  const canvas = document.getElementById('corrMeter');
+  const W = canvas.offsetWidth || 300;
+  const H = 22;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, W, H);
+
+  // Background gradient zones
+  const zones = [
+    { from: 0,   to: W*0.25, color: 'rgba(255,23,68,0.12)' },  // -1 to -0.5: danger
+    { from: W*0.25, to: W*0.4, color: 'rgba(255,109,0,0.08)' },
+    { from: W*0.4, to: W*0.6, color: 'rgba(255,214,0,0.06)' },
+    { from: W*0.6, to: W, color: 'rgba(0,200,83,0.08)' },
+  ];
+  zones.forEach(z => {
+    ctx.fillStyle = z.color;
+    ctx.fillRect(z.from, 0, z.to - z.from, H);
+  });
+
+  // Center line
+  ctx.fillStyle = '#222';
+  ctx.fillRect(W/2 - 0.5, 0, 1, H);
+
+  // Bar position: -1 -> left, +1 -> right
+  const barX = ((value + 1) / 2) * W;
+  const barColor = value < -0.3 ? '#ff1744' : value < 0.3 ? '#ffd600' : '#00e676';
+
+  // Gradient fill from center
+  const grd = ctx.createLinearGradient(W/2, 0, barX, 0);
+  if (value >= 0) {
+    grd.addColorStop(0, 'rgba(0,230,118,0.0)');
+    grd.addColorStop(1, barColor + 'cc');
+  } else {
+    grd.addColorStop(0, barColor + 'cc');
+    grd.addColorStop(1, 'rgba(255,23,68,0.0)');
+  }
+  ctx.fillStyle = grd;
+  if (value >= 0) ctx.fillRect(W/2, 2, barX - W/2, H-4);
+  else ctx.fillRect(barX, 2, W/2 - barX, H-4);
+
+  // Indicator line
+  ctx.fillStyle = barColor;
+  ctx.fillRect(barX - 1.5, 1, 3, H-2);
+
+  // Tick marks at -1, -0.5, 0, +0.5, +1
+  [-1, -0.5, 0, 0.5, 1].forEach(v => {
+    const x = ((v + 1) / 2) * W;
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x - 0.5, 0, 1, H);
+  });
+}
+
+// ── Lissajous ─────────────────────────────────────────────────
+function drawLissajous(bufL, bufR) {
+  const canvas = document.getElementById('lissa');
+  const size = canvas.offsetWidth || 120;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ctx.fillStyle = '#060606';
+  ctx.fillRect(0, 0, size, size);
+
+  // Grid
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(size/2, 0); ctx.lineTo(size/2, size);
+  ctx.moveTo(0, size/2); ctx.lineTo(size, size/2);
+  // Diagonal guides
+  ctx.moveTo(0, 0); ctx.lineTo(size, size);
+  ctx.moveTo(0, size); ctx.lineTo(size, 0);
+  ctx.stroke();
+
+  if (!bufL || bufL.length === 0) return;
+
+  const step = Math.max(1, Math.floor(bufL.length / 256));
+  ctx.lineWidth = 1;
+  for (let i = 0; i < bufL.length - step; i += step) {
+    const x = (bufL[i] * 0.5 + 0.5) * size;
+    const y = (bufR[i] * 0.5 + 0.5) * size;
+    const alpha = Math.min(1, i / bufL.length + 0.2);
+    ctx.fillStyle = `rgba(0,230,118,${alpha * 0.6})`;
+    ctx.fillRect(x - 0.5, y - 0.5, 1.5, 1.5);
+  }
+}
+
+// ── LUFS Bar Draw ─────────────────────────────────────────────
+function drawLufsBars(M, S, I) {
+  const canvas = document.getElementById('lufsBars');
+  const W = 80, H = 70;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  ctx.fillStyle = '#060606';
+  ctx.fillRect(0, 0, W, H);
+
+  function lufsToH(lufs) {
+    // -40 to -5 LUFS range
+    if (!isFinite(lufs)) return 0;
+    return Math.max(0, Math.min(1, (lufs + 40) / 35)) * (H - 14);
+  }
+
+  const bars = [
+    { val: M, label: 'M', color: '#00c853' },
+    { val: S, label: 'S', color: '#00b0ff' },
+    { val: I, label: 'I', color: '#c8a84b' },
+  ];
+  const bw = 16, gap = 8;
+  const totalW = bars.length * bw + (bars.length - 1) * gap;
+  const startX = (W - totalW) / 2;
+
+  bars.forEach((b, i) => {
+    const x = startX + i * (bw + gap);
+    const bh = lufsToH(b.val);
+    const y = H - 12 - bh;
+    // bg
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(x, 2, bw, H - 14);
+    // bar
+    if (bh > 0) {
+      ctx.fillStyle = b.color + 'aa';
+      ctx.fillRect(x, y, bw, bh);
+      // top bright
+      ctx.fillStyle = b.color;
+      ctx.fillRect(x, y, bw, 2);
+    }
+    // label
+    ctx.fillStyle = '#555';
+    ctx.font = '7px Space Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.label, x + bw/2, H - 3);
+    // value
+    if (isFinite(b.val)) {
+      ctx.fillStyle = b.color;
+      ctx.font = '7px Space Mono';
+      ctx.fillText(b.val.toFixed(1), x + bw/2, y - 2);
+    }
+  });
+}
+
+// ── Linear to dB ─────────────────────────────────────────────
+function linToDB(lin) {
+  if (lin <= 0) return -Infinity;
+  return 20 * Math.log10(lin);
+}
+
+// ── VU Ballistics ─────────────────────────────────────────────
+// VU standard: 300ms integration (approx)
+const VU_ATTACK = 0.03;
+const VU_RELEASE = 0.015;
+
+// ── Main Analysis Loop ────────────────────────────────────────
+let bufSize = 2048;
+let timeBufL, timeBufR, freqBufL, freqBufR;
+let lufsShortBuf = [];
+let lufsShortInterval = 0;
+let integratedGate = [];
+let intBlocks = [];
+
+function analyse() {
+  if (!isRunning) return;
+  rafId = requestAnimationFrame(analyse);
+  STATE.frameCount++;
+
+  timeBufL = timeBufL || new Float32Array(analyserL.fftSize);
+  timeBufR = timeBufR || new Float32Array(analyserR.fftSize);
+  freqBufL = freqBufL || new Uint8Array(analyserL.frequencyBinCount);
+  freqBufR = freqBufR || new Uint8Array(analyserR.frequencyBinCount);
+
+  analyserL.getFloatTimeDomainData(timeBufL);
+  analyserR.getFloatTimeDomainData(timeBufR);
+
+  // ── RMS for VU ──
+  let sumL = 0, sumR = 0;
+  const n = timeBufL.length;
+  for (let i = 0; i < n; i++) {
+    sumL += timeBufL[i] * timeBufL[i];
+    sumR += timeBufR[i] * timeBufR[i];
+  }
+  const rmsL = Math.sqrt(sumL / n);
+  const rmsR = Math.sqrt(sumR / n);
+  // VU in dBVU (0 dBVU = -18 dBFS approx)
+  const vuDbL = linToDB(rmsL) + 18;
+  const vuDbR = linToDB(rmsR) + 18;
+
+  // Ballistics
+  const tgt_L = isFinite(vuDbL) ? vuDbL : -20;
+  const tgt_R = isFinite(vuDbR) ? vuDbR : -20;
+  if (tgt_L > STATE.vuLSmooth) STATE.vuLSmooth += (tgt_L - STATE.vuLSmooth) * VU_ATTACK * 3;
+  else STATE.vuLSmooth += (tgt_L - STATE.vuLSmooth) * VU_RELEASE;
+  if (tgt_R > STATE.vuRSmooth) STATE.vuRSmooth += (tgt_R - STATE.vuRSmooth) * VU_ATTACK * 3;
+  else STATE.vuRSmooth += (tgt_R - STATE.vuRSmooth) * VU_RELEASE;
+
+  STATE.vuLSmooth = Math.max(-20, Math.min(3, STATE.vuLSmooth));
+  STATE.vuRSmooth = Math.max(-20, Math.min(3, STATE.vuRSmooth));
+
+  if (STATE.vuLSmooth > STATE.vuLPeak) STATE.vuLPeak = STATE.vuLSmooth;
+  if (STATE.vuRSmooth > STATE.vuRPeak) STATE.vuRPeak = STATE.vuRSmooth;
+
+  // ── True Peak ──
+  let tpL = -Infinity, tpR = -Infinity;
+  for (let i = 0; i < n; i++) {
+    const aL = Math.abs(timeBufL[i]);
+    const aR = Math.abs(timeBufR[i]);
+    if (aL > tpL) tpL = aL;
+    if (aR > tpR) tpR = aR;
+  }
+  const tpLdb = linToDB(tpL);
+  const tpRdb = linToDB(tpR);
+  if (tpLdb > STATE.tpL) STATE.tpL = tpLdb;
+  if (tpRdb > STATE.tpR) STATE.tpR = tpRdb;
+
+  // ── Peak dBFS with hold ──
+  if (tpLdb > STATE.peakL) { STATE.peakL = tpLdb; STATE.peakLHoldTimer = 120; STATE.peakLHold = tpLdb; }
+  else { STATE.peakLHoldTimer--; if (STATE.peakLHoldTimer <= 0) STATE.peakL *= 0.92; }
+
+  if (tpRdb > STATE.peakR) { STATE.peakR = tpRdb; STATE.peakRHoldTimer = 120; STATE.peakRHold = tpRdb; }
+  else { STATE.peakRHoldTimer--; if (STATE.peakRHoldTimer <= 0) STATE.peakR *= 0.92; }
+
+  // ── Correlation ──
+  let sumLR = 0, sumLL = 0, sumRR = 0;
+  for (let i = 0; i < n; i++) {
+    sumLR += timeBufL[i] * timeBufR[i];
+    sumLL += timeBufL[i] * timeBufL[i];
+    sumRR += timeBufR[i] * timeBufR[i];
+  }
+  const denom = Math.sqrt(sumLL * sumRR);
+  const corr = denom > 0 ? sumLR / denom : 0;
+  STATE.corrValue = STATE.corrValue * 0.85 + corr * 0.15;
+
+  // ── LUFS (simplified ITU-R BS.1770-4) ──
+  // K-weighted: approximate with high-shelf + high-pass
+  // For simplicity, use broadband energy weighted
+  lufsShortInterval++;
+  if (lufsShortInterval >= 4) { // every ~4 frames = ~100ms
+    lufsShortInterval = 0;
+    const energyL = sumL / n;
+    const energyR = sumR / n;
+    const blockEnergy = (energyL + energyR);
+    const blockLufs = blockEnergy > 0 ? -0.691 + 10 * Math.log10(blockEnergy) : -Infinity;
+
+    // Momentary (400ms window ~12 blocks)
+    lufsShortBuf.push(blockLufs);
+    if (lufsShortBuf.length > 12) lufsShortBuf.shift();
+    const mArr = lufsShortBuf.filter(v => isFinite(v));
+    if (mArr.length > 0) {
+      const mSum = mArr.reduce((a,b) => a + Math.pow(10, b/10), 0) / mArr.length;
+      STATE.lufsM = 10 * Math.log10(mSum);
+    }
+
+    // Short-term (3s window ~90 blocks)
+    intBlocks.push(blockLufs);
+    if (intBlocks.length > 90) intBlocks.shift();
+    const sArr = intBlocks.filter(v => isFinite(v));
+    if (sArr.length > 0) {
+      const sSum = sArr.reduce((a,b) => a + Math.pow(10, b/10), 0) / sArr.length;
+      STATE.lufsS = 10 * Math.log10(sSum);
+    }
+
+    // Integrated
+    if (isFinite(blockLufs) && blockLufs > -70) {
+      STATE.integratedSum += Math.pow(10, blockLufs/10);
+      STATE.integratedCount++;
+      STATE.lufsI = STATE.integratedCount > 0 ? 10 * Math.log10(STATE.integratedSum / STATE.integratedCount) : -Infinity;
+    }
+  }
+
+  // ── Lissajous buffer (subsample) ──
+  const lissaStep = Math.floor(n / 512);
+  STATE.lissaBuffer = [];
+  const lissaBufL = [], lissaBufR = [];
+  for (let i = 0; i < n; i += lissaStep) {
+    lissaBufL.push(timeBufL[i]);
+    lissaBufR.push(timeBufR[i]);
+  }
+
+  // ── Draw ──
+  drawVU('vuL', STATE.vuLSmooth, STATE.vuLPeak);
+  drawVU('vuR', STATE.vuRSmooth, STATE.vuRPeak);
+
+  drawPeak('peakL', STATE.peakL, STATE.peakLHold);
+  drawPeak('peakR', STATE.peakR, STATE.peakRHold);
+
+  drawCorr(STATE.corrValue);
+  drawLissajous(lissaBufL, lissaBufR);
+  drawLufsBars(STATE.lufsM, STATE.lufsS, STATE.lufsI);
+
+  // Update text readouts
+  document.getElementById('vuLval').textContent = isFinite(STATE.vuLSmooth) ? STATE.vuLSmooth.toFixed(1) + ' VU' : '—';
+  document.getElementById('vuRval').textContent = isFinite(STATE.vuRSmooth) ? STATE.vuRSmooth.toFixed(1) + ' VU' : '—';
+  document.getElementById('vuLpeak').textContent = isFinite(STATE.vuLPeak) ? 'pk: ' + STATE.vuLPeak.toFixed(1) : 'pk: —';
+  document.getElementById('vuRpeak').textContent = isFinite(STATE.vuRPeak) ? 'pk: ' + STATE.vuRPeak.toFixed(1) : 'pk: —';
+
+  const peakLdb = isFinite(STATE.peakL) ? STATE.peakL : -Infinity;
+  const peakRdb = isFinite(STATE.peakR) ? STATE.peakR : -Infinity;
+  document.getElementById('peakLval').textContent = isFinite(peakLdb) ? peakLdb.toFixed(1) : '—';
+  document.getElementById('peakRval').textContent = isFinite(peakRdb) ? peakRdb.toFixed(1) : '—';
+  const peakLcolor = peakLdb >= -3 ? '#ff1744' : peakLdb >= -9 ? '#ffd600' : '#f0f0f0';
+  const peakRcolor = peakRdb >= -3 ? '#ff1744' : peakRdb >= -9 ? '#ffd600' : '#f0f0f0';
+  document.getElementById('peakLval').style.color = peakLcolor;
+  document.getElementById('peakRval').style.color = peakRcolor;
+  document.getElementById('peakLhold').textContent = isFinite(STATE.peakLHold) ? 'hld:' + STATE.peakLHold.toFixed(1) : '';
+  document.getElementById('peakRhold').textContent = isFinite(STATE.peakRHold) ? 'hld:' + STATE.peakRHold.toFixed(1) : '';
+
+  document.getElementById('corrVal').textContent = STATE.corrValue.toFixed(2);
+  const corrEl = document.getElementById('corrVal');
+  corrEl.style.color = STATE.corrValue < -0.3 ? '#ff1744' : STATE.corrValue < 0.3 ? '#ffd600' : '#00e676';
+
+  // LUFS display
+  const lufsActive = STATE.lufsMode === 'M' ? STATE.lufsM : STATE.lufsMode === 'S' ? STATE.lufsS : STATE.lufsI;
+  const lufsEl = document.getElementById('lufsDisplay');
+  if (isFinite(lufsActive)) {
+    lufsEl.textContent = lufsActive.toFixed(1);
+    lufsEl.className = 'lufs-value' + (lufsActive > -14 ? ' over' : lufsActive > -18 ? ' warn' : '');
+  } else {
+    lufsEl.textContent = '—';
+    lufsEl.className = 'lufs-value';
+  }
+
+  const tp = Math.max(isFinite(STATE.tpL)?STATE.tpL:-Infinity, isFinite(STATE.tpR)?STATE.tpR:-Infinity);
+  document.getElementById('tpVal').textContent = isFinite(tp) ? tp.toFixed(1) + ' dBTP' : '—';
+  document.getElementById('tpVal').style.color = tp >= -1 ? '#ff1744' : '#888';
+}
+
+// ── Start Audio ───────────────────────────────────────────────
+// NOTE: audioCtx must be created SYNCHRONOUSLY inside a user gesture handler.
+// Call initAudioContext() first (sync), then startAudio() (async) separately.
+function initAudioContext() {
+  if (audioCtx && audioCtx.state !== 'closed') return; // already alive
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) { alert('このブラウザはWeb Audio APIに対応していません。'); return; }
+  audioCtx = new AC(); // no sampleRate constraint — let iOS choose
+  // Unlock iOS silent mode
+  const buf = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start(0);
+}
+
+async function startAudio(deviceId) {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  isRunning = false;
+
+  const constraints = {
+    audio: {
+      deviceId: deviceId ? { exact: deviceId } : undefined,
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+      channelCount: { ideal: 2 },
+    }
+  };
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    // Resume context if suspended (iOS requires this after getUserMedia)
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+
+    source = audioCtx.createMediaStreamSource(stream);
+
+    // Splitter for L/R
+    splitter = audioCtx.createChannelSplitter(2);
+    analyserL = audioCtx.createAnalyser();
+    analyserR = audioCtx.createAnalyser();
+    analyserL.fftSize = 2048;
+    analyserR.fftSize = 2048;
+    analyserL.smoothingTimeConstant = 0.0;
+    analyserR.smoothingTimeConstant = 0.0;
+
+    source.connect(splitter);
+    splitter.connect(analyserL, 0);
+    splitter.connect(analyserR, 1);
+
+    // Mono fallback: connect R analyser to ch0 if mono source
+    const trackSettings = stream.getAudioTracks()[0].getSettings();
+    if ((trackSettings.channelCount || 1) === 1) {
+      splitter.connect(analyserR, 0);
+    }
+
+    isRunning = true;
+    document.getElementById('statusDot').className = 'status-dot active';
+    analyse();
+    await populateDevices();
+  } catch (e) {
+    console.error('startAudio error:', e.name, e.message);
+    document.getElementById('statusDot').className = 'status-dot error';
+    if (e.name === 'NotAllowedError') {
+      alert('マイクのアクセスが拒否されました。\nSafari: 設定 > Safari > マイク をオンにしてください。');
+    } else if (e.name === 'NotFoundError') {
+      alert('マイクが見つかりません。デバイスを確認してください。');
+    } else {
+      alert('オーディオエラー: ' + e.name + '\n' + e.message);
+    }
+  }
+}
+
+// ── Device List ───────────────────────────────────────────────
+async function populateDevices() {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const audioInputs = devices.filter(d => d.kind === 'audioinput');
+  const sel = document.getElementById('deviceSelect');
+  sel.innerHTML = '';
+  audioInputs.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.deviceId;
+    opt.textContent = d.label || `マイク ${d.deviceId.slice(0,6)}`;
+    sel.appendChild(opt);
+  });
+  sel.className = 'device-select active';
+}
+
+function switchInput(deviceId) {
+  // Sync init required for iOS on every user gesture that touches AudioContext
+  initAudioContext();
+  document.getElementById('btnMic').className = 'input-btn' + (deviceId === 'default' ? ' active' : '');
+  startAudio(deviceId === 'default' ? null : deviceId).then(resetAll);
+}
+
+// ── Controls ──────────────────────────────────────────────────
+function resetPeaks() {
+  STATE.vuLPeak = -Infinity; STATE.vuRPeak = -Infinity;
+  STATE.peakLHold = -Infinity; STATE.peakRHold = -Infinity;
+  STATE.tpL = -Infinity; STATE.tpR = -Infinity;
+}
+function resetLoudness() {
+  lufsShortBuf = [];
+  intBlocks = [];
+  STATE.lufsM = -Infinity; STATE.lufsS = -Infinity; STATE.lufsI = -Infinity;
+  STATE.integratedSum = 0; STATE.integratedCount = 0;
+}
+function resetAll() { resetPeaks(); resetLoudness(); }
+
+function setLufsMode(mode) {
+  STATE.lufsMode = mode;
+  ['M','S','I'].forEach(m => {
+    document.getElementById('btn'+m).className = 'lufs-btn' + (m === mode ? ' active' : '');
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────
+document.getElementById('startBtn').addEventListener('click', async () => {
+  // initAudioContext() MUST run synchronously before any await (iOS requirement)
+  initAudioContext();
+  document.getElementById('overlay').classList.add('hidden');
+  await startAudio(null);
+});
+
+// Handle device changes (USB plug/unplug)
+navigator.mediaDevices.addEventListener('devicechange', populateDevices);
+
+// Resize
+window.addEventListener('resize', () => {
+  // canvases auto-redraw on next frame
+});
+</script>
+</body>
+</html>

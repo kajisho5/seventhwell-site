@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SUMIDASHI">
+<meta name="theme-color" content="#07090e">
+<title>SUMIDASHI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@600;700&family=Space+Mono&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── THEME ── */
+[data-theme="dark"]{
+  --bg:#07090e;--bg2:#0c1018;--bg3:#111820;
+  --card:#0e1520;--bdr:#182030;--bdr2:#1e2d42;--bdr3:#253548;
+  --acc:#00aaff;--acc2:rgba(0,170,255,.1);
+  --grn:#00e88f;--org:#ff9500;--red:#ff3f50;--pur:#aa66ff;
+  --t1:#ddeeff;--t2:#5a7890;--t3:#2a3d50;--t4:#1a2535;
+  --bar-bg:rgba(7,9,14,.97);
+  --input-bg:var(--bg2);
+}
+[data-theme="light"]{
+  --bg:#f4f6f8;--bg2:#ffffff;--bg3:#eef1f4;
+  --card:#ffffff;--bdr:#dde3ea;--bdr2:#c8d0da;--bdr3:#b0bcc8;
+  --acc:#0088cc;--acc2:rgba(0,136,204,.1);
+  --grn:#00aa66;--org:#e08000;--red:#cc2233;--pur:#8844cc;
+  --t1:#1a2535;--t2:#5a7080;--t3:#99aabb;--t4:#c8d8e0;
+  --bar-bg:rgba(244,246,248,.97);
+  --input-bg:#f8fafc;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--t1);font-family:'Noto Sans JP',sans-serif;min-height:100%;transition:background .2s,color .2s}
+
+/* ── BAR ── */
+.bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bar-bg);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.bar-logo{display:flex;align-items:center;gap:9px}
+.bar-mark svg{display:block}
+.bar-wordmark{display:flex;flex-direction:column;gap:1px}
+.bar-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.18em;color:var(--t1);line-height:1}
+.bar-sub{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--t3);line-height:1}
+.bar-right{display:flex;align-items:center;gap:8px}
+.bar-ver{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)}
+
+/* theme toggle */
+.theme-btn{width:32px;height:20px;border-radius:10px;background:var(--bdr2);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.theme-btn::after{content:'';position:absolute;width:14px;height:14px;border-radius:7px;background:var(--t2);top:3px;left:3px;transition:transform .2s,background .2s}
+[data-theme="light"] .theme-btn{background:var(--acc2)}
+[data-theme="light"] .theme-btn::after{transform:translateX(12px);background:var(--acc)}
+
+/* ── TABS ── */
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg2);border-bottom:1px solid var(--bdr);position:sticky;top:58px;z-index:99}
+.tab{padding:9px 2px;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:var(--t3);border:none;background:none;border-bottom:2px solid transparent;cursor:pointer;outline:none;transition:all .15s}
+.tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+
+/* ── PAGE ── */
+.pg{display:none;padding:12px 12px 60px}
+.pg.on{display:block}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:13px 13px 8px;margin-bottom:10px}
+.card-ttl{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--acc);margin-bottom:11px;padding-left:8px;border-left:3px solid var(--acc)}
+
+/* ── FIELDS ── */
+.f{margin-bottom:9px}
+.f>label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
+input[type=number],input[type=text],select,textarea{width:100%;background:var(--input-bg);border:1px solid var(--bdr);color:var(--t1);font-family:'Space Mono',monospace;font-size:15px;padding:9px 11px;border-radius:6px;outline:none;appearance:none;-webkit-appearance:none;transition:border-color .15s,box-shadow .15s}
+input[type=text],textarea{font-family:'Noto Sans JP',sans-serif}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc2)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2300aaff' fill='none' stroke-width='1.4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+select option{background:var(--bg3)}
+textarea{font-family:'Noto Sans JP',sans-serif;font-size:13px;resize:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px}
+.chip{padding:4px 9px;border-radius:4px;background:var(--bg2);border:1px solid var(--bdr);font-family:'Space Mono',monospace;font-size:10px;color:var(--t2);cursor:pointer;transition:all .15s}
+.chip.on{border-color:var(--acc);color:var(--acc);background:var(--acc2)}
+
+/* ── MARGIN DIAGRAM ── */
+.diag-wrap{display:flex;justify-content:center;margin:2px 0 12px}
+.diag{position:relative;width:200px;height:138px;background:var(--input-bg);border-radius:5px;overflow:hidden;border:1px solid var(--bdr)}
+#dMon{position:absolute;border:2px solid #4488cc;background:rgba(68,136,204,0.08);border-radius:2px;transition:all .2s}
+#dBrk{position:absolute;border:2px dashed rgba(200,80,0,.8);border-radius:2px;transition:all .2s;background:rgba(200,80,0,0.06)}
+.dlbl{position:absolute;font-family:'Space Mono',monospace;font-size:7px;color:var(--org);pointer-events:none}
+
+/* ── SENTENCE INPUT ── */
+.sent{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-bottom:5px}
+.sent select{flex:0 0 auto;width:auto;font-size:12px;padding:7px 26px 7px 9px}
+.sent input{flex:0 0 74px;font-size:14px;padding:7px 9px}
+.sw2{flex:0 0 auto;font-size:11px;color:var(--t2);white-space:nowrap;font-family:'Space Mono',monospace}
+.smm{font-size:10px;color:var(--t3);font-family:'Space Mono',monospace}
+.prev-line{margin-top:5px;padding:6px 9px;background:var(--bg3);border-radius:4px;border-left:2px solid var(--acc);font-family:'Space Mono',monospace;font-size:10px;color:var(--t2);line-height:1.5}
+.prev-line b{color:var(--acc)}
+
+/* ── BUTTONS ── */
+.go{width:100%;padding:15px;border-radius:8px;background:var(--acc);color:#000;border:none;outline:none;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-bottom:12px;transition:background .15s}
+.go:active{background:#33bbff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 13px;border-radius:6px;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border:none;outline:none;transition:all .15s}
+.btn-outline{background:transparent;border:1px solid var(--bdr2);color:var(--t2)}
+.btn-outline:active{border-color:var(--acc);color:var(--acc)}
+.btn-green{background:var(--grn);color:#000}
+.btn-green:active{opacity:.8}
+.btn-row{display:flex;gap:7px;margin-bottom:10px}
+.btn-full{width:100%}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:50px 20px;color:var(--t3);font-family:'Space Mono',monospace;font-size:11px;line-height:2.4}
+
+/* ── RESULT ANSWER ── */
+.answer{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.answer-head{padding:10px 14px;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--t3);background:var(--bg2);border-bottom:1px solid var(--bdr)}
+.ans-row{display:flex}
+.ans-cell{flex:1;padding:18px 14px;border-right:1px solid var(--bdr)}
+.ans-cell:last-child{border-right:none}
+.ans-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:6px;line-height:1.4}
+.ans-val{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;color:var(--acc);line-height:1}
+.ans-val.g{color:var(--grn)}
+.ans-unit{font-size:11px;color:var(--t2);margin-left:2px}
+.refs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+.ref{background:var(--card);border:1px solid var(--bdr);border-radius:7px;padding:9px 11px}
+.ref-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px}
+.ref-val{font-family:'Space Mono',monospace;font-size:13px;color:var(--t1)}
+.ref-val.g{color:var(--grn)}
+.ref-val.o{color:var(--org)}
+.copy-btn{width:100%;padding:12px;border-radius:7px;background:transparent;border:1px solid var(--bdr2);color:var(--t2);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;margin-bottom:8px;transition:all .15s}
+.copy-btn:active{border-color:var(--grn);color:var(--grn)}
+.preset-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:var(--acc2);border:1px solid rgba(0,170,255,.25);border-radius:5px;font-family:'Space Mono',monospace;font-size:10px;color:var(--acc);margin-bottom:12px}
+
+/* ── QR ── */
+.qr-wrap{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:14px;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.qr-wrap canvas{border-radius:4px}
+.qr-lbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--t2);text-align:center;line-height:1.5}
+
+/* ── PRESETS ── */
+.search-wrap{position:relative;margin-bottom:10px}
+.search-wrap input{padding-left:30px;font-family:'Noto Sans JP',sans-serif;font-size:14px}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
+.preset-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.pitem{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:11px 12px;cursor:pointer;transition:border-color .15s;display:flex;align-items:center;gap:9px}
+.pitem:active{border-color:var(--bdr3)}
+.pitem-info{flex:1;min-width:0}
+.pitem-name{font-size:13px;color:var(--t1);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pitem-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)}
+.pitem-tags{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+.ptag{padding:2px 6px;border-radius:3px;font-family:'Space Mono',monospace;font-size:8px;background:var(--bg2);border:1px solid var(--bdr2);color:var(--t3)}
+.ptag.co{border-color:rgba(170,102,255,.3);color:var(--pur)}
+.ptag.mn{border-color:rgba(0,170,255,.25);color:var(--acc)}
+.ptag.br{border-color:rgba(255,149,0,.25);color:var(--org)}
+.pitem-del{flex-shrink:0;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid var(--bdr);color:var(--t3);font-size:12px;transition:all .15s}
+.pitem-del:active{border-color:var(--red);color:var(--red)}
+.no-results{text-align:center;padding:28px 0;font-family:'Space Mono',monospace;font-size:11px;color:var(--t3)}
+.save-form{background:var(--bg2);border:1px solid var(--bdr3);border-radius:8px;padding:13px;margin-bottom:10px}
+.sec-lbl{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.div-line{height:1px;background:var(--bdr);margin:12px 0}
+
+/* ── SHARE SHEET ── */
+#share-sheet{background:#fff;color:#111;padding:18px 18px 22px;border-radius:10px;margin-bottom:12px;font-family:'Noto Sans JP',sans-serif}
+[data-theme="light"] #share-sheet{border:1px solid #dde3ea}
+.ss-header{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:12px}
+.ss-brand{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.2em;color:#888}
+.ss-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.15em;color:#111;margin-top:1px}
+.ss-date{font-family:'Space Mono',monospace;font-size:9px;color:#999;margin-top:2px}
+.ss-site{font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;color:#111;text-align:right}
+.ss-site-lbl{font-size:9px;color:#999;font-family:'Space Mono',monospace;text-align:right;margin-bottom:2px}
+/* diagram in share sheet */
+.ss-diagram{margin-bottom:12px;border-radius:6px;overflow:hidden}
+.ss-diagram canvas{width:100%;display:block}
+.ss-answer{display:flex;gap:8px;margin-bottom:12px}
+.ss-cell{flex:1;background:#f5f7fa;border-radius:6px;padding:11px 10px}
+.ss-cell-lbl{font-family:'Space Mono',monospace;font-size:8px;color:#888;margin-bottom:4px;line-height:1.4}
+.ss-cell-val{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#0066cc;line-height:1}
+.ss-cell-val.g{color:#009955}
+.ss-cell-unit{font-size:10px;color:#666;margin-left:2px}
+.ss-refs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+.ss-ref{background:#f5f7fa;border-radius:5px;padding:7px 8px}
+.ss-ref-lbl{font-family:'Space Mono',monospace;font-size:8px;color:#999;margin-bottom:2px}
+.ss-ref-val{font-family:'Space Mono',monospace;font-size:11px;color:#111;font-weight:600}
+.ss-specs{background:#f0f4f8;border-radius:6px;padding:9px 11px;margin-bottom:8px}
+.ss-specs-ttl{font-family:'Rajdhani',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:6px}
+.ss-spec-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid #e0e5ec}
+.ss-spec-row:last-child{border-bottom:none}
+.ss-spec-lbl{color:#777}
+.ss-spec-val{color:#111;font-family:'Space Mono',monospace;font-size:11px}
+.ss-footer{font-family:'Space Mono',monospace;font-size:8px;color:#bbb;text-align:center;border-top:1px solid #ddd;padding-top:7px}
+.share-btn{width:100%;padding:14px;border-radius:8px;background:var(--grn);color:#000;border:none;outline:none;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin-bottom:8px;transition:all .15s}
+.share-btn:active{opacity:.8}
+.share-hint{font-family:'Space Mono',monospace;font-size:10px;color:var(--t3);text-align:center;margin-bottom:14px}
+
+/* ── HISTORY ── */
+.hitem{background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:12px 13px;margin-bottom:7px;cursor:pointer;transition:border-color .15s}
+.hitem:active{border-color:var(--bdr3)}
+.hitem-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px}
+.hitem-site{font-size:13px;color:var(--t1);font-weight:500}
+.hitem-date{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)}
+.hitem-answer{font-family:'Space Mono',monospace;font-size:12px;color:var(--acc);margin-bottom:4px}
+.hitem-answer span{color:var(--grn)}
+.hitem-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--t3)}
+.hitem-del{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid var(--bdr);color:var(--t3);font-size:11px;flex-shrink:0;transition:all .15s}
+.hitem-del:active{border-color:var(--red);color:var(--red)}
+</style>
+<!-- SEVENTHWELL Tools：アイコンと共有画像（2026-09-27 追加。元は release/tools-live/） -->
+<link rel="icon" type="image/svg+xml" href="/img/tools/sumidashi.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/tools/sumidashi-32.png">
+<link rel="apple-touch-icon" href="/img/tools/sumidashi-180.png">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="SUMIDASHI — SEVENTHWELL">
+<meta property="og:description" content="モニター壁掛け位置計算アプリ">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://seventh-well.com/sumidashi/">
+<meta property="og:image" content="https://seventh-well.com/img/tools/sumidashi-ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-logo">
+    <div class="bar-mark">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <circle cx="14" cy="14" r="13" fill="rgba(128,128,128,0.04)"/>
+        <line x1="2" y1="14" x2="11" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="17" y1="14" x2="26" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="14" y1="2" x2="14" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="14" y1="17" x2="14" y2="26" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="14" cy="14" r="1.5" fill="currentColor"/>
+        <path d="M4 9L4 4L9 4" stroke="currentColor" stroke-width="1.1" stroke-linecap="square" fill="none" opacity=".4"/>
+        <path d="M19 4L24 4L24 9" stroke="currentColor" stroke-width="1.1" stroke-linecap="square" fill="none" opacity=".4"/>
+        <path d="M24 19L24 24L19 24" stroke="currentColor" stroke-width="1.1" stroke-linecap="square" fill="none" opacity=".4"/>
+        <path d="M9 24L4 24L4 19" stroke="currentColor" stroke-width="1.1" stroke-linecap="square" fill="none" opacity=".4"/>
+      </svg>
+    </div>
+    <div class="bar-wordmark">
+      <div class="bar-name">SUMIDASHI</div>
+      <div class="bar-sub">WALL MOUNT CALC</div>
+    </div>
+  </div>
+  <div class="bar-right">
+    <button class="theme-btn" onclick="toggleTheme()" title="ダーク/ライト切替"></button>
+    <span class="bar-ver">v3.0</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab on"  onclick="sw('calc')">計算</button>
+  <button class="tab"     onclick="sw('presets')">プリセット</button>
+  <button class="tab"     onclick="sw('result')">結果</button>
+  <button class="tab"     onclick="sw('share')">指示書</button>
+  <button class="tab"     onclick="sw('history')">履歴</button>
+</div>
+
+<!-- ══ CALC ══ -->
+<div class="pg on" id="pg-calc">
+  <div id="loaded-badge" style="display:none">
+    <div class="preset-badge">📌 <span id="badge-name">—</span>
+      <span style="color:var(--t3);cursor:pointer;margin-left:4px" onclick="clearPreset()">✕</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-ttl">モニター本体サイズ</div>
+    <div class="chips" id="szChips">
+      <div class="chip" onclick="setSz(this,698,393)">32"</div>
+      <div class="chip" onclick="setSz(this,941,529)">43"</div>
+      <div class="chip on" onclick="setSz(this,1209,680)">55"</div>
+      <div class="chip" onclick="setSz(this,1428,803)">65"</div>
+      <div class="chip" onclick="setSz(this,1648,927)">75"</div>
+      <div class="chip" onclick="setSz(this,0,0)">手動</div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>幅 (mm)</label><input type="number" id="mW" value="1209" inputmode="numeric" oninput="updDiag()"></div>
+      <div class="f"><label>高さ (mm)</label><input type="number" id="mH" value="680" inputmode="numeric" oninput="updDiag()"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-ttl">背面金具の余白</div>
+    <div class="diag-wrap">
+      <div class="diag">
+        <div id="dBrk"></div><div id="dMon"></div>
+        <div class="dlbl" id="dT" style="top:3px;left:50%;transform:translateX(-50%)"></div>
+        <div class="dlbl" id="dB" style="bottom:3px;left:50%;transform:translateX(-50%)"></div>
+        <div class="dlbl" id="dL" style="top:50%;left:3px;transform:translateY(-50%)"></div>
+        <div class="dlbl" id="dR" style="top:50%;right:3px;transform:translateY(-50%)"></div>
+      </div>
+    </div>
+    <div class="row2" style="margin-bottom:7px">
+      <div class="f"><label>上 (mm)</label><input type="number" id="mgT" value="30" inputmode="numeric" oninput="updDiag()"></div>
+      <div class="f"><label>下 (mm)</label><input type="number" id="mgB" value="30" inputmode="numeric" oninput="updDiag()"></div>
+    </div>
+    <div class="row2">
+      <div class="f"><label>左 (mm)</label><input type="number" id="mgL" value="20" inputmode="numeric" oninput="updDiag()"></div>
+      <div class="f"><label>右 (mm)</label><input type="number" id="mgR" value="20" inputmode="numeric" oninput="updDiag()"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-ttl">配置指示</div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr2);border-radius:7px;padding:11px 12px 8px;margin-bottom:8px">
+      <div class="sec-lbl">横方向</div>
+      <div class="sent">
+        <select id="refH" onchange="syncFromH();updPrev()">
+          <option value="center">モニター中心</option>
+          <option value="left" selected>モニター左端</option>
+          <option value="right">モニター右端</option>
+        </select>
+        <span class="sw2">を</span>
+        <span id="fromH-label" style="font-size:11px;color:var(--org);font-family:'Space Mono',monospace;white-space:nowrap">左端から</span>
+        <input type="hidden" id="fromH" value="from_left">
+        <input type="number" id="valH" value="600" inputmode="numeric" oninput="updPrev()">
+        <span class="smm">mm</span>
+      </div>
+      <!-- 中心選択時のみ左右切替を表示 -->
+      <div id="center-dir-row" style="display:none;margin-top:6px">
+        <div style="display:flex;gap:6px">
+          <button class="chip on" id="dir-left" onclick="setDir('from_left')" style="flex:1;text-align:center">← 左端から</button>
+          <button class="chip" id="dir-right" onclick="setDir('from_right')" style="flex:1;text-align:center">右端から →</button>
+        </div>
+      </div>
+      <div class="prev-line" id="prevH"></div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr2);border-radius:7px;padding:11px 12px 8px">
+      <div class="sec-lbl">縦方向（FL基準）</div>
+      <div class="sent">
+        <select id="refV" onchange="updPrev()"><option value="center">モニター中心</option><option value="top">モニター上端</option><option value="bottom" selected>モニター下端</option></select>
+        <span class="sw2">を</span>
+        <span class="sw2" style="color:var(--org)">FL+</span>
+        <input type="number" id="valV" value="1500" inputmode="numeric" oninput="updPrev()">
+        <span class="smm">mm</span>
+      </div>
+      <div class="prev-line" id="prevV"></div>
+    </div>
+  </div>
+
+  <button class="go" onclick="calc()">▶ 計算する</button>
+
+  <div class="div-line"></div>
+  <div class="sec-lbl">プリセット保存</div>
+  <div class="save-form">
+    <div class="f"><label>映像会社名</label><input type="text" id="ps-company" placeholder="例: 東映エージエンシー"></div>
+    <div class="row2">
+      <div class="f"><label>モニターメーカー</label><input type="text" id="ps-maker" placeholder="例: SHARP"></div>
+      <div class="f"><label>型番</label><input type="text" id="ps-model" placeholder="例: PN-R556"></div>
+    </div>
+    <div class="f"><label>金具メーカー / 型番</label><input type="text" id="ps-bracket" placeholder="例: RATEC RSF 400"></div>
+    <div class="f"><label>メモ（任意）</label><textarea id="ps-memo" placeholder="備考・注意点など" rows="2"></textarea></div>
+    <button class="btn btn-green btn-full" onclick="savePreset()" style="margin-top:4px">💾 プリセット保存</button>
+  </div>
+</div>
+
+<!-- ══ PRESETS ══ -->
+<div class="pg" id="pg-presets">
+  <div class="search-wrap">
+    <span class="si">🔍</span>
+    <input type="text" id="srch" placeholder="会社・メーカー・型番・金具で検索…" oninput="renderPresets()">
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="exportJSON()" style="flex:1">📤 エクスポート</button>
+    <label class="btn btn-outline" style="flex:1;cursor:pointer">📥 インポート<input type="file" accept=".json" onchange="importJSON(event)" style="display:none"></label>
+  </div>
+  <div id="preset-list-wrap"></div>
+</div>
+
+<!-- ══ RESULT ══ -->
+<div class="pg" id="pg-result">
+  <div id="res-body"><div class="empty">← 計算タブで計算してください</div></div>
+</div>
+
+<!-- ══ SHARE ══ -->
+<div class="pg" id="pg-share">
+  <div id="share-body"><div class="empty">← 計算タブで計算してください</div></div>
+</div>
+
+<!-- ══ HISTORY ══ -->
+<div class="pg" id="pg-history">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec-lbl" style="margin-bottom:0">現場履歴</div>
+    <button class="btn btn-outline" onclick="clearHistory()" style="font-size:10px;padding:6px 10px">全削除</button>
+  </div>
+  <div id="hist-body"><div class="empty">履歴がありません</div></div>
+</div>
+
+<script>
+// ══ STORAGE ══
+const PS_KEY='sumidashi_presets_v1', HI_KEY='sumidashi_history_v1';
+function loadPS(){try{return JSON.parse(localStorage.getItem(PS_KEY)||'[]');}catch{return[];}}
+function savePS(a){localStorage.setItem(PS_KEY,JSON.stringify(a));}
+function loadHI(){try{return JSON.parse(localStorage.getItem(HI_KEY)||'[]');}catch{return[];}}
+function saveHI(a){localStorage.setItem(HI_KEY,JSON.stringify(a));}
+
+// ══ THEME ══
+function toggleTheme(){
+  const html=document.documentElement;
+  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('sumidashi_theme',next);
+}
+(function(){
+  const t=localStorage.getItem('sumidashi_theme');
+  if(t) document.documentElement.setAttribute('data-theme',t);
+})();
+
+// ══ TABS ══
+function sw(n){
+  ['calc','presets','result','share','history'].forEach((name,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('on',name===n);
+    document.getElementById('pg-'+name).classList.toggle('on',name===n);
+  });
+  if(n==='presets') renderPresets();
+  if(n==='history') renderHistory();
+}
+
+// ══ SIZE CHIPS ══
+function setSz(el,w,h){
+  document.querySelectorAll('#szChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  if(w>0){document.getElementById('mW').value=w;document.getElementById('mH').value=h;}
+  updDiag();
+}
+
+// ══ MARGIN DIAGRAM ══
+function updDiag(){
+  const DW=200,DH=138,pad=12;
+  const mw=gv('mW')||1,mh=gv('mH')||1;
+  const t=gv('mgT'),b=gv('mgB'),l=gv('mgL'),r=gv('mgR');
+  // モニターが外枠、金具が内側
+  const sc=Math.min((DW-pad*2)/mw,(DH-pad*2)/mh);
+  const mwPx=mw*sc,mhPx=mh*sc;
+  const ox=(DW-mwPx)/2,oy=(DH-mhPx)/2;
+  // モニター（外側・大きい）
+  st('dMon',{left:ox+'px',top:oy+'px',width:mwPx+'px',height:mhPx+'px'});
+  // 金具（内側・余白分だけ小さい）
+  const bwPx=Math.max(4,(mw-l-r)*sc), bhPx=Math.max(4,(mh-t-b)*sc);
+  const bx=ox+l*sc, by=oy+t*sc;
+  st('dBrk',{left:bx+'px',top:by+'px',width:bwPx+'px',height:bhPx+'px'});
+  tx('dT',t?`↑${t}`:''); tx('dB',b?`↓${b}`:'');
+  tx('dL',l?`←${l}`:''); tx('dR',r?`→${r}`:'');
+  updPrev();
+}
+
+// ══ SYNC fromH FROM refH ══
+function syncFromH(){
+  const refH=gs('refH');
+  const fromHEl=document.getElementById('fromH');
+  const lbl=document.getElementById('fromH-label');
+  const centerRow=document.getElementById('center-dir-row');
+  if(refH==='left'){
+    fromHEl.value='from_left';
+    lbl.textContent='左端から'; lbl.style.color='var(--acc)';
+    centerRow.style.display='none';
+  } else if(refH==='right'){
+    fromHEl.value='from_right';
+    lbl.textContent='右端から'; lbl.style.color='var(--acc)';
+    centerRow.style.display='none';
+  } else {
+    // center: 現在の fromH を維持、切替ボタンを表示
+    centerRow.style.display='block';
+    const cur=fromHEl.value;
+    lbl.textContent=cur==='from_left'?'左端から':'右端から';
+    lbl.style.color='var(--acc)';
+    document.getElementById('dir-left').classList.toggle('on',cur==='from_left');
+    document.getElementById('dir-right').classList.toggle('on',cur==='from_right');
+  }
+}
+function setDir(dir){
+  document.getElementById('fromH').value=dir;
+  syncFromH(); updPrev();
+}
+
+
+function updPrev(){
+  const monW=gv('mW'),monH=gv('mH');
+  const refH=gs('refH'),fromH=gs('fromH'),valH=gv('valH'),refV=gs('refV'),valV=gv('valV');
+  const baseX=fromH==='from_left'?valH:-valH;
+  const ml=baseX-(refH==='center'?monW/2:refH==='right'?monW:0);
+  const rl={center:'中心',left:'左端',right:'右端'};
+  const fl={from_left:'左端から',from_right:'右端から'};
+  document.getElementById('prevH').innerHTML=
+    `モニター${rl[refH]}が${fl[fromH]} <b>${valH}mm</b> → 左端:<b>${Math.round(ml)}mm</b> 右端:<b>${Math.round(ml+monW)}mm</b>`;
+  const rv={center:'中心',top:'上端',bottom:'下端'};
+  const cfl=valV-(refV==='top'?monH/2:refV==='bottom'?-monH/2:0);
+  document.getElementById('prevV').innerHTML=
+    `モニター${rv[refV]}が FL+<b>${valV}mm</b> → 上端:FL+<b>${Math.round(cfl+monH/2)}mm</b> 下端:FL+<b>${Math.round(cfl-monH/2)}mm</b>`;
+}
+
+// ══ HELPERS ══
+function gv(id){return parseFloat(document.getElementById(id).value)||0;}
+function gs(id){return document.getElementById(id).value;}
+function gstr(id){return document.getElementById(id).value.trim();}
+function st(id,s){Object.assign(document.getElementById(id).style,s);}
+function tx(id,t){document.getElementById(id).textContent=t;}
+
+// ══ CALCULATE ══
+let R=null, loadedPreset=null;
+function calc(){
+  const monW=gv('mW'),monH=gv('mH');
+  const mgT=gv('mgT'),mgB=gv('mgB'),mgL=gv('mgL'),mgR=gv('mgR');
+  const brkW=Math.max(0,monW-mgL-mgR), brkH=Math.max(0,monH-mgT-mgB);
+  const refH=gs('refH'),fromH=gs('fromH'),valH=gv('valH'),refV=gs('refV'),valV=gv('valV');
+
+  // 横方向: from_right の場合は「右端からの距離」で管理
+  // monRight_fromRight = 右端からモニター右端までの距離
+  let monLeft, monRight_fromRight=null;
+  if(fromH==='from_left'){
+    const baseX=valH;
+    monLeft=baseX-(refH==='center'?monW/2:refH==='right'?monW:0);
+  } else {
+    // 右端基準: refHに応じた点が右端からvalHmm
+    // 右端からの距離で統一。monRight_fromRight = 右端からモニター右端まで
+    const refPoint_fromRight = valH; // 指定した基準点が右端からrefPoint_fromRight mm
+    if(refH==='center')       monRight_fromRight = refPoint_fromRight - monW/2;
+    else if(refH==='right')   monRight_fromRight = refPoint_fromRight;
+    else                      monRight_fromRight = refPoint_fromRight + monW; // left基準
+    monLeft = null; // 左端からの絶対値は不明
+  }
+
+  const monCFL=valV-(refV==='top'?monH/2:refV==='bottom'?-monH/2:0);
+
+  // 金具位置
+  let brkLeft=null, brkRight_fromRight=null;
+  if(fromH==='from_left'){
+    brkLeft=Math.round(monLeft+mgL);
+  } else {
+    brkRight_fromRight=Math.round(monRight_fromRight+mgR);
+  }
+
+  R={
+    monW,monH,brkW,brkH,mgT,mgB,mgL,mgR,
+    fromH,
+    // 左端基準の場合
+    monLeft:   fromH==='from_left'?Math.round(monLeft):null,
+    monRight:  fromH==='from_left'?Math.round(monLeft+monW):null,
+    monCenterX:fromH==='from_left'?Math.round(monLeft+monW/2):null,
+    brkLeft:   fromH==='from_left'?brkLeft:null,
+    // 右端基準の場合
+    monRight_fromRight: fromH==='from_right'?Math.round(monRight_fromRight):null,
+    monLeft_fromRight:  fromH==='from_right'?Math.round(monRight_fromRight+monW):null,
+    monCenter_fromRight:fromH==='from_right'?Math.round(monRight_fromRight+monW/2):null,
+    brkRight_fromRight: fromH==='from_right'?brkRight_fromRight:null,
+    brkLeft_fromRight:  fromH==='from_right'?Math.round(brkRight_fromRight+brkW):null,
+    // 縦方向（共通）
+    monCenterFL:Math.round(monCFL),
+    monTopFL:Math.round(monCFL+monH/2), monBotFL:Math.round(monCFL-monH/2),
+    brkTopFL:Math.round(monCFL+monH/2-mgT),
+    preset:loadedPreset, calcAt:new Date().toLocaleDateString('ja-JP'),
+    refH_val: refH,
+  };
+  renderResult(); renderShare(); sw('result');
+}
+
+// ══ RESULT ══
+function renderResult(){
+  const s=R; let h='';
+  if(s.preset) h+=`<div class="preset-badge">📌 ${fmtPreset(s.preset)}</div>`;
+
+  // 横方向の表示を基準に応じて切り替え
+  const hLbl = s.fromH==='from_left' ? '壁の左端から<br>金具の左端まで' : '壁の右端から<br>金具の右端まで';
+  const hVal = s.fromH==='from_left' ? s.brkLeft : s.brkRight_fromRight;
+
+  h+=`<div class="answer"><div class="answer-head">金具をここに当てる</div>
+    <div class="ans-row">
+      <div class="ans-cell"><div class="ans-lbl">${hLbl}</div><div class="ans-val">${hVal}<span class="ans-unit">mm</span></div></div>
+      <div class="ans-cell"><div class="ans-lbl">FL から<br>金具の上端まで</div><div class="ans-val g">${s.brkTopFL}<span class="ans-unit">mm</span></div></div>
+    </div></div>`;
+
+  // 参考値
+  let refs='';
+  if(s.fromH==='from_left'){
+    refs+=`<div class="ref"><div class="ref-lbl">モニター左端</div><div class="ref-val">${s.monLeft} mm</div></div>`;
+    refs+=`<div class="ref"><div class="ref-lbl">モニター右端</div><div class="ref-val">${s.monRight} mm</div></div>`;
+    refs+=`<div class="ref"><div class="ref-lbl">モニター中心 X</div><div class="ref-val">${s.monCenterX} mm</div></div>`;
+  } else {
+    refs+=`<div class="ref"><div class="ref-lbl">右端からモニター右端</div><div class="ref-val">${s.monRight_fromRight} mm</div></div>`;
+    refs+=`<div class="ref"><div class="ref-lbl">右端からモニター左端</div><div class="ref-val">${s.monLeft_fromRight} mm</div></div>`;
+    refs+=`<div class="ref"><div class="ref-lbl">右端からモニター中心</div><div class="ref-val">${s.monCenter_fromRight} mm</div></div>`;
+  }
+  refs+=`<div class="ref"><div class="ref-lbl">モニター中心 FL+</div><div class="ref-val g">${s.monCenterFL} mm</div></div>`;
+  refs+=`<div class="ref"><div class="ref-lbl">モニター上端 FL+</div><div class="ref-val">${s.monTopFL} mm</div></div>`;
+  refs+=`<div class="ref"><div class="ref-lbl">モニター下端 FL+</div><div class="ref-val">${s.monBotFL} mm</div></div>`;
+  refs+=`<div class="ref"><div class="ref-lbl">金具サイズ</div><div class="ref-val o">${s.brkW}×${s.brkH} mm</div></div>`;
+  h+=`<div class="sec-lbl">参考値</div><div class="refs">${refs}</div>`;
+
+  h+=`<button class="copy-btn" onclick="doCopy()">📋 テキストコピー</button>`;
+  h+=`<button class="btn btn-outline btn-full" onclick="showQR()" style="margin-bottom:8px">🔳 QRコード生成</button>`;
+  h+=`<div id="qr-section" style="display:none"></div>`;
+  h+=`<button class="btn btn-outline btn-full" onclick="saveHistory()" style="margin-bottom:8px">🗂 履歴に保存</button>`;
+  document.getElementById('res-body').innerHTML=h;
+}
+
+function doCopy(){
+  const s=R;
+  let t='=== SUMIDASHI ===\n';
+  if(s.preset) t+=`プリセット: ${fmtPreset(s.preset)}\n`;
+  t+=`モニター: ${s.monW}×${s.monH}mm / 金具: ${s.brkW}×${s.brkH}mm\n\n`;
+  t+=`【金具をここに当てる】\n`;
+  if(s.fromH==='from_left'){
+    t+=`壁左端→金具左端: ${s.brkLeft}mm\n`;
+  } else {
+    t+=`壁右端→金具右端: ${s.brkRight_fromRight}mm\n`;
+  }
+  t+=`FL→金具上端: ${s.brkTopFL}mm\n\n`;
+  t+=`【参考】\n`;
+  if(s.fromH==='from_left'){
+    t+=`モニター左端:${s.monLeft}mm 右端:${s.monRight}mm 中心X:${s.monCenterX}mm\n`;
+  } else {
+    t+=`右端からモニター右端:${s.monRight_fromRight}mm 左端:${s.monLeft_fromRight}mm\n`;
+  }
+  t+=`上端 FL+${s.monTopFL}mm / 中心 FL+${s.monCenterFL}mm / 下端 FL+${s.monBotFL}mm\n`;
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>alert('コピーしました'));}
+  else{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);alert('コピーしました');}
+}
+
+// ══ QR CODE ══
+function showQR(){
+  const sec=document.getElementById('qr-section');
+  if(sec.style.display!=='none'){sec.style.display='none';return;}
+  const s=R;
+  const text=`SUMIDASHI\n金具左端:${s.brkLeft}mm FL+${s.brkTopFL}mm\nモニター中心 X${s.monCenterX} FL+${s.monCenterFL}`;
+  sec.innerHTML=`<div class="qr-wrap">
+    <canvas id="qr-canvas"></canvas>
+    <div class="qr-lbl">金具位置データ<br>別端末で読み取って共有</div>
+  </div>`;
+  sec.style.display='block';
+  drawQR(document.getElementById('qr-canvas'), text, 200);
+}
+
+// QR generator (pure JS, no library)
+function drawQR(canvas, text, size){
+  // Use a simple URL-based approach via Google Charts API as fallback
+  // or draw a real QR. Here we use an img via API for reliability.
+  const encoded=encodeURIComponent(text);
+  const url=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}&bgcolor=ffffff&color=111111&margin=2`;
+  const img=document.createElement('img');
+  img.style.cssText='width:200px;height:200px;border-radius:6px;display:block';
+  img.src=url;
+  img.onerror=()=>{
+    // offline fallback: show text
+    canvas.parentElement.innerHTML=`<div style="padding:20px;font-family:monospace;font-size:11px;color:var(--t2);background:var(--card);border-radius:8px;text-align:center">オフライン時はテキストコピーを使用してください</div>`;
+  };
+  canvas.replaceWith(img);
+}
+
+// ══ SHARE SHEET ══
+let shareJobName='';
+function renderShare(){
+  const s=R;
+  if(!s){document.getElementById('share-body').innerHTML='<div class="empty">← 計算タブで計算してください</div>';return;}
+  const html=`
+    <div class="f" style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">現場名</label>
+      <input type="text" id="job-name" placeholder="例: ○○展示会 第3ブース" value="${shareJobName}" oninput="shareJobName=this.value;renderShareSheet()">
+    </div>
+    <div id="ss-wrap"></div>
+    <button class="share-btn" onclick="doShare()">📸 スクショ用に表示 / 共有</button>
+    <p class="share-hint">このページをスクショしてLINE・Slackで送れます</p>`;
+  document.getElementById('share-body').innerHTML=html;
+  renderShareSheet();
+}
+
+function renderShareSheet(){
+  const s=R; if(!s) return;
+  const jobName=document.getElementById('job-name')?.value||'';
+  const presetStr=s.preset?fmtPreset(s.preset):'—';
+  const now=new Date().toLocaleDateString('ja-JP');
+
+  // draw position diagram — 2倍解像度で描いてCSSで縮小（文字をくっきりに）
+  const cW = Math.min(window.innerWidth - 56, 520);
+  const cH = Math.round(cW * 0.55);
+  const cW2 = cW * 2;   // 実ピクセル
+  const cH2 = cH * 2;
+
+  // from_right / from_left で表示を切り替え
+  const hLbl  = s.fromH==='from_left' ? '壁の左端から<br>金具の左端まで' : '壁の右端から<br>金具の右端まで';
+  const hVal  = s.fromH==='from_left' ? s.brkLeft : s.brkRight_fromRight;
+  const mXLbl = s.fromH==='from_left' ? 'モニター中心 X' : '右端からモニター中心';
+  const mXVal = s.fromH==='from_left' ? s.monCenterX : s.monCenter_fromRight;
+  const bLbl  = s.fromH==='from_left' ? '金具 左端' : '右端から金具右端';
+  const bVal  = s.fromH==='from_left' ? s.brkLeft   : s.brkRight_fromRight;
+
+  document.getElementById('ss-wrap').innerHTML=`
+    <div id="share-sheet">
+      <div class="ss-header">
+        <div>
+          <div class="ss-brand">SUMIDASHI</div>
+          <div class="ss-title">施工指示書</div>
+          <div class="ss-date">${now}</div>
+        </div>
+        <div>
+          <div class="ss-site-lbl">現場</div>
+          <div class="ss-site">${jobName||'—'}</div>
+        </div>
+      </div>
+
+      <div class="ss-diagram">
+        <canvas id="ss-cvs" width="${cW2}" height="${cH2}" style="width:${cW}px;height:${cH}px;display:block"></canvas>
+      </div>
+
+      <div class="ss-answer">
+        <div class="ss-cell">
+          <div class="ss-cell-lbl">${hLbl}</div>
+          <div class="ss-cell-val">${hVal}<span class="ss-cell-unit">mm</span></div>
+        </div>
+        <div class="ss-cell">
+          <div class="ss-cell-lbl">FL から<br>金具の上端まで</div>
+          <div class="ss-cell-val g">${s.brkTopFL}<span class="ss-cell-unit">mm</span></div>
+        </div>
+      </div>
+
+      <div class="ss-refs">
+        <div class="ss-ref"><div class="ss-ref-lbl">${mXLbl}</div><div class="ss-ref-val">${mXVal}mm</div></div>
+        <div class="ss-ref"><div class="ss-ref-lbl">モニター中心 FL+</div><div class="ss-ref-val">${s.monCenterFL}mm</div></div>
+        <div class="ss-ref"><div class="ss-ref-lbl">モニター上端 FL+</div><div class="ss-ref-val">${s.monTopFL}mm</div></div>
+        <div class="ss-ref"><div class="ss-ref-lbl">モニター下端 FL+</div><div class="ss-ref-val">${s.monBotFL}mm</div></div>
+        <div class="ss-ref"><div class="ss-ref-lbl">${bLbl}</div><div class="ss-ref-val">${bVal}mm</div></div>
+        <div class="ss-ref"><div class="ss-ref-lbl">金具サイズ</div><div class="ss-ref-val">${s.brkW}×${s.brkH}</div></div>
+      </div>
+
+      <div class="ss-specs">
+        <div class="ss-specs-ttl">仕様</div>
+        <div class="ss-spec-row"><span class="ss-spec-lbl">プリセット</span><span class="ss-spec-val">${presetStr}</span></div>
+        <div class="ss-spec-row"><span class="ss-spec-lbl">モニターサイズ</span><span class="ss-spec-val">${s.monW} × ${s.monH} mm</span></div>
+        <div class="ss-spec-row"><span class="ss-spec-lbl">金具余白 上/下</span><span class="ss-spec-val">${s.mgT} / ${s.mgB} mm</span></div>
+        <div class="ss-spec-row"><span class="ss-spec-lbl">金具余白 左/右</span><span class="ss-spec-val">${s.mgL} / ${s.mgR} mm</span></div>
+      </div>
+      <div class="ss-footer">SUMIDASHI — ${now}</div>
+    </div>`;
+
+  drawDiagram(document.getElementById('ss-cvs'), s, cW2, cH2, 2);
+}
+
+// ══ POSITION DIAGRAM ══
+function drawDiagram(cvs, s, W, H, dpr){
+  dpr = dpr || 1;
+  const fs = n => Math.round(n * dpr);
+  const ctx = cvs.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+
+  const monBotFL = s.monBotFL;
+  const brkBotFL = monBotFL + s.mgB;
+
+  // レイアウト定数
+  const VDIM_STEP = 20*dpr;
+  const VDIM_W    = 4*VDIM_STEP + 24*dpr;  // 左側縦寸法エリア
+  const HDIM_H    = 54*dpr;                  // 下側水平寸法エリア
+  const MT = 30*dpr, MR_BASE = 16*dpr;
+
+  // fromH パターン判定
+  const fromH = s.fromH;  // 'from_left' | 'from_right' | 'center'（center時はfrom_left or from_right）
+  const refH  = s.refH_val ?? 'left';  // モニターのどの点が基準か（calcで保存済みなければleft）
+
+  // 描画座標を「モニター左端からの絶対位置」に統一して計算
+  // from_left: monLeft が既知
+  // from_right: visW の右端を基準に逆算
+  // center: valH からモニター中心を求めてmonLeftを計算（すでにfrom_left/rightで処理済み）
+
+  // まずvisWを決める
+  let monLeftAbs, brkLeftAbs;
+  let wallRefX = null;      // 基準線のX（mm単位）
+  let wallRefLabel = '';
+  let wallRefRight = false; // 右端が基準か
+
+  if(fromH === 'from_left'){
+    monLeftAbs = s.monLeft ?? 0;
+    brkLeftAbs = s.brkLeft ?? (monLeftAbs + s.mgL);
+    wallRefX   = 0;
+    wallRefLabel = '壁左端';
+    wallRefRight = false;
+  } else {
+    // from_right: 右端が基準
+    // monRight_fromRight = 右端→モニター右端の距離
+    const monRfR = s.monRight_fromRight ?? 0;
+    const brkRfR = s.brkRight_fromRight ?? 0;
+    // 仮想visWの中で右端を設定: visW = monRfR + monW + 余白
+    // 右端を画面右端として描画
+    wallRefRight = true;
+    wallRefLabel = '壁右端';
+    // monLeftAbs はvisW確定後に計算するので後回し
+    monLeftAbs = null;
+    brkLeftAbs = null;
+  }
+
+  // visW: 図の横幅（mm換算）
+  let visW;
+  if(fromH === 'from_left'){
+    visW = Math.max(s.monW * 1.6, monLeftAbs + s.monW + 40);
+  } else {
+    const monRfR = s.monRight_fromRight ?? 0;
+    visW = Math.max(s.monW * 1.6, monRfR + s.monW + 40);
+  }
+  const visH = s.monTopFL + s.monH * 0.3;
+
+  // 右端基準の場合、wallRefX = visW（右端）
+  if(wallRefRight){
+    wallRefX = visW;
+    const monRfR = s.monRight_fromRight ?? 0;
+    const brkRfR = s.brkRight_fromRight ?? 0;
+    monLeftAbs = visW - monRfR - s.monW;
+    brkLeftAbs = visW - brkRfR - s.brkW;
+  }
+
+  const MR = wallRefRight ? (VDIM_W + 8*dpr) : MR_BASE;
+  const drawL = VDIM_W;
+  const scl   = Math.min((W - drawL - MR) / visW, (H - MT - HDIM_H) / visH);
+
+  const X = x => drawL + x * scl;
+  const Y = y => (H - HDIM_H) - y * scl;
+  const FL_Y  = Y(0);
+  const mon_x = X(monLeftAbs);
+  const mon_y = Y(s.monTopFL);
+  const mon_w = s.monW * scl;
+  const mon_h = s.monH * scl;
+  const brk_x = X(brkLeftAbs);
+  const brk_y = Y(s.brkTopFL);
+  const brk_w = Math.max(4, s.brkW * scl);
+  const brk_h = Math.max(4, s.brkH * scl);
+  const wallX = X(wallRefX);  // 基準壁ラインのcanvas X
+
+  // ── FL ライン ──
+  ctx.strokeStyle='rgba(150,80,0,0.4)'; ctx.lineWidth=dpr; ctx.setLineDash([6*dpr,4*dpr]);
+  ctx.beginPath(); ctx.moveTo(0,FL_Y); ctx.lineTo(W,FL_Y); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#884400'; ctx.font='bold '+fs(10)+'px "Space Mono"';
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText('FL', 4*dpr, FL_Y);
+
+  // ── 壁基準ライン（太い） ──
+  ctx.strokeStyle='#111111'; ctx.lineWidth=3*dpr;
+  ctx.beginPath(); ctx.moveTo(wallX, MT-8*dpr); ctx.lineTo(wallX, FL_Y+50*dpr); ctx.stroke();
+  ctx.fillStyle='#111111'; ctx.font='bold '+fs(10)+'px "Space Mono"';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText(wallRefLabel, wallX, MT-10*dpr);
+
+  // ── モニター（青実線） ──
+  ctx.fillStyle='rgba(34,102,200,0.06)'; ctx.fillRect(mon_x,mon_y,mon_w,mon_h);
+  ctx.strokeStyle='#1a55aa'; ctx.lineWidth=2.5*dpr;
+  ctx.strokeRect(mon_x,mon_y,mon_w,mon_h);
+  ctx.fillStyle='#1a55aa'; ctx.font='bold '+fs(9)+'px "Space Mono"';
+  ctx.textAlign='left'; ctx.textBaseline='bottom';
+  ctx.fillText('モニター', mon_x+4*dpr, mon_y-4*dpr);
+
+  // ── 金具（オレンジ破線） ──
+  ctx.strokeStyle='#cc5500'; ctx.lineWidth=2*dpr; ctx.setLineDash([5*dpr,3*dpr]);
+  ctx.strokeRect(brk_x,brk_y,brk_w,brk_h); ctx.setLineDash([]);
+  if(brk_w>30*dpr && brk_h>16*dpr){
+    ctx.fillStyle='#cc5500'; ctx.font='bold '+fs(8)+'px "Space Mono"';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('金具', brk_x+brk_w/2, brk_y+brk_h/2);
+  }
+
+  // ── 金具左上端ドット ──
+  ctx.beginPath(); ctx.arc(brk_x,brk_y,6*dpr,0,Math.PI*2);
+  ctx.fillStyle='#dd2233'; ctx.fill();
+
+  // ══ 縦寸法線（左エリア）══
+  function dot(x,y,color,r){ ctx.beginPath(); ctx.arc(x,y,r||3.5*dpr,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); }
+
+  const vx = [
+    VDIM_W - 1*VDIM_STEP,
+    VDIM_W - 2*VDIM_STEP,
+    VDIM_W - 3*VDIM_STEP,
+    VDIM_W - 4*VDIM_STEP,
+  ];
+  const vDefs = [
+    { x:vx[0], yTop:Y(monBotFL),   col:'#1a55aa', val:monBotFL   },
+    { x:vx[1], yTop:Y(brkBotFL),   col:'#cc7700', val:brkBotFL   },
+    { x:vx[2], yTop:Y(s.brkTopFL), col:'#cc2233', val:s.brkTopFL },
+    { x:vx[3], yTop:Y(s.monTopFL), col:'#999999', val:s.monTopFL },
+  ];
+  vDefs.forEach(v => {
+    const yTop=v.yTop, yBot=FL_Y, x=v.x;
+    ctx.strokeStyle=v.col; ctx.lineWidth=1.5*dpr;
+    ctx.beginPath(); ctx.moveTo(x,yTop); ctx.lineTo(x,yBot); ctx.stroke();
+    dot(x,yTop,v.col); dot(x,yBot,v.col);
+    // 引き出し点線→モニター左端
+    ctx.strokeStyle=v.col; ctx.lineWidth=0.5*dpr; ctx.setLineDash([3*dpr,2*dpr]);
+    ctx.beginPath(); ctx.moveTo(x,yTop); ctx.lineTo(mon_x,yTop); ctx.stroke();
+    ctx.setLineDash([]);
+    // 数値（縦向き）
+    ctx.save();
+    ctx.translate(x-7*dpr,(yTop+yBot)/2); ctx.rotate(-Math.PI/2);
+    ctx.fillStyle=v.col; ctx.font='bold '+fs(9)+'px "Space Mono"';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(v.val+'mm',0,0);
+    ctx.restore();
+  });
+
+  // ══ 水平寸法線（下エリア）══
+  function hdim(xL,xR,y,color,val){
+    if(Math.abs(xR-xL)<4) return;
+    ctx.strokeStyle=color; ctx.lineWidth=1.5*dpr;
+    ctx.beginPath(); ctx.moveTo(xL,y); ctx.lineTo(xR,y); ctx.stroke();
+    dot(xL,y,color,3.5*dpr); dot(xR,y,color,3.5*dpr);
+    ctx.strokeStyle=color; ctx.lineWidth=0.5*dpr; ctx.setLineDash([3*dpr,2*dpr]);
+    ctx.beginPath(); ctx.moveTo(xL,y); ctx.lineTo(xL,FL_Y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(xR,y); ctx.lineTo(xR,FL_Y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=color; ctx.font='bold '+fs(9)+'px "Space Mono"';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(val+'mm',(xL+xR)/2,y+3*dpr);
+  }
+
+  const hY1 = FL_Y + 16*dpr;
+  const hY2 = FL_Y + 36*dpr;
+
+  if(fromH==='from_left'){
+    // 壁左端 → モニター左端、壁左端 → 金具左端
+    hdim(wallX, mon_x, hY1, '#1a55aa', s.monLeft);
+    hdim(wallX, brk_x, hY2, '#cc2233', s.brkLeft);
+  } else {
+    // 壁右端 ← モニター右端、壁右端 ← 金具右端
+    hdim(mon_x+mon_w, wallX, hY1, '#1a55aa', s.monRight_fromRight);
+    hdim(brk_x+brk_w, wallX, hY2, '#cc2233', s.brkRight_fromRight);
+  }
+
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
+
+function doShare(){
+  alert('このページをスクリーンショットしてください\niPhone: 電源ボタン + 音量UPボタン同時押し');
+}
+
+// ══ HISTORY ══
+function saveHistory(){
+  if(!R){alert('先に計算してください');return;}
+  const jobName=prompt('現場名を入力（任意）','');
+  const entry={
+    id:Date.now(), jobName:jobName||'', preset:R.preset,
+    monW:R.monW, monH:R.monH, brkW:R.brkW, brkH:R.brkH,
+    brkLeft:R.brkLeft, brkTopFL:R.brkTopFL,
+    monCenterX:R.monCenterX, monCenterFL:R.monCenterFL,
+    monTopFL:R.monTopFL, monBotFL:R.monBotFL,
+    savedAt:new Date().toLocaleDateString('ja-JP'),
+  };
+  const arr=loadHI(); arr.unshift(entry); saveHI(arr);
+  alert('履歴に保存しました');
+}
+
+function renderHistory(){
+  const arr=loadHI();
+  const wrap=document.getElementById('hist-body');
+  if(!arr.length){wrap.innerHTML='<div class="empty">履歴がありません</div>';return;}
+  wrap.innerHTML=arr.map(e=>`
+    <div class="hitem" onclick="loadHistory(${e.id})">
+      <div class="hitem-top">
+        <div>
+          <div class="hitem-site">${e.jobName||'（現場名なし）'}</div>
+          <div class="hitem-date">${e.savedAt}${e.preset?' ・ '+fmtPreset(e.preset):''}</div>
+        </div>
+        <div class="hitem-del" onclick="delHistory(${e.id},event)">🗑</div>
+      </div>
+      <div class="hitem-answer">左端: ${e.brkLeft}mm &nbsp;|&nbsp; FL+<span>${e.brkTopFL}mm</span></div>
+      <div class="hitem-sub">モニター ${e.monW}×${e.monH} / 金具 ${e.brkW}×${e.brkH}</div>
+    </div>`).join('');
+}
+
+function loadHistory(id){
+  const e=loadHI().find(x=>x.id===id); if(!e) return;
+  R={...e, calcAt:e.savedAt};
+  renderResult(); renderShare(); sw('result');
+}
+
+function delHistory(id,ev){
+  ev.stopPropagation();
+  if(!confirm('この履歴を削除しますか？')) return;
+  saveHI(loadHI().filter(x=>x.id!==id)); renderHistory();
+}
+
+function clearHistory(){
+  if(!confirm('履歴をすべて削除しますか？')) return;
+  saveHI([]); renderHistory();
+}
+
+// ══ PRESETS ══
+function fmtPreset(p){return[p.company,p.maker,p.model].filter(Boolean).join(' / ')||'(名称未設定)';}
+
+function savePreset(){
+  const company=gstr('ps-company'),maker=gstr('ps-maker'),model=gstr('ps-model'),bracket=gstr('ps-bracket'),memo=gstr('ps-memo');
+  if(!maker&&!model){alert('メーカーまたは型番を入力してください');return;}
+  const p={id:Date.now(),company,maker,model,bracket,memo,
+    monW:gv('mW'),monH:gv('mH'),mgT:gv('mgT'),mgB:gv('mgB'),mgL:gv('mgL'),mgR:gv('mgR'),
+    createdAt:new Date().toLocaleDateString('ja-JP')};
+  const arr=loadPS(); arr.unshift(p); savePS(arr);
+  ['ps-company','ps-maker','ps-model','ps-bracket','ps-memo'].forEach(id=>document.getElementById(id).value='');
+  alert(`保存しました: ${fmtPreset(p)}`);
+}
+
+function loadPreset(id){
+  const p=loadPS().find(x=>x.id===id); if(!p) return;
+  document.getElementById('mW').value=p.monW; document.getElementById('mH').value=p.monH;
+  document.getElementById('mgT').value=p.mgT; document.getElementById('mgB').value=p.mgB;
+  document.getElementById('mgL').value=p.mgL; document.getElementById('mgR').value=p.mgR;
+  document.querySelectorAll('#szChips .chip').forEach(c=>c.classList.remove('on'));
+  loadedPreset=p; tx('badge-name',fmtPreset(p)); st('loaded-badge',{display:'block'});
+  updDiag(); sw('calc');
+}
+
+function clearPreset(){loadedPreset=null; st('loaded-badge',{display:'none'});}
+
+function deletePreset(id,e){
+  e.stopPropagation();
+  if(!confirm('このプリセットを削除しますか？')) return;
+  savePS(loadPS().filter(x=>x.id!==id)); renderPresets();
+}
+
+function renderPresets(){
+  const q=(document.getElementById('srch')?.value||'').toLowerCase();
+  const arr=loadPS();
+  const filtered=arr.filter(p=>!q||[p.company,p.maker,p.model,p.bracket,p.memo].join(' ').toLowerCase().includes(q));
+  const wrap=document.getElementById('preset-list-wrap');
+  if(!arr.length){wrap.innerHTML='<div class="no-results">プリセットがありません<br><span style="color:var(--t3);font-size:9px">計算タブで保存してください</span></div>';return;}
+  if(!filtered.length){wrap.innerHTML=`<div class="no-results">「${q}」に一致するプリセットがありません</div>`;return;}
+  wrap.innerHTML=`<div class="preset-list">${filtered.map(p=>`
+    <div class="pitem" onclick="loadPreset(${p.id})">
+      <div class="pitem-info">
+        <div class="pitem-name">${[p.maker,p.model].filter(Boolean).join(' ')||'(名称未設定)'}</div>
+        <div class="pitem-sub">${p.monW}×${p.monH}mm &nbsp;|&nbsp; 余白 上${p.mgT}/下${p.mgB}/左${p.mgL}/右${p.mgR}</div>
+        <div class="pitem-tags">
+          ${p.company?`<span class="ptag co">${p.company}</span>`:''}
+          ${p.maker?`<span class="ptag mn">${p.maker}</span>`:''}
+          ${p.bracket?`<span class="ptag br">${p.bracket}</span>`:''}
+        </div>
+        ${p.memo?`<div style="font-size:10px;color:var(--t3);margin-top:4px">${p.memo}</div>`:''}
+      </div>
+      <div class="pitem-del" onclick="deletePreset(${p.id},event)">🗑</div>
+    </div>`).join('')}</div>`;
+}
+
+function exportJSON(){
+  const arr=loadPS(); if(!arr.length){alert('プリセットがありません');return;}
+  const b=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download=`sumidashi_presets_${new Date().toISOString().slice(0,10)}.json`; a.click();
+}
+
+function importJSON(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const arr=JSON.parse(ev.target.result); if(!Array.isArray(arr)) throw 0;
+      const ex=loadPS(); const exIds=new Set(ex.map(x=>x.id));
+      const added=arr.filter(x=>!exIds.has(x.id));
+      savePS([...added,...ex]); renderPresets(); alert(`${added.length}件インポートしました`);
+    }catch{alert('ファイルが正しくありません');}
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+// ══ PWA SERVICE WORKER ══
+if('serviceWorker' in navigator){
+  const swCode=`
+const CACHE='sumidashi-v3';
+const URLS=['/'];
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(URLS)));
+  self.skipWaiting();
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener('fetch',e=>{
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/'))));
+});`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+// ══ INIT ══
+updDiag(); updPrev(); syncFromH();
+</script>
+</body>
+</html>

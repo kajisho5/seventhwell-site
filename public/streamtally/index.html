@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STREAMTALLY — 配信監視ダッシュボード | SEVENTHWELL</title>
+<meta name="description" content="STREAMTALLY は、ライブ配信の切断・無音・音割れ・映像の静止・黒味を常時見張る監視ダッシュボードです。異常は赤い帯と警報音で知らせ、確認するまで鳴り続けます。案件ごとの記録は報告書として書き出せます。">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#efeee9">
+<link rel="canonical" href="https://seventh-well.com/streamtally/">
+<meta property="og:type" content="product">
+<meta property="og:url" content="https://seventh-well.com/streamtally/">
+<meta property="og:image" content="https://seventh-well.com/streamtally/img/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="STREAMTALLY — 配信監視ダッシュボード">
+<meta property="og:description" content="落ちた、無音、止まった。本番中に気づける。">
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" href="/goodtimes.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="/site.css?v=e953ad92">
+<script>document.documentElement.classList.add('js')</script>
+<!--
+  ★このページの出どころ★
+  文言・機能・秒数・ロゴ・画面はすべて STREAMTALLY ブランドキット（streamtally-brand-kit.zip、README.md）から。
+  README の約束（確かめた範囲だけ書く）：
+   ・検知の秒数は「わざと障害を起こしたときの実測値」（テストパターン映像・初期設定・伝送の遅れを含む）。
+   ・Webhook は模擬の受信サーバーで Slack・Discord・汎用 JSON の3形式を確認。本物の Slack・Discord への送信はまだ → そう書き添える。
+   ・YouTube Live の状態取得は実装済みだが未確認 → 書かない。
+   ・タリーの赤はロゴのランプ専用（異常の意味に使わない）。
+   ・画面のデータはすべて架空。
+  商標（J-PlatPat）は未確認。
+-->
+</head>
+<body class="page-streamtally">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="../" aria-label="SEVENTHWELL トップへ">SEVENTHWELL</a>
+    <nav class="nav" aria-label="メインメニュー">
+      <a href="../#about">About</a>
+      <a href="../#services">Services</a>
+      <a href="../#works">Works</a>
+      <a href="../#products" aria-current="true">Products</a>
+      <a href="../#tools">Tools</a>
+      <a href="../#code">Code</a>
+      <a href="../#contact">Contact</a>
+    </nav>
+    <div class="onair" aria-hidden="true"><span class="lamp"></span><span class="lbl">On Air</span><span class="tc" data-tc></span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ja" aria-pressed="true">JA</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu"><i></i>Menu</button>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="メニュー">
+  <div class="wrap menu-top">
+    <span class="logo">SEVENTHWELL</span>
+    <button class="menu-close" type="button" aria-label="閉じる"></button>
+  </div>
+  <nav class="wrap" aria-label="メニュー">
+    <a href="#detect"><small>CH 01</small><span>Detect</span></a>
+    <a href="#dashboard"><small>CH 02</small><span>Dashboard</span></a>
+    <a href="#sources"><small>CH 03</small><span>Sources</span></a>
+    <a href="#alerts"><small>CH 04</small><span>Alerts</span></a>
+    <a href="#records"><small>CH 05</small><span>Records</span></a>
+    <a href="../"><small>TOP</small><span>SEVENTHWELL</span></a>
+  </nav>
+  <div class="wrap menu-foot">
+    <div class="onair" aria-hidden="true"><span class="lamp"></span><span class="tc" data-tc></span></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="ja" aria-pressed="true">JA</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero wrap" id="top">
+  <p style="margin-bottom:18px"><a class="back" href="../#products"><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M17 10H4M9 5l-5 5 5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>SEVENTHWELL / Products</a></p>
+  <div class="meta">
+    <div>Stream Monitoring<span>HLS · RTMP · SRT</span></div>
+    <div>Loss · Silence · Freeze<span>Clipping · Black</span></div>
+    <div>Alarm until Acknowledged<span>Webhook · Report</span></div>
+  </div>
+  <h1 class="p-hero-logo"><img src="img/logo-light.svg" alt="STREAMTALLY" width="1126" height="190"></h1>
+  <p class="p-cat" data-en="A monitoring tool that watches the picture and sound of live streams on one screen and alerts you at once">ライブ配信の映像と音を1画面で見張り、異常をすぐ知らせる監視ツール</p>
+  <div class="hero-foot">
+    <p class="lead" data-en="Dropped, silent, frozen.<br>Caught during the show.">落ちた、無音、止まった。<br>本番中に気づける。</p>
+    <div class="cta">
+      <a class="btn btn-red" href="../?topic=streamtally#contact"><span data-en="Talk to us">導入の相談</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+      <a class="btn" href="#detect"><span data-en="See what it detects">検知できること</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v13M5 11l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+    </div>
+  </div>
+  <figure class="shot hero-shot">
+    <img src="img/dashboard.webp" alt="STREAMTALLYの監視画面。配信ごとのカードに状態・音量メーター・サムネイル・計測値。第2会場が無音で異常になり、上部の赤い帯で知らせている" width="1600" height="900">
+    <figcaption><b>Dashboard</b><span data-en="Monitoring screen">監視画面</span></figcaption>
+  </figure>
+  <p class="shot-note" data-en="All data on the screens is fictional (test-pattern video and sine-wave audio).">画面のデータはすべて架空です（映像はテストパターン、音は正弦波）。</p>
+</section>
+
+<!-- ═══════════ CH01 DETECT ═══════════ -->
+<section class="sec wrap" id="detect">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 01</span>
+    <span class="sh-note" data-en="Measured by causing each fault on purpose">障害をわざと起こして測った</span>
+    <h2 class="sh-title">Detect</h2>
+  </header>
+  <p class="rv" style="max-width:46em;margin-bottom:28px" data-en="The worst accident in live streaming: the stream dropped or the sound was gone, and nobody noticed during the show. STREAMTALLY judges these faults continuously.">配信の現場で一番怖いのは「落ちていた／音が出ていなかったのに、本番中だれも気づかなかった」という事故です。STREAMTALLY は次の異常を常時判定します。</p>
+  <table class="req rv">
+    <thead><tr><th scope="col" data-en="Fault">異常</th><th scope="col" data-en="How it is judged">判定</th><th scope="col" data-en="To warning">注意まで</th><th scope="col" data-en="To fault">異常まで</th></tr></thead>
+    <tbody>
+      <tr><th scope="row" data-en="Loss / stall">切断・受信停止</th><td data-en="Connection dropped, no data arriving, HLS playlist not updating">接続が切れた、データが来ない、HLS のプレイリストが更新されない</td><td class="num">0.1–3.6s</td><td class="num">3.3–5.6s</td></tr>
+      <tr><th scope="row" data-en="Silence">無音</th><td data-en="All channels stay below −60 dBFS">全チャンネルの音量が −60 dBFS 未満のまま続く</td><td class="num">5.4–6.8s</td><td class="num">15.4–17.1s</td></tr>
+      <tr><th scope="row" data-en="Clipping">音割れ</th><td data-en="Peaks near 0 dBFS (−1 dBFS or above) continue">0 dBFS 近く（−1 dBFS 以上）のピークが続く</td><td class="num">0.7–3.3s</td><td class="num">—</td></tr>
+      <tr><th scope="row" data-en="Freeze">映像の静止</th><td data-en="The picture stays still (a partly moving picture is not counted)">画が動かないまま続く（一部だけ動く画は静止にしない）</td><td class="num">3.2–4.6s</td><td class="num">10.2–12.6s</td></tr>
+      <tr><th scope="row" data-en="Black">黒味</th><td data-en="Almost the whole picture stays black">画面のほぼ全体が黒いまま続く</td><td class="num">2.5–4.8s</td><td class="num">5.2–9.1s</td></tr>
+    </tbody>
+  </table>
+  <p class="rv" style="margin-top:18px;color:var(--mute);font-size:14px" data-en="Seconds are measured values when each fault was caused on purpose, including test-pattern video, default settings and transmission delay.">※ 秒数は、障害をわざと起こしたときの実測値です（テストパターン映像・初期設定・伝送の遅れを含みます）。</p>
+</section>
+
+<!-- ═══════════ CH02 DASHBOARD ═══════════ -->
+<section class="sec wrap" id="dashboard">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 02</span>
+    <span class="sh-note" data-en="Readable from across a dark control room">暗い調整室で、離れて見ても分かる</span>
+    <h2 class="sh-title">Dashboard</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/dashboard.webp" alt="監視画面。配信ごとのカードと、上部の赤い異常の帯" width="1600" height="900" loading="lazy"><figcaption><b>Dashboard</b><span data-en="Monitoring screen">監視画面</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Dashboard">監視画面</p>
+      <h3 data-en="Every stream on one screen">配信ごとのカードで、全部を1画面に</h3>
+      <ul class="pts">
+        <li><b data-en="Status in colour, shape and text">状態を「色・形・文字」の3つで表示</b><span data-en="Normal, warning and fault can be told apart without relying on colour.">正常・注意・異常を、色だけに頼らず見分けられます。</span></li>
+        <li><b data-en="Measured values">計測値の実測</b><span data-en="Bitrate, resolution and frame rate, audio meters, a thumbnail every second, and an HLS latency estimate.">ビットレート・解像度・フレームレート、音量メーター、1秒ごとのサムネイル、HLS の遅延の目安。</span></li>
+        <li><b data-en="The last 10 minutes">直近10分の履歴</b><span data-en="See at a glance when and for how long something happened.">いつから、どのくらい続いているかが一目で分かります。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show slim rev rv">
+    <figure class="shot"><img src="img/dashboard_mobile.webp" alt="スマートフォンで開いた監視画面" width="390" height="844" loading="lazy"><figcaption><b>Mobile</b><span data-en="On a phone">スマートフォン</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Mobile">スマートフォン</p>
+      <h3 data-en="Check the status even away from the desk">現場を離れていても、状態を確かめられる</h3>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH03 SOURCES ═══════════ -->
+<section class="sec wrap" id="sources">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 03</span>
+    <span class="sh-note" data-en="What it can watch">見張れる配信</span>
+    <h2 class="sh-title">Sources</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/monitors.webp" alt="監視対象の登録画面。URLか、RTMP・SRTの受け口を選ぶ" width="1600" height="900" loading="lazy"><figcaption><b>Monitors</b><span data-en="Registering streams">監視対象の登録</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker">HLS · RTMP · SRT</p>
+      <h3 data-en="Pull by URL, or have the encoder send to it">URLで取りに行くか、エンコーダーから送ってもらうか</h3>
+      <ul class="pts">
+        <li><b data-en="Several streams, grouped by project">複数の配信を、案件ごとに</b><span data-en="Name each stream and register it under a project.">配信に名前を付けて、案件ごとに登録します。</span></li>
+        <li><b data-en="Pull by URL">URLで取得</b><span data-en="HLS (.m3u8), RTMP and SRT.">HLS（.m3u8）・RTMP・SRT。</span></li>
+        <li><b data-en="RTMP / SRT ingest points">RTMP・SRT の受け口</b><span data-en="The encoder&#39;s destination is shown on screen.">受け口にすると、エンコーダーの送出先が画面に表示されます。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH04 ALERTS ═══════════ -->
+<section class="sec wrap" id="alerts">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 04</span>
+    <span class="sh-note" data-en="Keeps sounding until someone acknowledges">だれかが確認するまで、鳴り続ける</span>
+    <h2 class="sh-title">Alerts</h2>
+  </header>
+
+  <div class="show rev rv">
+    <figure class="shot"><img src="img/settings.webp" alt="通知・連携の設定画面。案件の管理、Webhookの設定、警報音の設定" width="1600" height="1127" loading="lazy"><figcaption><b>Settings</b><span data-en="Notifications &amp; integrations">通知・連携</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Alarm">アラーム</p>
+      <h3 data-en="A red band and an alarm sound">赤い帯と警報音</h3>
+      <ul class="pts">
+        <li><b data-en="Sounds until acknowledged">「確認」を押すまで鳴り続ける</b><span data-en="An acknowledgement is shared with every other screen.">確認したことは、ほかの画面にも伝わります。</span></li>
+        <li><b data-en="Webhook on fault and recovery">発生と復旧を Webhook で</b><span data-en="Sent in Slack, Discord and generic JSON formats, retried on failure.">Slack・Discord・汎用 JSON の形式で送り、失敗したら再送します。</span></li>
+      </ul>
+      <p class="txt-lead" style="font-size:14px;color:var(--mute)" data-en="The three Webhook formats were checked with a mock receiver; sending to real Slack and Discord has not yet been checked.">※ Webhook は模擬の受信サーバーで3形式の受信を確認済み。本物の Slack・Discord への送信はまだ確認していません。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CH05 RECORDS ═══════════ -->
+<section class="sec wrap" id="records">
+  <header class="sh rv">
+    <span class="sh-ch"><i></i>CH 05</span>
+    <span class="sh-note" data-en="Straight into your report to the client">クライアントへの報告に、そのまま</span>
+    <h2 class="sh-title">Records</h2>
+  </header>
+
+  <div class="show rv">
+    <figure class="shot"><img src="img/logs.webp" alt="記録の一覧。いつ・どの配信で・何が・何秒続いたか" width="1600" height="750" loading="lazy"><figcaption><b>Logs</b><span data-en="Event log">記録</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Log">記録</p>
+      <h3 data-en="When, which stream, what, and for how long">いつ・どの配信で・何が・何秒続いたか</h3>
+      <ul class="pts">
+        <li><b data-en="Notes on each event">出来事にメモを残せる</b></li>
+        <li><b data-en="CSV (Excel-ready)">CSV（Excel 対応）で書き出し</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="show tall rev rv">
+    <figure class="shot"><img src="img/report.webp" alt="案件ごとの報告書。監視した時間、正常だった割合、出来事の一覧" width="1240" height="1754" loading="lazy"><figcaption><b>Report</b><span data-en="Report per project">案件ごとの報告書</span></figcaption></figure>
+    <div class="txt">
+      <p class="kicker" data-en="Report">報告書</p>
+      <h3 data-en="A printable report per project">案件ごとの報告書（印刷・PDF）</h3>
+      <ul class="pts">
+        <li><b data-en="Hours monitored and share of normal time">監視した時間と、正常だった割合</b></li>
+        <li><b data-en="List of events">出来事の一覧</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="sec wrap" id="demo">
+  <div class="cta-band rv">
+    <p class="big" data-en="Know before<br>the viewers do.">視聴者より先に、<br>気づく。</p>
+    <p data-en="STREAMTALLY was built by SEVENTHWELL for its own live streaming work. Tell us about your streams.">STREAMTALLY は、映像・音響の技術オペレーションを手がける SEVENTHWELL が、自社の配信現場のために作りました。お使いの配信の形をお聞かせください。</p>
+    <div class="cta">
+      <a class="btn btn-red" href="../?topic=streamtally#contact"><span data-en="Talk to us">導入の相談</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+      <a class="btn" href="../#products"><span data-en="Other products">他のプロダクト</span><svg class="arw" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h13M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p class="eop">End of<br>Program</p>
+    <div class="foot-row">
+      <span>© SEVENTHWELL</span>
+      <nav aria-label="フッターメニュー">
+        <a href="../">Top</a><a href="../#products">Products</a><a href="#detect">Detect</a><a href="#alerts">Alerts</a><a href="#records">Records</a><a href="../#contact">Contact</a>
+      </nav>
+      <span class="tc" data-tc></span>
+    </div>
+  </div>
+</footer>
+
+<script src="/site.js?v=fc20da72"></script>
+</body>
+</html>

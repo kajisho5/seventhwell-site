@@ -75,6 +75,5 @@
   }
 }
 
-/* Goodtimes の woff2 を public/fonts/ に置いたら、下のコメントを外す（それまでは Michroma で表示）
-@font-face { font-family: "Goodtimes"; src: url("/fonts/goodtimes.woff2") format("woff2"); font-display: swap; }
-*/
+/* ロゴ用の Goodtimes（旧サイトで使っていたフォントファイルをそのまま持ってきた） */
+@font-face { font-family: "Goodtimes"; src: url("/goodtimes.ttf") format("truetype"); font-display: swap; }

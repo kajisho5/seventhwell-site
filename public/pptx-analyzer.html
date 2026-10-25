@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLIDESCAN</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SLIDESCAN">
+<meta name="theme-color" content="#111114">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────
+   TOKENS  (Apple / Google Material You 風)
+───────────────────────────────────────── */
+:root {
+  /* Surface */
+  --bg:        #111114;
+  --surface:   #1c1c1f;
+  --surface-2: #242428;
+  --surface-3: #2c2c30;
+  --overlay:   rgba(255,255,255,.06);
+  /* Separator */
+  --sep:       rgba(255,255,255,.08);
+  --sep-hi:    rgba(255,255,255,.14);
+  /* Label */
+  --label:     #f5f5f7;
+  --label-2:   rgba(245,245,247,.6);
+  --label-3:   rgba(245,245,247,.35);
+  --label-4:   rgba(245,245,247,.18);
+  /* Accent */
+  --blue:      #3b86f7;
+  --blue-bg:   rgba(59,134,247,.12);
+  --blue-sep:  rgba(59,134,247,.28);
+  /* Status */
+  --red:       #ff453a;
+  --red-bg:    rgba(255,69,58,.1);
+  --red-sep:   rgba(255,69,58,.25);
+  --amber:     #ff9f0a;
+  --amber-bg:  rgba(255,159,10,.1);
+  --amber-sep: rgba(255,159,10,.25);
+  --green:     #30d158;
+  --green-bg:  rgba(48,209,88,.1);
+  --green-sep: rgba(48,209,88,.25);
+  --purple:    #bf5af2;
+  --purple-bg: rgba(191,90,242,.1);
+  --purple-sep:rgba(191,90,242,.25);
+  /* Font */
+  --f-ui:   'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --f-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  /* Layout */
+  --sidebar: 280px;
+  --radius:  12px;
+  --radius-s: 8px;
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  height:100%; background:var(--bg); color:var(--label);
+  font-family:var(--f-ui); font-size:14px; line-height:1.5;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); border-radius:10px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.2); }
+
+#app { display:flex; flex-direction:column; height:100vh; }
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+header {
+  height: 52px;
+  display: flex; align-items:center; padding:0 20px; gap:16px;
+  flex-shrink:0; position:relative; z-index:50;
+  background: rgba(17,17,20,.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom:1px solid var(--sep);
+}
+
+.logo {
+  display:flex; align-items:center; gap:10px;
+}
+/* scan icon SVG is inline */
+.logo-icon { width:26px; height:26px; flex-shrink:0; }
+
+.logo-name {
+  font-size:17px; font-weight:600; letter-spacing:-.02em; color:var(--label);
+}
+.logo-name em { font-style:normal; color:var(--label-2); font-weight:400; }
+
+.logo-pill {
+  font-size:10px; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--label-3); background:var(--surface-2); border:1px solid var(--sep);
+  padding:2px 8px; border-radius:20px;
+}
+
+.hspace { flex:1; }
+.hactions { display:flex; gap:8px; align-items:center; }
+
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--f-ui); font-size:13px; font-weight:500;
+  border-radius:8px; padding:6px 14px; cursor:pointer;
+  border:1px solid var(--sep-hi); background:var(--surface);
+  color:var(--label-2); transition:all .12s ease; white-space:nowrap;
+  user-select:none; -webkit-tap-highlight-color:transparent;
+  text-decoration:none;
+}
+.btn:hover { background:var(--surface-2); color:var(--label); border-color:rgba(255,255,255,.2); }
+.btn:active { transform:scale(.97); }
+.btn-primary {
+  background:var(--blue); border-color:transparent; color:#fff;
+}
+.btn-primary:hover { background:#5a9ef9; border-color:transparent; color:#fff; }
+
+.hver { font-size:11px; color:var(--label-4); font-weight:400; }
+
+#body { display:flex; flex:1; overflow:hidden; }
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+#sidebar {
+  width:var(--sidebar); flex-shrink:0;
+  border-right:1px solid var(--sep);
+  display:flex; flex-direction:column; overflow:hidden;
+  background:var(--surface);
+}
+
+.sb-header {
+  padding:14px 16px 10px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--sep); flex-shrink:0;
+}
+.sb-title {
+  font-size:12px; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--label-3);
+}
+.sb-count {
+  font-size:12px; font-weight:500; color:var(--label-3);
+  background:var(--surface-2); border:1px solid var(--sep);
+  padding:1px 9px; border-radius:20px; min-width:28px; text-align:center;
+}
+
+#file-list { overflow-y:auto; flex:1; padding:6px; }
+
+.folder-grp { margin-bottom:4px; }
+.folder-label {
+  padding:5px 10px; font-size:11px; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--label-4);
+  display:flex; align-items:center; gap:5px;
+}
+
+/* FILE ITEM */
+.file-item {
+  display:flex; align-items:center; cursor:pointer;
+  border-radius:var(--radius-s); margin-bottom:2px;
+  padding:0; position:relative; transition:background .1s;
+  overflow:hidden; border:1px solid transparent;
+}
+.file-item:hover { background:var(--overlay); }
+.file-item.active {
+  background:var(--blue-bg);
+  border-color:var(--blue-sep);
+}
+.file-item.compare-sel { background:var(--purple-bg); border-color:var(--purple-sep); }
+
+.fi-thumb {
+  width:60px; height:44px; flex-shrink:0;
+  background:var(--surface-2); overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:6px 0 0 6px; position:relative;
+}
+.fi-thumb img { width:100%; height:100%; object-fit:cover; }
+.fi-thumb-ph {
+  font-size:8px; color:var(--label-4); text-align:center;
+  line-height:1.3; padding:2px; word-break:break-all;
+  font-family:var(--f-mono);
+}
+.fi-thumb-count {
+  position:absolute; bottom:2px; right:3px;
+  font-size:8px; color:rgba(255,255,255,.5);
+  background:rgba(0,0,0,.55); padding:0 4px; border-radius:3px;
+  font-family:var(--f-mono);
+}
+
+.fi-body { flex:1; padding:8px 10px 8px 10px; min-width:0; }
+.fi-name {
+  font-size:13px; font-weight:500; color:var(--label);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;
+}
+.fi-row { display:flex; align-items:center; gap:5px; }
+.fi-dots { display:flex; gap:4px; align-items:center; }
+.dot { width:6px; height:6px; border-radius:50%; }
+.dot-v  { background:var(--red); }
+.dot-a  { background:var(--amber); }
+.dot-au { background:var(--green); }
+.dot-h  { background:var(--blue); }
+.fi-status { font-size:12px; margin-left:auto; }
+.fi-status.s  { color:var(--blue); animation:spin-fade 1.4s ease-in-out infinite; }
+.fi-status.ok { color:var(--green); }
+.fi-status.ng { color:var(--red); }
+@keyframes spin-fade { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+.fi-check {
+  width:36px; height:44px; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; cursor:pointer;
+}
+.fi-check input { width:14px; height:14px; accent-color:var(--blue); cursor:pointer; }
+
+/* COMPARE BAR */
+#compare-bar {
+  display:none; border-top:1px solid var(--sep); padding:10px 14px;
+  flex-shrink:0; background:var(--surface);
+}
+.cmp-inner { display:flex; gap:10px; align-items:center; }
+.cmp-names { flex:1; display:flex; flex-direction:column; gap:3px; }
+.cmp-name { font-size:11px; color:var(--label-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cmp-name b { color:var(--blue); }
+.btn-compare {
+  font-size:12px; font-weight:600; letter-spacing:.02em;
+  background:var(--blue); border:none; color:#fff;
+  padding:8px 16px; border-radius:8px; cursor:pointer; flex-shrink:0;
+  transition:all .12s; white-space:nowrap;
+}
+.btn-compare:hover { background:#5a9ef9; }
+.btn-compare:disabled { background:var(--surface-3); color:var(--label-4); cursor:not-allowed; }
+
+/* ══════════════════════════════════════
+   MAIN AREA
+══════════════════════════════════════ */
+#main { flex:1; overflow:hidden; display:flex; flex-direction:column; background:var(--bg); }
+
+/* ── DROP ZONE ── */
+#drop-overlay {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding:40px;
+}
+.drop-zone {
+  width:100%; max-width:520px; padding:72px 48px;
+  text-align:center; cursor:pointer;
+  border-radius:20px; border:1.5px dashed var(--sep-hi);
+  transition:all .2s ease; position:relative;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color:rgba(59,134,247,.5); border-style:solid;
+  background:var(--blue-bg);
+}
+.dz-iconbox {
+  width:72px; height:72px; margin:0 auto 28px;
+  background:var(--surface); border:1px solid var(--sep-hi);
+  border-radius:20px; display:flex; align-items:center; justify-content:center;
+}
+.dz-label {
+  font-size:22px; font-weight:700; letter-spacing:-.03em;
+  color:var(--label); margin-bottom:8px;
+}
+.dz-sub { font-size:15px; color:var(--label-2); margin-bottom:6px; }
+.dz-hint { font-size:12px; color:var(--label-3); font-family:var(--f-mono); }
+.dz-btns { display:flex; gap:10px; justify-content:center; margin-top:28px; }
+.dz-btn {
+  font-size:13px; font-weight:500;
+  background:var(--surface-2); border:1px solid var(--sep-hi);
+  color:var(--label-2); padding:9px 20px; border-radius:9px;
+  cursor:pointer; transition:all .12s;
+  display:inline-flex; align-items:center; justify-content:center;
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.dz-btn:hover { background:var(--surface-3); color:var(--label); }
+input.fi-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+}
+
+/* ══════════════════════════════════════
+   DETAIL VIEW
+══════════════════════════════════════ */
+#detail-view { display:none; flex:1; overflow:hidden; flex-direction:column; }
+
+.dv-bar {
+  display:flex; align-items:center; gap:14px;
+  padding:12px 20px; border-bottom:1px solid var(--sep); flex-shrink:0;
+  background:var(--surface);
+}
+.dv-thumb {
+  width:80px; height:56px; background:var(--surface-2); border:1px solid var(--sep-hi);
+  overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  border-radius:8px;
+}
+.dv-thumb img { width:100%; height:100%; object-fit:cover; }
+.dv-thumb-ph { font-size:10px; color:var(--label-4); font-family:var(--f-mono); }
+.dv-info { flex:1; min-width:0; }
+.dv-name {
+  font-size:15px; font-weight:600; letter-spacing:-.01em;
+  color:var(--label); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.dv-path { font-size:11px; color:var(--label-3); margin-top:2px; font-family:var(--f-mono); }
+
+/* TABS */
+.tabs {
+  display:flex; border-bottom:1px solid var(--sep);
+  flex-shrink:0; background:var(--surface); padding:0 12px; overflow-x:auto;
+  gap:2px;
+}
+.tabs::-webkit-scrollbar { height:0; }
+.tab {
+  font-size:13px; font-weight:500; padding:12px 14px; cursor:pointer;
+  color:var(--label-3); white-space:nowrap; border-bottom:2px solid transparent;
+  transition:all .12s; display:flex; align-items:center; gap:7px; flex-shrink:0;
+}
+.tab:hover { color:var(--label-2); }
+.tab.active { color:var(--label); border-bottom-color:var(--blue); }
+
+.tab-pill {
+  font-size:11px; font-weight:600; padding:1px 8px;
+  border-radius:20px; background:var(--surface-2); border:1px solid var(--sep);
+  color:var(--label-3);
+}
+.tab-pill.red    { background:var(--red-bg);    border-color:var(--red-sep);    color:var(--red); }
+.tab-pill.amber  { background:var(--amber-bg);  border-color:var(--amber-sep);  color:var(--amber); }
+.tab-pill.blue   { background:var(--blue-bg);   border-color:var(--blue-sep);   color:var(--blue); }
+
+.tab-body { flex:1; overflow-y:auto; padding:28px 28px 72px; }
+
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+/* ══════════════════════════════════════
+   COMPARE VIEW
+══════════════════════════════════════ */
+#compare-view { display:none; flex:1; overflow:hidden; flex-direction:column; }
+.cmp-bar {
+  display:flex; align-items:center; gap:14px; padding:12px 20px;
+  border-bottom:1px solid var(--sep); flex-shrink:0; background:var(--surface);
+}
+.cmp-bar-title { font-size:14px; font-weight:600; color:var(--label); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cmp-body { flex:1; overflow-y:auto; padding:28px 28px 72px; }
+
+.cmp-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:28px; }
+.cmp-card {
+  background:var(--surface); border:1px solid var(--sep-hi);
+  padding:16px; display:flex; align-items:center; gap:12px;
+  border-radius:var(--radius);
+}
+.cmp-card-thumb {
+  width:58px; height:42px; background:var(--surface-2); border:1px solid var(--sep);
+  overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  border-radius:6px;
+}
+.cmp-card-thumb img { width:100%; height:100%; object-fit:cover; }
+.cmp-card-tag { font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); margin-bottom:3px; }
+.cmp-card-name { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--label-2); }
+
+/* ══════════════════════════════════════
+   SHARED UI COMPONENTS
+══════════════════════════════════════ */
+
+/* SECTION HEADING */
+.sec {
+  font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--label-3); margin-bottom:10px; margin-top:28px;
+}
+.sec:first-child { margin-top:0; }
+
+/* ALERT */
+.alert {
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  border-radius:var(--radius-s); margin-bottom:20px; font-size:13px; font-weight:500;
+  border:1px solid;
+}
+.alert.ok     { background:var(--green-bg);  border-color:var(--green-sep);  color:var(--green); }
+.alert.danger { background:var(--red-bg);    border-color:var(--red-sep);    color:var(--red); }
+.alert.warn   { background:var(--amber-bg);  border-color:var(--amber-sep);  color:var(--amber); }
+.alert.info   { background:var(--blue-bg);   border-color:var(--blue-sep);   color:var(--blue); }
+.alert.scan   { background:var(--blue-bg);   border-color:var(--blue-sep);   color:var(--blue); }
+
+/* STAT GRID */
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; margin-bottom:24px; }
+.stat-card {
+  background:var(--surface); border:1px solid var(--sep);
+  border-radius:var(--radius); padding:16px 16px 14px;
+}
+.stat-num {
+  font-size:36px; font-weight:700; line-height:1; letter-spacing:-.03em;
+  margin-bottom:4px; color:var(--label);
+}
+.stat-num.red   { color:var(--red); }
+.stat-num.amber { color:var(--amber); }
+.stat-num.green { color:var(--green); }
+.stat-label { font-size:11px; font-weight:500; color:var(--label-3); letter-spacing:.03em; text-transform:uppercase; }
+
+/* KV GRID */
+.kv-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
+.kv-card {
+  background:var(--surface); border:1px solid var(--sep);
+  border-radius:var(--radius); padding:18px;
+}
+.kv-label { font-size:11px; font-weight:500; color:var(--label-3); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+.kv-val { font-size:30px; font-weight:700; letter-spacing:-.03em; color:var(--label); line-height:1; }
+.kv-val.red { color:var(--red); } .kv-val.amber { color:var(--amber); }
+
+/* CHECKLIST */
+.checklist { background:var(--surface); border:1px solid var(--sep); border-radius:var(--radius); overflow:hidden; margin-bottom:24px; }
+.check-item {
+  display:flex; align-items:center; gap:14px; padding:15px 18px;
+  border-bottom:1px solid var(--sep); transition:background .08s;
+}
+.check-item:last-child { border-bottom:none; }
+.check-item:hover { background:var(--overlay); }
+.check-ico { width:22px; text-align:center; font-size:16px; flex-shrink:0; }
+.check-text { flex:1; font-size:14px; color:var(--label-2); }
+.check-val { font-size:13px; color:var(--label-3); font-family:var(--f-mono); text-align:right; }
+.check-val.red   { color:var(--red); }
+.check-val.amber { color:var(--amber); }
+.check-val.green { color:var(--green); }
+
+/* TABLE */
+.tbl-wrap { background:var(--surface); border:1px solid var(--sep); border-radius:var(--radius); overflow:hidden; margin-bottom:20px; }
+.tbl { width:100%; border-collapse:collapse; }
+.tbl th {
+  font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--label-3); text-align:left; padding:11px 16px;
+  border-bottom:1px solid var(--sep); font-family:var(--f-ui);
+}
+.tbl td { padding:12px 16px; border-bottom:1px solid var(--sep); color:var(--label-2); font-size:13px; vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tr:hover td { background:rgba(255,255,255,.02); }
+
+/* CHIPS */
+.chip {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 10px; font-size:11px; font-weight:600;
+  border-radius:20px; border:1px solid; letter-spacing:.02em;
+}
+.chip.red    { background:var(--red-bg);    border-color:var(--red-sep);    color:var(--red); }
+.chip.amber  { background:var(--amber-bg);  border-color:var(--amber-sep);  color:var(--amber); }
+.chip.green  { background:var(--green-bg);  border-color:var(--green-sep);  color:var(--green); }
+.chip.blue   { background:var(--blue-bg);   border-color:var(--blue-sep);   color:var(--blue); }
+.chip.purple { background:var(--purple-bg); border-color:var(--purple-sep); color:var(--purple); }
+.chip.mono   { background:var(--surface-2); border-color:var(--sep-hi);     color:var(--label-3); }
+
+/* SLIDE NUMBER */
+.slide-num {
+  display:inline-block; font-family:var(--f-mono); font-size:11px; font-weight:500;
+  background:var(--surface-2); border:1px solid var(--sep-hi);
+  padding:2px 8px; border-radius:6px; color:var(--label-3);
+  min-width:32px; text-align:center;
+}
+
+/* FONT CLOUD */
+.font-cloud { display:flex; flex-wrap:wrap; gap:7px; padding:12px 0 4px; }
+.font-tag {
+  font-size:12px; padding:4px 12px; border-radius:20px;
+  background:var(--surface-2); border:1px solid var(--sep-hi); color:var(--label-2);
+}
+.font-tag.custom { background:var(--amber-bg); border-color:var(--amber-sep); color:var(--amber); }
+.font-tag.system { color:var(--label-3); }
+
+/* META PAIRS */
+.meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--sep); border-radius:var(--radius); overflow:hidden; margin-bottom:20px; }
+.meta-pair { background:var(--surface); padding:14px 18px; }
+.meta-key { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.05em; color:var(--label-3); margin-bottom:4px; }
+.meta-val { font-size:13px; font-weight:500; color:var(--label); }
+
+/* OS BOX (meta tab) */
+.os-section { background:var(--surface); border:1px solid var(--sep); border-radius:var(--radius); overflow:hidden; margin-bottom:20px; }
+.os-row { display:flex; justify-content:space-between; align-items:center; padding:13px 18px; border-bottom:1px solid var(--sep); }
+.os-row:last-child { border-bottom:none; }
+.os-key { font-size:12px; color:var(--label-3); }
+.os-val { font-size:13px; font-weight:500; color:var(--label); text-align:right; max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* TOGGLE BTN */
+.toggle-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:13px; font-weight:500;
+  background:var(--surface); border:1px solid var(--sep-hi);
+  color:var(--label-2); padding:8px 16px; border-radius:8px;
+  cursor:pointer; transition:all .12s; margin-top:14px;
+}
+.toggle-btn:hover { background:var(--surface-2); color:var(--label); }
+
+/* DIFF */
+.diff-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; }
+.diff-sum-card { background:var(--surface); border:1px solid var(--sep); border-radius:var(--radius); padding:16px; }
+.diff-sum-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--label-3); margin-bottom:8px; }
+.diff-sum-val { font-size:22px; font-weight:700; letter-spacing:-.02em; color:var(--label); }
+.diff-sum-val.changed { color:var(--amber); }
+.diff-sum-val.same    { color:var(--label-3); }
+
+.diff-tbl-wrap { background:var(--surface); border:1px solid var(--sep); border-radius:var(--radius); overflow:hidden; margin-bottom:20px; }
+.diff-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.diff-tbl th { font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--label-3); text-align:left; padding:10px 14px; border-bottom:1px solid var(--sep); }
+.diff-tbl td { padding:10px 14px; border-bottom:1px solid var(--sep); vertical-align:middle; color:var(--label-2); }
+.diff-tbl tr:last-child td { border-bottom:none; }
+.diff-tbl tr:hover td { background:rgba(255,255,255,.02); }
+.diff-tbl .th-a { color:var(--blue); } .diff-tbl .th-b { color:var(--purple); }
+.diff-tbl tr.row-add td { background:rgba(48,209,88,.04); }
+.diff-tbl tr.row-del td { background:rgba(255,69,58,.04); }
+.diff-tbl tr.row-chg td { background:rgba(255,159,10,.04); }
+
+.d-add { color:var(--green); } .d-del { color:var(--red); }
+.d-chg { color:var(--amber); } .d-eq  { color:var(--label-3); }
+
+/* TEXT DIFF */
+.tdiff-card { background:var(--surface); border:1px solid var(--sep); border-radius:var(--radius); overflow:hidden; margin-bottom:10px; }
+.tdiff-head { display:flex; align-items:center; gap:10px; padding:10px 16px; background:var(--surface-2); border-bottom:1px solid var(--sep); font-size:12px; font-weight:600; color:var(--label-3); }
+.tdiff-body { padding:12px 16px; font-family:var(--f-mono); font-size:12px; line-height:1.9; }
+.tdl-same    { color:var(--label-3); }
+.tdl-del     { color:var(--red);   background:var(--red-bg);   border-radius:4px; padding:0 4px; }
+.tdl-add     { color:var(--green); background:var(--green-bg); border-radius:4px; padding:0 4px; }
+mark.m-add { background:rgba(48,209,88,.2);  color:var(--green); border-radius:3px; padding:0 2px; }
+mark.m-del { background:rgba(255,69,58,.2);  color:var(--red);   border-radius:3px; padding:0 2px; text-decoration:line-through; }
+
+.empty-state { text-align:center; padding:40px; color:var(--label-3); font-size:13px; }
+
+/* LINK */
+a.link { color:var(--blue); text-decoration:none; font-family:var(--f-mono); font-size:12px; }
+a.link:hover { text-decoration:underline; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+
+/* ── モバイルナビバー（スマホのみ表示） ── */
+#mobile-nav {
+  display:none;
+  height:52px; flex-shrink:0;
+  background:rgba(17,17,20,.9);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--sep);
+  align-items:center; padding:0 16px; gap:12px;
+  z-index:50; position:relative;
+}
+.mob-menu-btn {
+  width:36px; height:36px; border-radius:8px;
+  background:var(--surface); border:1px solid var(--sep-hi);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; transition:.12s;
+  position:relative;
+}
+.mob-menu-btn:hover { background:var(--surface-2); }
+.mob-menu-btn svg { transition:opacity .15s; }
+.mob-menu-btn .icon-menu  { position:absolute; }
+.mob-menu-btn .icon-close { position:absolute; opacity:0; }
+.mob-menu-btn.open .icon-menu  { opacity:0; }
+.mob-menu-btn.open .icon-close { opacity:1; }
+
+.mob-logo { font-size:16px; font-weight:600; letter-spacing:-.02em; color:var(--label); flex:1; }
+.mob-logo em { font-style:normal; color:var(--label-2); font-weight:400; }
+.mob-add-btn {
+  font-size:12px; font-weight:500;
+  background:var(--blue); border:none; color:#fff;
+  padding:7px 14px; border-radius:8px; cursor:pointer;
+  display:inline-flex; align-items:center; user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ── サイドバーオーバーレイ（スマホ） ── */
+#sb-overlay {
+  display:none;
+  position:fixed; inset:0; background:rgba(0,0,0,.5);
+  z-index:80; backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  opacity:0; transition:opacity .25s;
+  pointer-events:none;
+}
+#sb-overlay.visible {
+  pointer-events:auto;
+}
+#sb-overlay.visible { opacity:1; }
+
+/* ── TABLET: 768px〜1024px ── */
+@media (max-width:1024px) and (min-width:641px) {
+  :root { --sidebar: 220px; }
+
+  .logo-pill { display:none; }
+  .hver { display:none; }
+
+  .tab { padding:10px 12px; font-size:12px; }
+  .kv-grid { grid-template-columns:1fr 1fr; }
+  .stat-grid { grid-template-columns:repeat(3,1fr); }
+  .diff-summary-grid { grid-template-columns:repeat(2,1fr); }
+  .cmp-cards { grid-template-columns:1fr; }
+  .tbl td, .tbl th { padding:10px 12px; }
+  .tab-body, .cmp-body { padding:20px 20px 64px; }
+}
+
+/* ── MOBILE: ≤640px ── */
+@media (max-width:640px) {
+  html, body { overflow:hidden; -webkit-overflow-scrolling:touch; }
+
+  /* ヘッダー非表示 → モバイルナビ表示 */
+  header { display:none; }
+  #mobile-nav { display:flex; }
+
+  /* body を縦スタック */
+  #body {
+    flex-direction:column;
+    overflow:visible;
+    height:calc(100dvh - 52px);
+    position:relative;
+  }
+
+  /* サイドバー → 左からスライドするドロワー */
+  #sidebar {
+    position:fixed;
+    top:52px; left:0; bottom:0;
+    width:min(320px, 85vw);
+    z-index:90;
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    border-right:1px solid var(--sep);
+    box-shadow: 4px 0 24px rgba(0,0,0,.4);
+  }
+  #sidebar.open {
+    transform:translateX(0);
+  }
+  #sb-overlay { display:block; }
+
+  /* メインエリア全幅 */
+  #main {
+    flex:1;
+    height:calc(100dvh - 52px);
+    overflow:hidden;
+  }
+
+  /* ドロップゾーン調整 */
+  #drop-overlay { padding:24px 16px; align-items:flex-start; padding-top:40px; }
+  .drop-zone { padding:48px 24px; border-radius:16px; }
+  .dz-iconbox { width:56px; height:56px; border-radius:14px; }
+  .dz-label { font-size:20px; }
+  .dz-btns { flex-direction:column; gap:8px; }
+  .dz-btn { width:100%; text-align:center; padding:12px; }
+
+  /* detail header コンパクト */
+  .dv-bar { padding:10px 14px; }
+  .dv-thumb { width:60px; height:42px; }
+  .dv-name { font-size:13px; }
+
+  /* tabs スクロール */
+  .tabs { padding:0 4px; }
+  .tab { padding:10px 12px; font-size:12px; }
+
+  /* content padding 縮小 */
+  .tab-body { padding:16px 14px 80px; }
+  .cmp-body { padding:16px 14px 80px; }
+
+  /* グリッド 1列 */
+  .kv-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  .stat-grid { grid-template-columns:repeat(3,1fr); gap:8px; }
+  .diff-summary-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  .cmp-cards { grid-template-columns:1fr; }
+
+  /* stat num 小さく */
+  .stat-num { font-size:28px; }
+  .kv-val { font-size:24px; }
+
+  /* テーブル横スクロール */
+  .tbl-wrap, .diff-tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .tbl, .diff-tbl { min-width:480px; }
+  .tbl td, .tbl th { padding:10px 12px; }
+
+  /* checklist */
+  .check-item { padding:13px 14px; }
+  .check-text { font-size:13px; }
+
+  /* os-section */
+  .os-row { padding:12px 14px; }
+
+  /* compare bar */
+  .cmp-bar { padding:10px 14px; }
+  .cmp-bar-title { font-size:12px; }
+}
+
+/* ── SMALL MOBILE: ≤375px ── */
+@media (max-width:375px) {
+  .kv-grid { grid-template-columns:1fr; }
+  .stat-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+<!-- SEVENTHWELL 共通の見た目（中身を更新してもこの1行を残す） -->
+<link rel="stylesheet" href="/app-theme.css">
+<!-- SEVENTHWELL Tools：アイコンと共有画像（2026-09-27 追加。元は release/tools-live/） -->
+<link rel="icon" type="image/svg+xml" href="/img/tools/slidescan.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/tools/slidescan-32.png">
+<link rel="apple-touch-icon" href="/img/tools/slidescan-180.png">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="SLIDESCAN (PPTX ANALYZER) — SEVENTHWELL">
+<meta property="og:description" content="パワーポイントファイル解析ツール">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://seventh-well.com/pptx-analyzer/">
+<meta property="og:image" content="https://seventh-well.com/img/tools/slidescan-ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<div id="app">
+
+<!-- ── モバイルナビバー（≤640px） ── -->
+<div id="mobile-nav">
+  <button class="mob-menu-btn" id="mob-menu-btn" onclick="toggleSidebar()">
+    <svg class="icon-menu" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <line x1="2" y1="4" x2="14" y2="4" stroke="var(--label-2)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="2" y1="8" x2="14" y2="8" stroke="var(--label-2)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="2" y1="12" x2="14" y2="12" stroke="var(--label-2)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <svg class="icon-close" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <line x1="3" y1="3" x2="13" y2="13" stroke="var(--label-2)" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="13" y1="3" x2="3" y2="13" stroke="var(--label-2)" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <span class="mob-logo">Slide<em>Scan</em></span>
+  <!-- iOSはlabel→inputの直接タッチが必要 -->
+  <label class="mob-add-btn">+ 追加<input type="file" class="fi-input" accept=".pptx" multiple></label>
+</div>
+
+<!-- ── サイドバー背景オーバーレイ ── -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">
+    <!-- Scan icon -->
+    <svg class="logo-icon" viewBox="0 0 26 26" fill="none">
+      <rect x="1" y="4" width="24" height="18" rx="3" stroke="rgba(255,255,255,.25)" stroke-width="1.4"/>
+      <line x1="1" y1="13" x2="25" y2="13" stroke="url(#sl)" stroke-width="1.8">
+        <animateTransform attributeName="transform" type="translate" values="0,-7;0,7;0,-7" dur="2.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;.35;1" dur="2.8s" repeatCount="indefinite"/>
+      </line>
+      <rect x="4" y="8"  width="12" height="1.4" rx=".7" fill="rgba(255,255,255,.22)"/>
+      <rect x="4" y="13" width="18" height="1.4" rx=".7" fill="rgba(255,255,255,.15)"/>
+      <rect x="4" y="18" width="9"  height="1.4" rx=".7" fill="rgba(255,255,255,.1)"/>
+      <defs>
+        <linearGradient id="sl" x1="0" y1="0" x2="26" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stop-color="#3b86f7" stop-opacity="0"/>
+          <stop offset="50%"  stop-color="#3b86f7"/>
+          <stop offset="100%" stop-color="#3b86f7" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <span class="logo-name">Slide<em>Scan</em></span>
+    <span class="logo-pill"><a href="/">by SEVENTHWELL</a></span>
+  </div>
+  <div class="hspace"></div>
+  <div class="hactions">
+    <label class="btn">+ ファイル<input type="file" class="fi-input" accept=".pptx" multiple></label>
+    <label class="btn">+ フォルダ<input type="file" class="fi-input fi-folder" webkitdirectory multiple></label>
+    <span class="hver">v4.3</span>
+  </div>
+</header>
+
+<div id="body">
+
+  <!-- ── SIDEBAR ── -->
+  <div id="sidebar">
+    <div class="sb-header">
+      <span class="sb-title">ファイル</span>
+      <span class="sb-count" id="sb-count">0</span>
+    </div>
+    <div id="file-list"></div>
+    <div id="compare-bar">
+      <div class="cmp-inner">
+        <div class="cmp-names">
+          <div class="cmp-name" id="cmp-slot-a">A: <span style="color:var(--label-4)">選択してください</span></div>
+          <div class="cmp-name" id="cmp-slot-b">B: <span style="color:var(--label-4)">選択してください</span></div>
+        </div>
+        <button class="btn-compare" id="cmp-go-btn" onclick="runCompare()" disabled>比較</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div id="main">
+
+    <!-- DROP -->
+    <div id="drop-overlay">
+      <div class="drop-zone" id="drop-zone">
+        <div class="dz-iconbox">
+          <svg width="36" height="36" viewBox="0 0 26 26" fill="none">
+            <rect x="1" y="4" width="24" height="18" rx="3" stroke="rgba(59,134,247,.5)" stroke-width="1.4"/>
+            <line x1="1" y1="13" x2="25" y2="13" stroke="url(#sl2)" stroke-width="1.8">
+              <animateTransform attributeName="transform" type="translate" values="0,-7;0,7;0,-7" dur="2.8s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;.3;1" dur="2.8s" repeatCount="indefinite"/>
+            </line>
+            <rect x="4" y="8"  width="12" height="1.4" rx=".7" fill="rgba(59,134,247,.35)"/>
+            <rect x="4" y="13" width="18" height="1.4" rx=".7" fill="rgba(59,134,247,.25)"/>
+            <rect x="4" y="18" width="9"  height="1.4" rx=".7" fill="rgba(59,134,247,.18)"/>
+            <defs>
+              <linearGradient id="sl2" x1="0" y1="0" x2="26" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%"   stop-color="#3b86f7" stop-opacity="0"/>
+                <stop offset="50%"  stop-color="#3b86f7"/>
+                <stop offset="100%" stop-color="#3b86f7" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="dz-label">ファイルをドロップ</div>
+        <div class="dz-sub">.pptx ファイルまたはフォルダを</div>
+        <div class="dz-hint">.pptx のみ解析 · 複数ファイル · フォルダ対応</div>
+        <div class="dz-btns">
+          <label class="dz-btn">ファイルを選択<input type="file" class="fi-input" accept=".pptx" multiple></label>
+          <label class="dz-btn">フォルダを選択<input type="file" class="fi-input fi-folder" webkitdirectory multiple></label>
+        </div>
+      </div>
+    </div>
+
+    <div id="detail-view"></div>
+    <div id="compare-view"></div>
+  </div>
+</div>
+</div>
+<script>
+// ── アイコン（Lucide — shadcn/ui 標準のアイコンセット。ISC License / https://lucide.dev）──
+// 絵文字は環境ごとに見た目が違い、Windows では出ないものもあるため、線画の SVG に統一する。
+const ICONS={
+  'check':'<path d="M20 6 9 17l-5-5"/>',
+  'circle-check':'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  'circle-x':'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  'triangle-alert':'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  'info':'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  'x':'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'loader-circle':'<path d="M21 12a9 9 0 1 1-6.219-8.56"/>',
+  'chevron-down':'<path d="m6 9 6 6 6-6"/>',
+  'arrow-left-right':'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  'monitor':'<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+  'laptop':'<path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>',
+  'cloud':'<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+  'cpu':'<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+  'film':'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>',
+  'music':'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  'image':'<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/>',
+  'file':'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+  'file-text':'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  'mail':'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  'link':'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  'paperclip':'<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>'
+};
+function ico(name,cls=''){
+  return `<svg class="i ${cls}" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`;
+}
+
+// ── DEBUG ──
+window.onerror = function(msg,src,line,col,err){
+  alert('JSエラー: ' + msg + ' (line:' + line + ')');
+  return false;
+};
+console.log('Script start');
+// ── CONSTANTS ──
+const VIDEO_EXT=new Set(['mp4','m4v','mov','avi','wmv','mkv','webm','flv','mpg','mpeg','3gp','ogv','ts','mts','m2ts','asf','divx','f4v']);
+const AUDIO_EXT=new Set(['mp3','wav','aac','m4a','ogg','flac','wma','aiff','aif','opus','caf','mid','midi','amr','ape']);
+const IMAGE_EXT=new Set(['png','jpg','jpeg','gif','bmp','tiff','tif','webp','svg','emf','wmf','ico','heic']);
+const SYSTEM_FONTS=new Set(['Arial','Calibri','Times New Roman','Helvetica','Georgia','Verdana','Tahoma','Trebuchet MS','Impact','Comic Sans MS','Courier New','Palatino','Garamond','Century Gothic','Franklin Gothic Medium','Gill Sans','Futura','Meiryo','Yu Gothic','Yu Mincho','Hiragino Kaku Gothic ProN','Hiragino Mincho ProN','MS Gothic','MS Mincho','MS PGothic','MS PMincho','BIZ UDGothic','BIZ UDMincho','Osaka','Noto Sans JP','Noto Serif JP','HiraKakuProN-W3','HiraKakuProN-W6','+mj-lt','+mn-lt','+mj-ea','+mn-ea','+mj-cs','+mn-cs','Times','Symbol','Wingdings','Webdings','Arial Black','Arial Narrow','Arial Unicode MS','Segoe UI','Consolas','Cambria','Candara','Constantia','Corbel','ヒラギノ角ゴ ProN','ヒラギノ明朝 ProN','游ゴシック','游明朝','メイリオ','源ノ角ゴシック']);
+
+const classifyExt=p=>{const e=p.split('.').pop().toLowerCase();if(VIDEO_EXT.has(e))return'video';if(AUDIO_EXT.has(e))return'audio';if(IMAGE_EXT.has(e))return'image';return'other';};
+const fmtB=b=>{if(!b)return'—';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(2)+'MB';};
+const fmtMs=ms=>{if(!ms&&ms!==0)return'—';const s=ms/1000;return s<60?s.toFixed(1)+'s':Math.floor(s/60)+'m'+(s%60).toFixed(0)+'s';};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+let idCnt=0;
+const state={files:[],activeId:null,activeTabs:{},compareMode:false,compareIds:[null,null]};
+
+// ── DRAG & DROP ──
+const dz=document.getElementById('drop-zone');
+document.body.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+document.body.addEventListener('dragleave',e=>{if(!e.relatedTarget)dz.classList.remove('drag-over');});
+document.body.addEventListener('drop',async e=>{e.preventDefault();dz.classList.remove('drag-over');addFiles(await collectDrop(e.dataTransfer));});
+async function collectDrop(dt){const out=[];if(dt.items){for(const it of dt.items){const e=it.webkitGetAsEntry?.();if(e)await walkEntry(e,'',out);}}else{for(const f of dt.files)if(f.name.toLowerCase().endsWith('.pptx'))out.push({file:f,path:f.name});}return out;}
+async function walkEntry(entry,prefix,out){
+  if(entry.isFile){if(entry.name.toLowerCase().endsWith('.pptx')){const f=await new Promise(r=>entry.file(r));out.push({file:f,path:prefix+entry.name});}}
+  else if(entry.isDirectory){const rd=entry.createReader();let batch;do{batch=await new Promise(r=>rd.readEntries(r));for(const e of batch)await walkEntry(e,prefix+entry.name+'/',out);}while(batch.length>0);}
+}
+// 全inputを取得してchangeをリッスン → addFiles定義後に登録するので末尾に移動
+
+
+
+const normRelPath=(base,rel)=>{const parts=(base+'/'+rel).split('/');const out=[];for(const p of parts){if(p==='..'&&out.length)out.pop();else if(p!=='.')out.push(p);}return out.join('/');};
+
+// ── SCAN ──
+async function scanFile(entry){
+  updateSBItem(entry);if(state.activeId===entry.id)renderDetail(entry);
+  try{
+    const zip=await JSZip.loadAsync(await entry.file.arrayBuffer());
+    // THUMBNAIL
+    let thumbData=null;
+    for(const tp of['ppt/thumbnails/thumbnail.jpeg','ppt/thumbnails/thumbnail.jpg','ppt/thumbnails/thumbnail.png','docProps/thumbnail.jpeg','docProps/thumbnail.jpg']){
+      const tf=zip.file(tp);if(tf){try{const ab=await tf.async('arraybuffer');const mime=tp.endsWith('.png')?'image/png':'image/jpeg';const b64=btoa(String.fromCharCode(...new Uint8Array(ab)));thumbData=`data:${mime};base64,${b64}`;break;}catch(e){}}
+    }
+    entry.thumbnail=thumbData;
+    // APP.XML
+    let appInfo={application:'',appVersion:'',company:'',presentationFormat:''};
+    try{const xml=await zip.file('docProps/app.xml')?.async('string')||'';appInfo.application=xml.match(/<Application>([^<]*)<\/Application>/)?.[1]||'';appInfo.appVersion=xml.match(/<AppVersion>([^<]*)<\/AppVersion>/)?.[1]||'';appInfo.company=xml.match(/<Company>([^<]*)<\/Company>/)?.[1]||'';appInfo.presentationFormat=xml.match(/<PresentationFormat>([^<]*)<\/PresentationFormat>/)?.[1]||'';}catch(e){}
+    // CORE.XML
+    let coreInfo={creator:'',lastModifiedBy:'',created:'',modified:''};
+    try{const xml=await zip.file('docProps/core.xml')?.async('string')||'';coreInfo.creator=xml.match(/<dc:creator>([^<]*)<\/dc:creator>/)?.[1]||'';coreInfo.lastModifiedBy=xml.match(/<cp:lastModifiedBy>([^<]*)<\/cp:lastModifiedBy>/)?.[1]||'';coreInfo.created=xml.match(/<dcterms:created[^>]*>([^<]*)<\/dcterms:created>/)?.[1]||'';coreInfo.modified=xml.match(/<dcterms:modified[^>]*>([^<]*)<\/dcterms:modified>/)?.[1]||'';}catch(e){}
+    // OS DETECT
+    const appLower=(appInfo.application||'').toLowerCase();
+    let detectedOS='Unknown';
+    if(appLower.includes('powerpoint')){if(appLower.includes('mac')||appLower.includes('macos'))detectedOS='macOS';else if(appInfo.appVersion&&appInfo.appVersion.includes('.'))detectedOS='Windows';else detectedOS='Microsoft PowerPoint';}
+    else if(appLower.includes('keynote'))detectedOS='macOS (Keynote)';
+    else if(appLower.includes('libreoffice')||appLower.includes('openoffice'))detectedOS='LibreOffice / OpenOffice';
+    else if(appLower.includes('google'))detectedOS='Google Slides';
+    else if(appLower.includes('wps'))detectedOS='WPS Office';
+    // SLIDE ORDER
+    let slideOrder=[];
+    try{const presXml=await zip.file('ppt/presentation.xml')?.async('string')||'';for(const m of presXml.matchAll(/<p:sldId[^>]+r:id="([^"]+)"/g))slideOrder.push(m[1]);}catch(e){}
+    const rIdToSlide={};
+    try{const relsXml=await zip.file('ppt/_rels/presentation.xml.rels')?.async('string')||'';for(const m of relsXml.matchAll(/Id="([^"]+)"[^>]+Target="([^"]+)"/g)){const rid=m[1];const target=normRelPath('ppt/_rels',m[2]);if(target.match(/ppt\/slides\/slide\d+\.xml/))rIdToSlide[rid]=target;}}catch(e){}
+    const orderedSlides=slideOrder.map(rid=>rIdToSlide[rid]).filter(Boolean);
+    const slideFiles=[];
+    zip.forEach(p=>{if(/^ppt\/slides\/slide\d+\.xml$/.test(p))slideFiles.push(p);});
+    slideFiles.sort((a,b)=>parseInt(a.match(/slide(\d+)/)[1])-parseInt(b.match(/slide(\d+)/)[1]));
+    const finalOrder=orderedSlides.length>0?orderedSlides:slideFiles;
+    // PER-SLIDE
+    const slideMediaMap={},slides=[];
+    for(let i=0;i<finalOrder.length;i++){
+      const slidePath=finalOrder[i];const slideNum=i+1;
+      let xml='';try{xml=await zip.file(slidePath)?.async('string')||'';}catch(e){}
+      // TEXT
+      const textBlocks=[];
+      for(const spM of xml.matchAll(/<p:sp\b[\s\S]*?<\/p:sp>/g)){
+        const paras=[];
+        for(const pM of spM[0].matchAll(/<a:p\b[\s\S]*?<\/a:p>/g)){
+          const runs=[...pM[0].matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>m[1]).join('');
+          if(runs.trim())paras.push(runs.trim());
+        }
+        if(paras.length)textBlocks.push(paras.join('\n'));
+      }
+      const titleText=textBlocks.join(' ').slice(0,40);
+      const hiddenSlide=/<p:sld\b[^>]*show="0"/.test(xml);
+      const transMatch=xml.match(/<p:transition\b([\s\S]*?)\/>/)||xml.match(/<p:transition\b([^>]*)>/);
+      const transAttr=transMatch?transMatch[1]:'';
+      const advClick=!transAttr.includes('advClick="0"');
+      const advTmM=transAttr.match(/advTm="(\d+)"/);
+      const autoAdv=!!advTmM;const autoAdvTime=advTmM?parseInt(advTmM[1]):null;
+      const fontSet=new Set([...xml.matchAll(/typeface="([^"]+)"/g)].map(m=>m[1]).filter(f=>f&&!f.startsWith('+mn-')&&!f.startsWith('+mj-')));
+      const customFonts=[],systemFonts=[];
+      for(const f of fontSet){if(SYSTEM_FONTS.has(f))systemFonts.push(f);else customFonts.push(f);}
+      const links=[];
+      const slideRelsPath=normRelPath('ppt/slides','_rels/'+slidePath.replace(/^.*\//,'')+'.rels');
+      try{
+        const relsXml=await zip.file(slideRelsPath)?.async('string')||'';
+        for(const m of relsXml.matchAll(/Type="[^"]*\/hyperlink"[^>]*Target="([^"]+)"/g))links.push(m[1]);
+        for(const m of relsXml.matchAll(/Target="\.\.\/media\/([^"]+)"/g)){const fn=m[1];if(!slideMediaMap[fn])slideMediaMap[fn]=[];slideMediaMap[fn].push(slideNum);}
+      }catch(e){}
+      slides.push({num:slideNum,path:slidePath,hidden:hiddenSlide,autoAdv,autoAdvTime,clickDisabled:!advClick,customFonts,systemFonts,allFonts:[...new Set([...customFonts,...systemFonts])],links,titleText,textBlocks});
+    }
+    // MEDIA
+    const media=[];
+    zip.forEach((path,ze)=>{if(ze.dir||!path.startsWith('ppt/media/'))return;const fn=path.split('/').pop();const type=classifyExt(path);const size=ze._data?ze._data.uncompressedSize:0;const slideNums=(slideMediaMap[fn]||[]).slice().sort((a,b)=>a-b);media.push({path,name:fn,size,type,slides:slideNums});});
+    media.sort((a,b)=>({video:0,audio:1,image:2,other:3}[a.type]-{video:0,audio:1,image:2,other:3}[b.type]));
+    const allCF=new Set(),allSF=new Set();
+    for(const s of slides){s.customFonts.forEach(f=>allCF.add(f));s.systemFonts.forEach(f=>allSF.add(f));}
+    const allLinks=[];for(const s of slides)for(const l of s.links)if(!allLinks.includes(l))allLinks.push(l);
+    entry.result={appInfo,coreInfo,detectedOS,slides,totalSlides:slides.length,hiddenSlides:slides.filter(s=>s.hidden),visibleSlides:slides.filter(s=>!s.hidden),autoAdvSlides:slides.filter(s=>s.autoAdv),clickDisabledSlides:slides.filter(s=>s.clickDisabled),media,videos:media.filter(m=>m.type==='video'),audios:media.filter(m=>m.type==='audio'),images:media.filter(m=>m.type==='image'),others:media.filter(m=>m.type==='other'),allCustomFonts:[...allCF].sort(),allSystemFonts:[...allSF].sort(),allLinks};
+    entry.status=(entry.result.videos.length+entry.result.audios.length+entry.result.autoAdvSlides.length+entry.result.clickDisabledSlides.length)>0?'found':'ok';
+  }catch(e){entry.status='error';}
+  updateSBItem(entry);if(state.activeId===entry.id)renderDetail(entry);
+}
+
+// ── SIDEBAR ──
+function renderSidebar(){
+  document.getElementById('sb-count').textContent=state.files.length;
+  const groups={};
+  for(const f of state.files){const parts=f.path.split('/');const folder=parts.length>1?parts.slice(0,-1).join('/'):'';if(!groups[folder])groups[folder]=[];groups[folder].push(f);}
+  const list=document.getElementById('file-list');list.innerHTML='';
+  for(const [folder,files] of Object.entries(groups)){
+    const grp=document.createElement('div');grp.className='folder-grp';
+    if(folder){const lbl=document.createElement('div');lbl.className='folder-label';lbl.innerHTML=`<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>${esc(folder)}`;grp.appendChild(lbl);}
+    for(const f of files)grp.appendChild(makeSBItem(f));
+    list.appendChild(grp);
+  }
+  updateCompareBar();
+}
+function makeSBItem(entry){
+  const el=document.createElement('div');
+  const isCmp=state.compareIds.includes(entry.id);
+  el.className='file-item'+(state.activeId===entry.id&&!state.compareMode?' active':'')+(isCmp?' compare-sel':'');
+  el.dataset.id=entry.id;
+  // thumb
+  const thumb=document.createElement('div');thumb.className='fi-thumb';
+  if(entry.thumbnail){const img=document.createElement('img');img.src=entry.thumbnail;thumb.appendChild(img);}
+  else{const ph=document.createElement('div');ph.className='fi-thumb-ph';ph.textContent=entry.status==='scanning'?'…':(entry.result?.slides?.[0]?.titleText||entry.name.replace('.pptx','')).slice(0,12);thumb.appendChild(ph);}
+  if(entry.result){const n=document.createElement('div');n.className='fi-thumb-count';n.textContent=entry.result.totalSlides+'枚';thumb.appendChild(n);}
+  // body
+  const body=document.createElement('div');body.className='fi-body';
+  const name=document.createElement('div');name.className='fi-name';name.title=entry.path;name.textContent=entry.name;
+  const row=document.createElement('div');row.className='fi-row';
+  const dots=document.createElement('div');dots.className='fi-dots';
+  if(entry.result){
+    if(entry.result.videos.length)dots.innerHTML+='<span class="dot dot-v" title="動画"></span>';
+    if(entry.result.audios.length)dots.innerHTML+='<span class="dot dot-a" title="音声"></span>';
+    if(entry.result.autoAdvSlides.length)dots.innerHTML+='<span class="dot dot-au" title="自動送り"></span>';
+    if(entry.result.allLinks.length)dots.innerHTML+='<span class="dot dot-h" title="リンク"></span>';
+  }
+  const st=document.createElement('div');st.className='fi-status';
+  if(entry.status==='scanning'){st.classList.add('s');st.innerHTML=ico('loader-circle','spin');}
+  else if(entry.status==='ok'){st.classList.add('ok');st.innerHTML=ico('check');}
+  else{st.classList.add('ng');st.innerHTML=ico('triangle-alert');}
+  row.appendChild(dots);row.appendChild(st);
+  body.appendChild(name);body.appendChild(row);
+  body.onclick=()=>selectFile(entry.id);
+  // checkbox
+  const chkW=document.createElement('div');chkW.className='fi-check';
+  const chk=document.createElement('input');chk.type='checkbox';chk.checked=isCmp;
+  chk.addEventListener('change',e=>{e.stopPropagation();toggleCompare(entry.id,chk.checked);});
+  chkW.appendChild(chk);
+  el.appendChild(thumb);el.appendChild(body);el.appendChild(chkW);
+  return el;
+}
+function updateSBItem(entry){
+  const ex=document.querySelector(`.file-item[data-id="${entry.id}"]`);
+  if(ex)ex.replaceWith(makeSBItem(entry));else renderSidebar();
+  document.getElementById('sb-count').textContent=state.files.length;
+}
+function selectFile(id){
+  if(state.compareMode)return;
+  state.activeId=id;
+  document.querySelectorAll('.file-item').forEach(el=>el.classList.toggle('active',el.dataset.id==id));
+  const entry=state.files.find(f=>f.id===id);if(entry)renderDetail(entry);
+}
+
+// ── COMPARE ──
+function toggleCompare(id,checked){
+  if(checked){if(!state.compareIds[0])state.compareIds[0]=id;else if(!state.compareIds[1]&&state.compareIds[0]!==id)state.compareIds[1]=id;else if(state.compareIds[0]!==id&&state.compareIds[1]!==id)state.compareIds[1]=id;}
+  else{if(state.compareIds[0]===id)state.compareIds[0]=null;else if(state.compareIds[1]===id)state.compareIds[1]=null;if(!state.compareIds[0]&&state.compareIds[1]){state.compareIds[0]=state.compareIds[1];state.compareIds[1]=null;}}
+  renderSidebar();
+}
+function updateCompareBar(){
+  const bar=document.getElementById('compare-bar');
+  const hasAny=state.compareIds[0]||state.compareIds[1];
+  bar.style.display=hasAny?'block':'none';
+  const fa=state.files.find(f=>f.id===state.compareIds[0]);
+  const fb=state.files.find(f=>f.id===state.compareIds[1]);
+  document.getElementById('cmp-slot-a').innerHTML=`<b style="color:var(--blue)">A</b>: ${fa?esc(fa.name):'<span style="color:var(--label-4)">未選択</span>'}`;
+  document.getElementById('cmp-slot-b').innerHTML=`<b style="color:var(--purple)">B</b>: ${fb?esc(fb.name):'<span style="color:var(--label-4)">未選択</span>'}`;
+  document.getElementById('cmp-go-btn').disabled=!(fa&&fb&&fa.result&&fb.result);
+}
+function runCompare(){
+  const fa=state.files.find(f=>f.id===state.compareIds[0]);
+  const fb=state.files.find(f=>f.id===state.compareIds[1]);
+  if(!fa||!fb||!fa.result||!fb.result)return;
+  state.compareMode=true;
+  document.getElementById('detail-view').style.display='none';
+  const cv=document.getElementById('compare-view');
+  cv.style.display='flex';cv.style.flexDirection='column';
+  cv.innerHTML=buildCompare(fa,fb);
+}
+function closeCompare(){
+  state.compareMode=false;
+  document.getElementById('compare-view').style.display='none';
+  document.getElementById('detail-view').style.display='flex';
+}
+
+// ── DETAIL ──
+function renderDetail(entry){
+  const dv=document.getElementById('detail-view');
+  if(entry.status==='scanning'){
+    dv.innerHTML=`<div class="dv-bar"><div class="dv-thumb"><div class="dv-thumb-ph">…</div></div><div class="dv-info"><div class="dv-name">${esc(entry.name)}</div><div class="dv-path">${esc(entry.path)}</div></div></div><div class="tab-body"><div class="alert scan">${ico('loader-circle','spin')} 解析中...</div></div>`;
+    return;
+  }
+  if(entry.status==='error'||!entry.result){
+    dv.innerHTML=`<div class="dv-bar"><div class="dv-info"><div class="dv-name">${esc(entry.name)}</div></div></div><div class="tab-body"><div class="alert danger">${ico('circle-x')} 解析エラー — 有効な .pptx ファイルか確認してください</div></div>`;
+    return;
+  }
+  const r=entry.result;
+  const at=state.activeTabs[entry.id]||'overview';
+  const thumbH=entry.thumbnail?`<img src="${entry.thumbnail}">`:`<div class="dv-thumb-ph">${esc((r.slides[0]?.titleText||'').slice(0,8)||'—')}</div>`;
+  const tabs=[
+    {id:'overview',label:'概要'},
+    {id:'slides',label:'スライド',cnt:r.totalSlides},
+    {id:'media',label:'メディア',cnt:r.media.length,cls:r.videos.length+r.audios.length>0?'red':''},
+    {id:'fonts',label:'フォント',cnt:r.allCustomFonts.length,cls:r.allCustomFonts.length>0?'amber':''},
+    {id:'links',label:'リンク',cnt:r.allLinks.length,cls:r.allLinks.length>0?'blue':''},
+    {id:'meta',label:'メタ情報'},
+  ];
+  const tabsH=tabs.map(t=>`<div class="tab${at===t.id?' active':''}" onclick="switchTab(${entry.id},'${t.id}')">${t.label}${t.cnt!=null?`<span class="tab-pill ${t.cls||''}">${t.cnt}</span>`:''}</div>`).join('');
+  dv.innerHTML=`
+    <div class="dv-bar"><div class="dv-thumb">${thumbH}</div><div class="dv-info"><div class="dv-name">${esc(entry.name)}</div><div class="dv-path">${esc(entry.path)}</div></div></div>
+    <div class="tabs">${tabsH}</div>
+    <div class="tab-body">
+      <div class="tab-pane${at==='overview'?' active':''}">${tabOverview(r)}</div>
+      <div class="tab-pane${at==='slides'?' active':''}">${tabSlides(r)}</div>
+      <div class="tab-pane${at==='media'?' active':''}">${tabMedia(r)}</div>
+      <div class="tab-pane${at==='fonts'?' active':''}">${tabFonts(r)}</div>
+      <div class="tab-pane${at==='links'?' active':''}">${tabLinks(r)}</div>
+      <div class="tab-pane${at==='meta'?' active':''}">${tabMeta(r,entry)}</div>
+    </div>`;
+}
+function switchTab(id,tab){state.activeTabs[id]=tab;const e=state.files.find(f=>f.id===id);if(e)renderDetail(e);}
+
+// ── TAB: OVERVIEW ──
+function tabOverview(r){
+  const osStr=r.detectedOS||'Unknown';
+  const osIcon=osStr.includes('Windows')?ico('monitor'):osStr.includes('macOS')||osStr.includes('Mac')?ico('laptop'):osStr.includes('Google')?ico('cloud'):ico('cpu');
+  const checks=[
+    {icon:r.videos.length+r.audios.length>0?ico('triangle-alert'):ico('circle-check'),text:'動画・音声ファイル',val:r.videos.length+r.audios.length>0?`VIDEO ${r.videos.length} / AUDIO ${r.audios.length}`:'なし',cls:r.videos.length+r.audios.length>0?'red':'green'},
+    {icon:r.autoAdvSlides.length>0?ico('triangle-alert'):ico('circle-check'),text:'自動送り',val:r.autoAdvSlides.length>0?`${r.autoAdvSlides.length} スライド`:'なし',cls:r.autoAdvSlides.length>0?'amber':'green'},
+    {icon:r.clickDisabledSlides.length>0?ico('triangle-alert'):ico('circle-check'),text:'クリック送り無効',val:r.clickDisabledSlides.length>0?`${r.clickDisabledSlides.length} スライド`:'なし',cls:r.clickDisabledSlides.length>0?'amber':'green'},
+    {icon:r.hiddenSlides.length>0?ico('info'):ico('circle-check'),text:'非表示スライド',val:r.hiddenSlides.length>0?`${r.hiddenSlides.length} 枚`:'なし',cls:r.hiddenSlides.length>0?'amber':'green'},
+    {icon:r.allCustomFonts.length>0?ico('triangle-alert'):ico('circle-check'),text:'非標準フォント',val:r.allCustomFonts.length>0?r.allCustomFonts.slice(0,2).join(', ')+(r.allCustomFonts.length>2?'…':''):'なし',cls:r.allCustomFonts.length>0?'amber':'green'},
+    {icon:r.allLinks.length>0?ico('info'):ico('circle-check'),text:'ハイパーリンク',val:r.allLinks.length>0?`${r.allLinks.length} 件`:'なし',cls:r.allLinks.length>0?'':'green'},
+  ];
+  return `
+    <div class="kv-grid">
+      <div class="kv-card"><div class="kv-label">総スライド数</div><div class="kv-val">${r.totalSlides}</div></div>
+      <div class="kv-card"><div class="kv-label">表示スライド数</div><div class="kv-val ${r.hiddenSlides.length?'amber':''}">${r.visibleSlides.length}</div></div>
+      <div class="kv-card"><div class="kv-label">非表示</div><div class="kv-val ${r.hiddenSlides.length?'amber':''}">${r.hiddenSlides.length}</div></div>
+      <div class="kv-card"><div class="kv-label">作成環境</div><div class="kv-val" style="font-size:18px">${osIcon} <span style="font-size:14px;font-weight:500;letter-spacing:0">${esc(osStr)}</span></div></div>
+    </div>
+    <div class="sec">オペレーターチェック</div>
+    <div class="checklist">${checks.map(c=>`<div class="check-item"><div class="check-ico ${c.cls}">${c.icon}</div><div class="check-text">${c.text}</div><div class="check-val ${c.cls}">${esc(c.val)}</div></div>`).join('')}</div>`;
+}
+
+// ── TAB: SLIDES ──
+function tabSlides(r){
+  const rows=r.slides.map(s=>{
+    const mc=r.media.filter(m=>m.slides.includes(s.num)).length;
+    const flags=[
+      s.hidden?`<span class="chip purple">非表示</span>`:'',
+      s.autoAdv?`<span class="chip amber">AUTO ${fmtMs(s.autoAdvTime)}</span>`:'',
+      s.clickDisabled?`<span class="chip red">CLICK OFF</span>`:'',
+    ].filter(Boolean).join(' ');
+    return `<tr>
+      <td><span class="slide-num">${s.num}</span></td>
+      <td>${flags||'<span style="color:var(--label-4)">—</span>'}</td>
+      <td>${mc>0?`<span style="color:var(--amber);font-weight:600">${mc}</span>`:'<span style="color:var(--label-4)">—</span>'}</td>
+      <td>${s.customFonts.length?s.customFonts.map(f=>`<span class="font-tag custom">${esc(f)}</span>`).join(' '):'<span style="color:var(--label-4)">—</span>'}</td>
+      <td style="max-width:200px">${s.links.length?s.links.map(l=>`<div style="color:var(--blue);font-family:var(--f-mono);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l)}</div>`).join(''):'<span style="color:var(--label-4)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">${r.totalSlides}</div><div class="stat-label">合計</div></div>
+      <div class="stat-card"><div class="stat-num">${r.visibleSlides.length}</div><div class="stat-label">表示</div></div>
+      <div class="stat-card"><div class="stat-num ${r.hiddenSlides.length?'amber':''}">${r.hiddenSlides.length}</div><div class="stat-label">非表示</div></div>
+      <div class="stat-card"><div class="stat-num ${r.autoAdvSlides.length?'amber':''}">${r.autoAdvSlides.length}</div><div class="stat-label">自動送り</div></div>
+      <div class="stat-card"><div class="stat-num ${r.clickDisabledSlides.length?'amber':''}">${r.clickDisabledSlides.length}</div><div class="stat-label">CLICK OFF</div></div>
+    </div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>フラグ</th><th>メディア</th><th>カスタムフォント</th><th>リンク</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ── TAB: MEDIA ──
+function tabMedia(r){
+  const avFiles=[...r.videos,...r.audios];
+  const avSec=avFiles.length
+    ?`<div class="sec" style="margin-top:0">動画 / 音声 — 要確認</div><div class="tbl-wrap">${mediaTbl(avFiles)}</div>`
+    :`<div class="alert ok">${ico('circle-check')} 動画・音声ファイルは検出されませんでした</div>`;
+  const allId=`ma-${Math.random().toString(36).slice(2)}`;
+  const allSec=r.media.length
+    ?`<button class="toggle-btn" onclick="tog('${allId}',this)">${ico('chevron-down','chev')} 全メディアを表示 (${r.media.length})</button><div id="${allId}" style="display:none;margin-top:14px"><div class="sec">すべてのメディア</div><div class="tbl-wrap">${mediaTbl(r.media)}</div></div>`
+    :`<p class="empty-state">メディアファイルなし</p>`;
+  return `<div class="stat-grid">
+    <div class="stat-card"><div class="stat-num ${r.videos.length?'red':''}">${r.videos.length}</div><div class="stat-label">動画</div></div>
+    <div class="stat-card"><div class="stat-num ${r.audios.length?'amber':''}">${r.audios.length}</div><div class="stat-label">音声</div></div>
+    <div class="stat-card"><div class="stat-num">${r.images.length}</div><div class="stat-label">画像</div></div>
+    <div class="stat-card"><div class="stat-num">${r.others.length}</div><div class="stat-label">その他</div></div>
+  </div>${avSec}${allSec}`;
+}
+function mediaTbl(files){
+  const chipCls={video:'red',audio:'amber',image:'mono',other:'mono'};
+  const lbl={video:ico('film')+' 動画',audio:ico('music')+' 音声',image:ico('image')+' 画像',other:ico('file')+' その他'};
+  return `<table class="tbl"><thead><tr><th>種別</th><th>スライド</th><th>ファイル名</th><th>拡張子</th><th>サイズ</th></tr></thead><tbody>${files.map(f=>`<tr><td><span class="chip ${chipCls[f.type]}">${lbl[f.type]}</span></td><td>${f.slides.length?f.slides.map(s=>`<span class="slide-num">S${s}</span>`).join(' '):'—'}</td><td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--label)">${esc(f.name)}</td><td style="font-family:var(--f-mono);color:var(--label-3)">${f.name.split('.').pop().toUpperCase()}</td><td style="font-family:var(--f-mono);color:var(--label-3)">${fmtB(f.size)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// ── TAB: FONTS ──
+function tabFonts(r){
+  const perSlide=r.slides.filter(s=>s.allFonts.length).map(s=>`<tr><td><span class="slide-num">${s.num}</span>${s.hidden?` <span class="chip purple" style="font-size:10px">非表示</span>`:''}</td><td>${s.customFonts.map(f=>`<span class="font-tag custom">${esc(f)}</span>`).join(' ')}${s.systemFonts.map(f=>`<span class="font-tag system">${esc(f)}</span>`).join(' ')}</td></tr>`).join('');
+  return (r.allCustomFonts.length
+    ?`<div class="alert warn">${ico('triangle-alert')} 埋め込みがない場合、表示が崩れる可能性があります</div><div class="sec" style="margin-top:0">非標準フォント</div><div class="font-cloud">${r.allCustomFonts.map(f=>`<span class="font-tag custom">${esc(f)}</span>`).join('')}</div>`
+    :`<div class="alert ok">${ico('circle-check')} 非標準フォントは使用されていません</div>`)
+  +(r.allSystemFonts.length?`<div class="sec">標準フォント</div><div class="font-cloud">${r.allSystemFonts.map(f=>`<span class="font-tag system">${esc(f)}</span>`).join('')}</div>`:'')
+  +(perSlide?`<div class="sec">スライドごと</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>フォント</th></tr></thead><tbody>${perSlide}</tbody></table></div>`:'');
+}
+
+// ── TAB: LINKS ──
+function tabLinks(r){
+  if(!r.allLinks.length)return`<div class="alert ok">${ico('circle-check')} ハイパーリンクはありません</div>`;
+  const rows=r.slides.filter(s=>s.links.length).map(s=>s.links.map(l=>`<tr><td><span class="slide-num">${s.num}</span></td><td>${l.startsWith('http')?`<a class="link" href="${esc(l)}" target="_blank" rel="noopener">${esc(l)}</a>`:`<span style="color:var(--label-3);font-family:var(--f-mono);font-size:12px">${esc(l)}</span>`}</td><td>${l.startsWith('mailto:')?ico('mail'):l.startsWith('http')?ico('link'):l.startsWith('#')?ico('paperclip'):ico('file-text')}</td></tr>`).join('')).join('');
+  return `<div class="alert info">${ico('info')} ${r.allLinks.length} 件 — 本番環境で動作確認を推奨</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>リンク先</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ── TAB: META ──
+function tabMeta(r,entry){
+  const a=r.appInfo,c=r.coreInfo;
+  const fmtDate=s=>{if(!s)return'—';try{return new Date(s).toLocaleString('ja-JP');}catch{return s;}};
+  const osIcon=r.detectedOS?.includes('Windows')?ico('monitor'):r.detectedOS?.includes('macOS')||r.detectedOS?.includes('Mac')?ico('laptop'):r.detectedOS?.includes('Google')?ico('cloud'):ico('cpu');
+  return `
+    <div class="sec" style="margin-top:0">作成環境</div>
+    <div class="os-section">
+      <div class="os-row"><span class="os-key">推定OS</span><span class="os-val">${osIcon} ${esc(r.detectedOS||'—')}</span></div>
+      <div class="os-row"><span class="os-key">アプリケーション</span><span class="os-val">${esc(a.application||'—')}</span></div>
+      <div class="os-row"><span class="os-key">バージョン</span><span class="os-val">${esc(a.appVersion||'—')}</span></div>
+      <div class="os-row"><span class="os-key">会社名</span><span class="os-val">${esc(a.company||'—')}</span></div>
+    </div>
+    <div class="sec">ドキュメント情報</div>
+    <div class="os-section">
+      <div class="os-row"><span class="os-key">作成者</span><span class="os-val">${esc(c.creator||'—')}</span></div>
+      <div class="os-row"><span class="os-key">最終更新者</span><span class="os-val">${esc(c.lastModifiedBy||'—')}</span></div>
+      <div class="os-row"><span class="os-key">作成日時</span><span class="os-val">${fmtDate(c.created)}</span></div>
+      <div class="os-row"><span class="os-key">更新日時</span><span class="os-val">${fmtDate(c.modified)}</span></div>
+    </div>
+    <div class="sec">ファイル</div>
+    <div class="os-section">
+      <div class="os-row"><span class="os-key">ファイル名</span><span class="os-val">${esc(entry.name)}</span></div>
+      <div class="os-row"><span class="os-key">ファイルサイズ</span><span class="os-val">${fmtB(entry.file.size)}</span></div>
+      <div class="os-row"><span class="os-key">スライド数</span><span class="os-val">${r.totalSlides} 枚 (表示 ${r.visibleSlides.length} 枚)</span></div>
+      <div class="os-row"><span class="os-key">フォーマット</span><span class="os-val">${esc(a.presentationFormat||'—')}</span></div>
+    </div>`;
+}
+
+// ── COMPARE ──
+function buildCompare(fa,fb){
+  const ra=fa.result,rb=fb.result;
+  const dSign=n=>n>0?`+${n}`:n<0?`${n}`:'=';
+  const dCls=n=>n!==0?'changed':'same';
+  const thA=fa.thumbnail?`<img src="${fa.thumbnail}">`:'';
+  const thB=fb.thumbnail?`<img src="${fb.thumbnail}">`:'';
+  // summary
+  const sd=rb.totalSlides-ra.totalSlides;
+  const summaryCards=[
+    {label:'スライド数',val:`${ra.totalSlides} → ${rb.totalSlides}`,sub:dSign(sd),cls:dCls(sd)},
+    {label:'非表示',val:`${ra.hiddenSlides.length} → ${rb.hiddenSlides.length}`,sub:dSign(rb.hiddenSlides.length-ra.hiddenSlides.length),cls:dCls(rb.hiddenSlides.length-ra.hiddenSlides.length)},
+    {label:'自動送り',val:`${ra.autoAdvSlides.length} → ${rb.autoAdvSlides.length}`,sub:dSign(rb.autoAdvSlides.length-ra.autoAdvSlides.length),cls:dCls(rb.autoAdvSlides.length-ra.autoAdvSlides.length)},
+    {label:'CLICK OFF',val:`${ra.clickDisabledSlides.length} → ${rb.clickDisabledSlides.length}`,sub:dSign(rb.clickDisabledSlides.length-ra.clickDisabledSlides.length),cls:dCls(rb.clickDisabledSlides.length-ra.clickDisabledSlides.length)},
+    {label:'動画',val:`${ra.videos.length} → ${rb.videos.length}`,sub:dSign(rb.videos.length-ra.videos.length),cls:dCls(rb.videos.length-ra.videos.length)},
+    {label:'音声',val:`${ra.audios.length} → ${rb.audios.length}`,sub:dSign(rb.audios.length-ra.audios.length),cls:dCls(rb.audios.length-ra.audios.length)},
+  ].map(c=>`<div class="diff-sum-card"><div class="diff-sum-label">${c.label}</div><div class="diff-sum-val ${c.cls}">${esc(c.val)} <span style="font-size:14px">(${esc(c.sub)})</span></div></div>`).join('');
+
+  // text diff
+  let textChangedCount=0;
+  const textDiffRows=[];
+  const maxSl=Math.max(ra.slides.length,rb.slides.length);
+  for(let i=0;i<maxSl;i++){
+    const sa=ra.slides[i],sb=rb.slides[i];
+    const tA=(sa?.textBlocks||[]).join('\n').trim();
+    const tB=(sb?.textBlocks||[]).join('\n').trim();
+    if(tA===tB)continue;textChangedCount++;
+    const lA=tA?tA.split('\n'):[];const lB=tB?tB.split('\n'):[];
+    const diff=lineDiff(lA,lB);
+    const diffH=diff.map(d=>{
+      if(d.type==='same')return`<div class="tdl-same">${esc(d.text)}</div>`;
+      if(d.type==='removed')return`<div class="tdl-del">－ ${inlineWordDiff(d.text,d.pair||'')}</div>`;
+      if(d.type==='added')return`<div class="tdl-add">＋ ${inlineWordDiff(d.pair||'',d.text)}</div>`;
+    }).join('');
+    const numH=!sa?`<span class="d-add">+${i+1}</span>`:!sb?`<span class="d-del">-${i+1}</span>`:`${i+1}`;
+    textDiffRows.push(`<div class="tdiff-card"><div class="tdiff-head"><span class="slide-num">${numH}</span>${!sa?'<span class="chip green">追加</span>':!sb?'<span class="chip red">削除</span>':'<span class="chip amber">変更</span>'}</div><div class="tdiff-body">${diffH||'<span style="color:var(--label-4)">テキストなし</span>'}</div></div>`);
+  }
+
+  // slide flags diff
+  const slideRows=[];
+  for(let i=0;i<Math.max(ra.slides.length,rb.slides.length);i++){
+    const sa=ra.slides[i],sb=rb.slides[i];
+    const flagsOf=s=>s?[s.hidden?'非表示':null,s.autoAdv?`AUTO`:null,s.clickDisabled?'CLICK OFF':null].filter(Boolean).join(', ')||'—':'—';
+    const chg=JSON.stringify(sa?{h:sa.hidden,a:sa.autoAdv,c:sa.clickDisabled,f:sa.customFonts.sort().join()}:{})!==JSON.stringify(sb?{h:sb.hidden,a:sb.autoAdv,c:sb.clickDisabled,f:sb.customFonts.sort().join()}:{});
+    slideRows.push(`<tr class="${!sa?'row-add':!sb?'row-del':chg?'row-chg':''}"><td><span class="slide-num">${!sa?`<span class="d-add">+${i+1}</span>`:!sb?`<span class="d-del">-${i+1}</span>`:i+1}</span></td><td style="color:var(--label-3)">${esc(flagsOf(sa))}</td><td style="color:var(--label-3)">${esc(flagsOf(sb))}</td><td>${!sa?'<span class="d-add">追加</span>':!sb?'<span class="d-del">削除</span>':chg?'<span class="d-chg">変更</span>':'<span class="d-eq">—</span>'}</td></tr>`);
+  }
+
+  // font diff
+  const fOnlyA=ra.allCustomFonts.filter(f=>!rb.allCustomFonts.includes(f));
+  const fOnlyB=rb.allCustomFonts.filter(f=>!ra.allCustomFonts.includes(f));
+  const fCommon=ra.allCustomFonts.filter(f=>rb.allCustomFonts.includes(f));
+  const fontDiffH=fOnlyA.length||fOnlyB.length?`${fOnlyA.length?`<div style="margin-bottom:8px"><span style="font-size:12px;color:var(--label-3)">A のみ: </span>${fOnlyA.map(f=>`<span class="font-tag custom">${esc(f)}</span>`).join(' ')}</div>`:''}${fOnlyB.length?`<div style="margin-bottom:8px"><span style="font-size:12px;color:var(--label-3)">B のみ: </span>${fOnlyB.map(f=>`<span class="font-tag" style="border-color:var(--green-sep);background:var(--green-bg);color:var(--green)">${esc(f)}</span>`).join(' ')}</div>`:''}${fCommon.length?`<div><span style="font-size:12px;color:var(--label-3)">共通: </span>${fCommon.map(f=>`<span class="font-tag custom">${esc(f)}</span>`).join(' ')}</div>`:''}`:`<p class="empty-state" style="padding:16px 0">フォント差分なし</p>`;
+
+  // media diff
+  const mNamesA=new Set(ra.media.map(m=>m.name));const mNamesB=new Set(rb.media.map(m=>m.name));
+  const mOnlyA=ra.media.filter(m=>!mNamesB.has(m.name));const mOnlyB=rb.media.filter(m=>!mNamesA.has(m.name));
+  const mediaDiffRows=[
+    ...mOnlyA.map(m=>`<tr class="row-del"><td><span class="chip red">${m.type}</span></td><td style="color:var(--red)">${esc(m.name)}</td><td style="color:var(--label-3)">${fmtB(m.size)}</td><td><span class="d-del">A のみ</span></td></tr>`),
+    ...mOnlyB.map(m=>`<tr class="row-add"><td><span class="chip green">${m.type}</span></td><td style="color:var(--green)">${esc(m.name)}</td><td style="color:var(--label-3)">${fmtB(m.size)}</td><td><span class="d-add">B のみ</span></td></tr>`),
+  ];
+
+  // link diff
+  const lOnlyA=ra.allLinks.filter(l=>!rb.allLinks.includes(l));const lOnlyB=rb.allLinks.filter(l=>!ra.allLinks.includes(l));
+
+  return `
+    <div class="cmp-bar">
+      <div class="cmp-bar-title">比較: ${esc(fa.name)} ${ico('arrow-left-right')} ${esc(fb.name)}</div>
+      <button class="btn" onclick="closeCompare()">${ico('x')} 閉じる</button>
+    </div>
+    <div class="cmp-body">
+      <div class="cmp-cards">
+        <div class="cmp-card"><div class="cmp-card-thumb">${thA}</div><div><div class="cmp-card-tag">A — 基準</div><div class="cmp-card-name">${esc(fa.name)}</div></div></div>
+        <div class="cmp-card"><div class="cmp-card-thumb">${thB}</div><div><div class="cmp-card-tag" style="color:var(--purple)">B — 比較</div><div class="cmp-card-name">${esc(fb.name)}</div></div></div>
+      </div>
+      <div class="sec" style="margin-top:0">サマリー</div>
+      <div class="diff-summary-grid">${summaryCards}</div>
+      <div class="sec">テキスト差分 <span style="font-weight:400;color:${textChangedCount?'var(--amber)':'var(--label-3)'}">— ${textChangedCount} スライド変更</span></div>
+      ${textDiffRows.length?textDiffRows.join(''):'<p class="empty-state" style="padding:16px 0">テキスト差分なし</p>'}
+      <div class="sec">スライドフラグ差分</div>
+      <div class="diff-tbl-wrap"><table class="diff-tbl"><thead><tr><th>#</th><th class="th-a">A</th><th class="th-b">B</th><th>差分</th></tr></thead><tbody>${slideRows.join('')}</tbody></table></div>
+      <div class="sec">フォント差分</div>
+      ${fontDiffH}
+      <div class="sec">メディア差分</div>
+      ${mediaDiffRows.length?`<div class="diff-tbl-wrap"><table class="diff-tbl"><thead><tr><th>種別</th><th>ファイル</th><th>サイズ</th><th>状態</th></tr></thead><tbody>${mediaDiffRows.join('')}</tbody></table></div>`:'<p class="empty-state" style="padding:16px 0">メディア差分なし</p>'}
+      <div class="sec">リンク差分</div>
+      ${lOnlyA.length||lOnlyB.length?`<div class="diff-tbl-wrap"><table class="diff-tbl"><thead><tr><th>状態</th><th>URL</th></tr></thead><tbody>${lOnlyA.map(l=>`<tr class="row-del"><td><span class="d-del">A のみ</span></td><td style="color:var(--red);font-family:var(--f-mono);font-size:11px">${esc(l)}</td></tr>`).join('')}${lOnlyB.map(l=>`<tr class="row-add"><td><span class="d-add">B のみ</span></td><td style="color:var(--green);font-family:var(--f-mono);font-size:11px">${esc(l)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty-state" style="padding:16px 0">リンク差分なし</p>'}
+    </div>`;
+}
+
+// ── DIFF FUNCTIONS ──
+function lineDiff(lA,lB){
+  const m=lA.length,n=lB.length;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){dp[i][j]=lA[i-1]===lB[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);}
+  const ops=[];let i=m,j=n;
+  while(i>0||j>0){
+    if(i>0&&j>0&&lA[i-1]===lB[j-1]){ops.unshift({type:'same',text:lA[i-1]});i--;j--;}
+    else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){ops.unshift({type:'added',text:lB[j-1]});j--;}
+    else{ops.unshift({type:'removed',text:lA[i-1]});i--;}
+  }
+  const res=[];
+  for(let k=0;k<ops.length;k++){
+    if(ops[k].type==='removed'&&k+1<ops.length&&ops[k+1].type==='added'){res.push({type:'removed',text:ops[k].text,pair:ops[k+1].text});res.push({type:'added',text:ops[k+1].text,pair:ops[k].text});k++;}
+    else res.push(ops[k]);
+  }
+  return res;
+}
+function inlineWordDiff(oldL,newL){
+  const wA=oldL.split(/(\s+)/).filter(s=>s.length),wB=newL.split(/(\s+)/).filter(s=>s.length);
+  const m=wA.length,n=wB.length;
+  if(!m)return wB.map(w=>`<mark class="m-add">${esc(w)}</mark>`).join('');
+  if(!n)return wA.map(w=>`<mark class="m-del">${esc(w)}</mark>`).join('');
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){dp[i][j]=wA[i-1]===wB[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);}
+  const ops=[];let i=m,j=n;
+  while(i>0||j>0){
+    if(i>0&&j>0&&wA[i-1]===wB[j-1]){ops.unshift({t:'s',w:wB[j-1]});i--;j--;}
+    else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){ops.unshift({t:'a',w:wB[j-1]});j--;}
+    else{ops.unshift({t:'r',w:wA[i-1]});i--;}
+  }
+  return ops.map(o=>o.t==='s'?esc(o.w):o.t==='a'?`<mark class="m-add">${esc(o.w)}</mark>`:`<mark class="m-del">${esc(o.w)}</mark>`).join('');
+}
+
+function tog(id,btn){
+  const el=document.getElementById(id);if(!el)return;
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  btn.classList.toggle('open',open);
+}
+
+// ── MOBILE SIDEBAR ──
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sb-overlay');
+  const btn=document.getElementById('mob-menu-btn');
+  const isOpen=sb.classList.contains('open');
+  if(isOpen){closeSidebar();}
+  else{sb.classList.add('open');ov.classList.add('visible');btn.classList.add('open');document.body.style.overflow='hidden';}
+}
+function closeSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('sb-overlay');
+  const btn=document.getElementById('mob-menu-btn');
+  sb.classList.remove('open');ov.classList.remove('visible');btn.classList.remove('open');
+  document.body.style.overflow='';
+}
+// ファイル選択後にサイドバーを閉じる
+function addFiles(items){
+  if(!items.length)return;
+  closeSidebar();
+  document.getElementById('drop-overlay').style.display='none';
+  const dv=document.getElementById('detail-view');
+  dv.style.display='flex';dv.style.flexDirection='column';
+  for(const {file,path} of items){
+    const id=++idCnt;
+    const entry={id,name:file.name,path,file,status:'scanning',result:null,thumbnail:null};
+    state.files.push(entry);state.activeTabs[id]='overview';
+    renderSidebar();if(!state.activeId)selectFile(id);scanFile(entry);
+  }
+}
+
+// ── ファイルinputリスナー（addFiles定義後に登録） ──
+console.log('Binding inputs:', document.querySelectorAll('input.fi-input').length);
+document.querySelectorAll('input.fi-input').forEach(inp=>{
+  inp.addEventListener('change',e=>{
+    const files=[...e.target.files].filter(f=>f.name.toLowerCase().endsWith('.pptx'));
+    addFiles(files.map(f=>({file:f,path:f.webkitRelativePath||f.name})));
+    e.target.value='';
+  });
+});
+</script>
+</body>
+</html>

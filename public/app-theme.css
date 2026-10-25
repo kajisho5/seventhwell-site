@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+/* SEVENTHWELL — Webツール共通の見た目（SLIDESCAN などのアプリ用）
+   ★アプリの中身（HTML・JS）には手を入れず、この1枚をかぶせるだけで見た目を合わせる★
+     アプリ側は色・フォントを CSS 変数（--bg / --label / --blue …）で持っているので、変数を上書きする。
+     アプリの <style> より後で読み込むこと（</head> の直前に <link rel="stylesheet" href="/app-theme.css">）。
+   ★中身を更新しても、この1行と変数名を残せば見た目は保たれる★
+   配色はサイトと同じ（紙・墨・タリー赤）。コントラストは本文系すべて 4.5:1 以上（紙 #efeee9 上で計算）。
+   主色は「墨」。赤はアプリ内で“エラー”の意味なので、ブランドの赤とは混ぜない（ロゴの走査線だけ赤）。 */
+
+@font-face{font-family:'Goodtimes';src:url('/goodtimes.ttf') format('truetype');font-display:swap}
+
+:root{
+  /* 面 */
+  --bg:#efeee9; --surface:#f7f6f2; --surface-2:#e5e4de; --surface-3:#dbdad3;
+  --overlay:rgba(18,18,18,.05); --sep:rgba(18,18,18,.14); --sep-hi:rgba(18,18,18,.3);
+  /* 文字（label-3 5.8:1 / label-4 4.9:1） */
+  --label:#121212; --label-2:#3a3a37; --label-3:#5b5b57; --label-4:#6b6b66;
+  /* 主色＝墨 */
+  --blue:#121212; --blue-bg:rgba(18,18,18,.07); --blue-sep:rgba(18,18,18,.35);
+  /* 状態色（明るい背景用に暗くしたもの） */
+  --red:#c4170d;    --red-bg:rgba(196,23,13,.08);   --red-sep:rgba(196,23,13,.32);
+  --amber:#9a5a00;  --amber-bg:rgba(214,140,0,.12); --amber-sep:rgba(154,90,0,.32);
+  --green:#1e7a3c;  --green-bg:rgba(30,122,60,.1);  --green-sep:rgba(30,122,60,.32);
+  --purple:#7b3fb0; --purple-bg:rgba(123,63,176,.1);--purple-sep:rgba(123,63,176,.32);
+  /* 角は立てる（サイトと同じ） */
+  --radius:0px; --radius-s:0px;
+  /* フォント：日本語は Noto Sans JP、数値・コードは等幅のまま */
+  --f-ui:'Noto Sans JP',-apple-system,BlinkMacSystemFont,sans-serif;
+  --sw-gt:'Goodtimes','Noto Sans JP',sans-serif;
+  --sw-tally:#e3261c;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--label)}
+
+/* ── ヘッダー：サイトのバーと同じ見え方 ── */
+header{background:rgba(239,238,233,.94)!important;border-bottom:1px solid var(--sep)!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.logo-name,.mob-logo{font-family:var(--sw-gt)!important;font-weight:400!important;letter-spacing:.04em!important;text-transform:uppercase}
+.logo-name em,.mob-logo em{color:var(--label-3)!important}
+.logo-pill{font-family:var(--sw-gt)!important;font-weight:400;letter-spacing:.06em;font-size:11px;background:transparent!important;border:1px solid var(--sep-hi)!important;color:var(--label-2)!important;border-radius:0!important}
+.logo-pill a{color:inherit;text-decoration:none}
+.logo-pill a:hover{color:var(--label)}
+.hver,.sb-count{font-family:var(--sw-gt)!important;font-weight:400;letter-spacing:.04em}
+/* ロゴとドロップ欄のアイコン：白線→墨、走査線はタリー赤 */
+.logo-icon rect[stroke],.dz-iconbox rect[stroke]{stroke:rgba(18,18,18,.4)}
+.logo-icon rect[fill],.dz-iconbox rect[fill]{fill:rgba(18,18,18,.22)}
+#sl stop,#sl2 stop{stop-color:var(--sw-tally)}
+
+/* ── ボタン：枠は墨、主ボタンは墨の塗り、押せる時にタリー赤 ── */
+.btn:hover{border-color:var(--label)!important}
+.btn-primary,.btn-compare,.mob-add-btn{background:var(--label)!important;color:#fff!important}
+.btn-primary:hover,.btn-compare:hover:not(:disabled),.mob-add-btn:hover{background:var(--sw-tally)!important;color:#fff!important}
+.btn-compare:disabled{background:var(--surface-3)!important;color:var(--label-3)!important}
+
+/* ── 固定色だった所 ── */
+::-webkit-scrollbar-thumb{background:rgba(18,18,18,.18)}
+::-webkit-scrollbar-thumb:hover{background:rgba(18,18,18,.3)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--label)}
+.tbl tr:hover td,.diff-tbl tr:hover td{background:rgba(18,18,18,.035)}
+.diff-tbl tr.row-add td{background:rgba(30,122,60,.06)}
+.diff-tbl tr.row-del td{background:rgba(196,23,13,.06)}
+.diff-tbl tr.row-chg td{background:rgba(214,140,0,.08)}
+mark.m-add{background:rgba(30,122,60,.16)}
+mark.m-del{background:rgba(196,23,13,.14)}
+:focus-visible{outline:2px solid var(--sw-tally);outline-offset:2px}
+
+/* ── 角を立てる（アプリ側で数値直書きの角丸。丸い状態ドット .dot だけは丸のまま） ── */
+::-webkit-scrollbar-thumb,.logo-pill,.btn,.sb-count,.fi-thumb,.fi-thumb-count,.btn-compare,.drop-zone,.dz-iconbox,.dz-btn,
+.dv-thumb,.tab-pill,.cmp-card-thumb,.chip,.slide-num,.font-tag,.toggle-btn,.tdl-del,.tdl-add,
+mark.m-add,mark.m-del,.mob-menu-btn,.mob-add-btn{border-radius:0!important}
+
+/* ── 数字は Goodtimes（サイトの数字と同じ見え方） ── */
+.stat-num,.kv-val,.diff-sum-val,.slide-num{font-family:var(--sw-gt)!important;font-weight:400!important;letter-spacing:.01em!important}
+.dz-label{font-weight:700}
+/* スマホ用の上部バー（アプリ側で暗色 rgba(17,17,20,.9) を直書き）→ 紙色に */
+#mobile-nav{background:rgba(239,238,233,.94)!important}
+
+/* ── アイコン（Lucide の線画 SVG。アプリ側の ico() が出す <svg class="i">） ── */
+.i{display:inline-block;width:1.1em;height:1.1em;vertical-align:-.18em;flex:none}
+.i.spin{animation:sw-spin 1s linear infinite}
+@keyframes sw-spin{to{transform:rotate(360deg)}}
+.alert .i{margin-right:.4em}
+.fi-status .i{width:14px;height:14px}
+.check-ico{color:var(--label-3);display:flex;align-items:center}
+.check-ico .i{width:18px;height:18px}
+.check-ico.green{color:var(--green)} .check-ico.amber{color:var(--amber)} .check-ico.red{color:var(--red)}
+.toggle-btn .chev{transition:transform .2s}
+.toggle-btn.open .chev{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.i.spin{animation:none}}

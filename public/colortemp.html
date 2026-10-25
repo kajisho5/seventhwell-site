@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>COLORTEMP EYE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --fg: #f0f0f0;
+    --dim: #444;
+    --accent: #f0f0f0;
+    --warn: #ff4444;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bot: env(safe-area-inset-bottom);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Space Mono', monospace;
+    min-height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    padding: calc(var(--safe-top) + 14px) 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--fg);
+  }
+  .logo span { color: var(--dim); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--dim);
+    transition: background 0.3s;
+  }
+  .status-dot.active { background: #00ff88; box-shadow: 0 0 8px #00ff8888; }
+
+  /* VIEWFINDER */
+  .viewfinder-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #0a0a0a;
+    overflow: hidden;
+  }
+  #video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #canvas { display: none; }
+
+  /* CROSSHAIR */
+  .crosshair {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px; height: 60px;
+    pointer-events: none;
+  }
+  .crosshair::before, .crosshair::after {
+    content: '';
+    position: absolute;
+    background: rgba(240,240,240,0.8);
+  }
+  .crosshair::before { width: 1px; height: 100%; left: 50%; top: 0; }
+  .crosshair::after  { width: 100%; height: 1px; top: 50%; left: 0; }
+
+  .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: rgba(240,240,240,0.9);
+    border-style: solid;
+  }
+  .corner.tl { top: 0; left: 0;   border-width: 2px 0 0 2px; }
+  .corner.tr { top: 0; right: 0;  border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+  .corner.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+  /* SAMPLE PATCH */
+  .sample-patch {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 40px; height: 40px;
+    border: 1px solid rgba(240,240,240,0.3);
+    border-radius: 4px;
+    background: #888;
+    transition: background 0.1s;
+  }
+
+  /* KELVIN TAPE */
+  .kelvin-tape {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 36px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .tape-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    flex-shrink: 0;
+  }
+  .tape-bar {
+    flex: 1;
+    height: 4px;
+    background: linear-gradient(to right, #ff6b35, #ffe066, #ffffff, #9ec8ff);
+    border-radius: 2px;
+    position: relative;
+  }
+  .tape-cursor {
+    position: absolute;
+    top: -4px;
+    width: 2px; height: 12px;
+    background: white;
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
+    border-radius: 1px;
+  }
+
+  /* METRICS */
+  .metrics {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0 calc(var(--safe-bot) + 10px);
+  }
+
+  /* BIG K VALUE */
+  .kelvin-display {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .k-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 1;
+    color: var(--fg);
+    letter-spacing: -0.02em;
+    transition: color 0.3s;
+  }
+  .k-unit {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+  }
+  .k-name {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    text-transform: uppercase;
+    padding-top: 4px;
+    margin-left: auto;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: #1a1a1a;
+    margin: 14px 20px;
+  }
+
+  /* GRID METRICS */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #1a1a1a;
+    margin: 0 20px;
+    border: 1px solid #1a1a1a;
+  }
+  .metric-cell {
+    background: var(--bg);
+    padding: 12px 14px;
+  }
+  .metric-cell.full { grid-column: 1 / -1; }
+  .metric-label {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .metric-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    color: var(--fg);
+    line-height: 1;
+  }
+  .metric-value.positive { color: #66ff88; }
+  .metric-value.negative { color: #ff6655; }
+  .metric-sub {
+    font-size: 9px;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+
+  /* RGB BAR */
+  .rgb-bars {
+    margin: 14px 20px 0;
+  }
+  .rgb-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .rgb-ch {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    width: 14px;
+    flex-shrink: 0;
+  }
+  .rgb-ch.r { color: #ff5555; }
+  .rgb-ch.g { color: #55ff88; }
+  .rgb-ch.b { color: #5599ff; }
+  .rgb-bar-track {
+    flex: 1;
+    height: 6px;
+    background: #1a1a1a;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .rgb-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.15s ease;
+  }
+  .rgb-bar-fill.r { background: #ff5555; }
+  .rgb-bar-fill.g { background: #55ff88; }
+  .rgb-bar-fill.b { background: #5599ff; }
+  .rgb-val {
+    font-size: 11px;
+    color: var(--fg);
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* FILTER RECOMMENDATION */
+  .filter-block {
+    margin: 14px 20px 0;
+    border: 1px solid #2a2a2a;
+    padding: 12px 14px;
+  }
+  .filter-title {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .filter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .filter-tag {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border: 1px solid #333;
+    color: var(--fg);
+    background: #111;
+    transition: border-color 0.2s;
+  }
+  .filter-tag.primary {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  /* FREEZE BUTTON */
+  .controls {
+    padding: 14px 20px calc(var(--safe-bot) + 14px);
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    flex: 1;
+    padding: 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.15em;
+    border: 1px solid #333;
+    background: #111;
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-appearance: none;
+  }
+  .btn:active { background: #222; transform: scale(0.98); }
+  .btn.primary {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .btn.primary:active { background: #ccc; }
+  .btn.frozen {
+    border-color: #ff4444;
+    color: #ff4444;
+  }
+
+  /* START OVERLAY */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    z-index: 100;
+    transition: opacity 0.5s;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+  .overlay-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.2em;
+  }
+  .overlay-sub {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-align: center;
+    line-height: 2;
+  }
+  .overlay-btn {
+    padding: 14px 48px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    border: 1px solid var(--fg);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    margin-top: 8px;
+    -webkit-appearance: none;
+  }
+  .overlay-btn:active { background: #222; }
+
+  /* SCAN LINE */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 200;
+  }
+</style>
+<!-- SEVENTHWELL Tools：アイコンと共有画像（2026-09-27 追加。元は release/tools-live/） -->
+<link rel="icon" type="image/svg+xml" href="/img/tools/colortemp.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/tools/colortemp-32.png">
+<link rel="apple-touch-icon" href="/img/tools/colortemp-180.png">
+<meta property="og:site_name" content="SEVENTHWELL">
+<meta property="og:title" content="COLORTEMP EYE (LENSGENNI) — SEVENTHWELL">
+<meta property="og:description" content="色温度・レンズ計算ツール">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://seventh-well.com/colortemp/">
+<meta property="og:image" content="https://seventh-well.com/img/tools/colortemp-ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+
+<!-- START OVERLAY -->
+<div class="overlay" id="overlay">
+  <div class="overlay-logo">COLORTEMP EYE</div>
+  <div class="overlay-sub">
+    COLOR TEMPERATURE ANALYZER<br>
+    FOR BROADCAST & LIVE PRODUCTION
+  </div>
+  <button class="overlay-btn" id="startBtn">ACTIVATE CAMERA</button>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">COLORTEMP<span> EYE</span></div>
+  <div class="status-dot" id="statusDot"></div>
+</header>
+
+<!-- VIEWFINDER -->
+<div class="viewfinder-wrap">
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+
+  <div class="crosshair">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+  </div>
+
+  <div class="sample-patch" id="samplePatch"></div>
+
+  <div class="kelvin-tape">
+    <div class="tape-label">1800K</div>
+    <div class="tape-bar">
+      <div class="tape-cursor" id="tapeCursor" style="left:50%"></div>
+    </div>
+    <div class="tape-label">12000K</div>
+  </div>
+</div>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="kelvin-display">
+    <div class="k-value" id="kValue">----</div>
+    <div class="k-unit">K</div>
+    <div class="k-name" id="kName">---</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="metrics-grid">
+    <div class="metric-cell">
+      <div class="metric-label">R GAIN</div>
+      <div class="metric-value" id="rGain">--</div>
+      <div class="metric-sub">correction</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-label">B GAIN</div>
+      <div class="metric-value" id="bGain">--</div>
+      <div class="metric-sub">correction</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-label">MG SHIFT</div>
+      <div class="metric-value" id="mgShift">--</div>
+      <div class="metric-sub">magenta ← → green</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-label">SCENE</div>
+      <div class="metric-value" id="sceneType" style="font-size:18px">--</div>
+      <div class="metric-sub">light source</div>
+    </div>
+  </div>
+
+  <div class="rgb-bars">
+    <div class="rgb-row">
+      <span class="rgb-ch r">R</span>
+      <div class="rgb-bar-track"><div class="rgb-bar-fill r" id="rBar" style="width:50%"></div></div>
+      <span class="rgb-val" id="rVal">128</span>
+    </div>
+    <div class="rgb-row">
+      <span class="rgb-ch g">G</span>
+      <div class="rgb-bar-track"><div class="rgb-bar-fill g" id="gBar" style="width:50%"></div></div>
+      <span class="rgb-val" id="gVal">128</span>
+    </div>
+    <div class="rgb-row">
+      <span class="rgb-ch b">B</span>
+      <div class="rgb-bar-track"><div class="rgb-bar-fill b" id="bBar" style="width:50%"></div></div>
+      <span class="rgb-val" id="bVal">128</span>
+    </div>
+  </div>
+
+  <div class="filter-block">
+    <div class="filter-title">RECOMMENDED FILTER</div>
+    <div class="filter-list" id="filterList">
+      <span class="filter-tag">--</span>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="btn primary" id="freezeBtn">FREEZE</button>
+  <button class="btn" id="copyBtn">COPY</button>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let stream = null;
+let frozen = false;
+let rafId = null;
+let lastK = 5600;
+let lastRGB = { r: 128, g: 128, b: 128 };
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+// ─── Color Temperature Estimation ────────────────────────
+// McCamy's approximation + XYZ estimation from RGB
+function rgbToXY(r, g, b) {
+  // Linear
+  const rl = r / 255, gl = g / 255, bl = b / 255;
+  // sRGB to XYZ (D65)
+  const X = rl * 0.4124 + gl * 0.3576 + bl * 0.1805;
+  const Y = rl * 0.2126 + gl * 0.7152 + bl * 0.0722;
+  const Z = rl * 0.0193 + gl * 0.1192 + bl * 0.9505;
+  const s = X + Y + Z;
+  if (s < 0.001) return { x: 0.33, y: 0.33 };
+  return { x: X / s, y: Y / s };
+}
+
+function xyCCT(x, y) {
+  // McCamy formula
+  const n = (x - 0.3320) / (0.1858 - y);
+  return 449 * n * n * n + 3525 * n * n + 6823.3 * n + 5520.33;
+}
+
+function estimateCCT(r, g, b) {
+  const { x, y } = rgbToXY(r, g, b);
+  let cct = xyCCT(x, y);
+  cct = Math.max(1800, Math.min(12000, cct));
+  return Math.round(cct / 50) * 50;
+}
+
+// ─── Mazeunta/Green Shift ────────────────────────────────
+function mgShift(r, g, b) {
+  const mg = g - (r + b) / 2;
+  return Math.round(mg * 0.1);
+}
+
+// ─── RGB Gain Corrections ────────────────────────────────
+function gainCorrections(r, g, b) {
+  const avg = (r + g + b) / 3;
+  if (avg < 1) return { rg: 0, bg: 0 };
+  const rg = ((avg / r) - 1) * 100;
+  const bg = ((avg / b) - 1) * 100;
+  return {
+    rg: Math.round(Math.max(-99, Math.min(99, rg))),
+    bg: Math.round(Math.max(-99, Math.min(99, bg)))
+  };
+}
+
+// ─── Scene Name ──────────────────────────────────────────
+function sceneName(k) {
+  if (k < 2200) return 'CANDLE';
+  if (k < 2800) return 'TUNGSTEN';
+  if (k < 3400) return 'HALOGEN';
+  if (k < 4000) return 'WARM FL';
+  if (k < 4500) return 'CW FL';
+  if (k < 5200) return 'HORIZON';
+  if (k < 5800) return 'DAYLIGHT';
+  if (k < 6500) return 'D65';
+  if (k < 7500) return 'OVERCAST';
+  if (k < 9000) return 'OPEN SKY';
+  return 'DEEP SKY';
+}
+
+// ─── Filter Recommendations ──────────────────────────────
+function filterRec(k) {
+  if (k < 2500) return ['85B', '85'];
+  if (k < 3000) return ['85B', '85', 'CTO'];
+  if (k < 3500) return ['85', 'Full CTO'];
+  if (k < 4000) return ['1/2 CTO', '85C'];
+  if (k < 4500) return ['1/4 CTO', '1/4 CTB'];
+  if (k < 5000) return ['1/4 CTB'];
+  if (k < 5500) return ['NONE', '1/8 CTB'];
+  if (k < 6000) return ['NONE'];
+  if (k < 7000) return ['1/4 CTO', '1/2 CTO'];
+  if (k < 9000) return ['1/2 CTO', 'Full CTO'];
+  return ['Full CTO', '85B'];
+}
+
+// ─── Tape cursor position ────────────────────────────────
+function kToPercent(k) {
+  const MIN = 1800, MAX = 12000;
+  return Math.max(0, Math.min(100, (k - MIN) / (MAX - MIN) * 100));
+}
+
+// ─── K value color tint ──────────────────────────────────
+function kToColor(k) {
+  if (k < 3000) return '#ffaa55';
+  if (k < 4000) return '#ffcc88';
+  if (k < 5500) return '#ffe8cc';
+  if (k < 6500) return '#f0f0f0';
+  if (k < 8000) return '#ccddff';
+  return '#9ec8ff';
+}
+
+// ─── Smooth value ────────────────────────────────────────
+function smooth(prev, next, alpha) {
+  return prev * (1 - alpha) + next * alpha;
+}
+
+// ─── Sample center region ────────────────────────────────
+function sampleCenter() {
+  const W = canvas.width, H = canvas.height;
+  const sw = Math.floor(W * 0.12), sh = Math.floor(H * 0.12);
+  const sx = Math.floor((W - sw) / 2), sy = Math.floor((H - sh) / 2);
+  const data = ctx.getImageData(sx, sy, sw, sh).data;
+  let r = 0, g = 0, b = 0, n = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    r += data[i]; g += data[i+1]; b += data[i+2]; n++;
+  }
+  return { r: r/n, g: g/n, b: b/n };
+}
+
+// ─── Update UI ───────────────────────────────────────────
+function updateUI(r, g, b) {
+  const k = estimateCCT(r, g, b);
+  lastK = smooth(lastK, k, 0.25);
+  const kRound = Math.round(lastK / 50) * 50;
+
+  lastRGB.r = smooth(lastRGB.r, r, 0.2);
+  lastRGB.g = smooth(lastRGB.g, g, 0.2);
+  lastRGB.b = smooth(lastRGB.b, b, 0.2);
+
+  const rr = lastRGB.r, gg = lastRGB.g, bb = lastRGB.b;
+
+  // K display
+  document.getElementById('kValue').textContent = kRound.toLocaleString();
+  document.getElementById('kValue').style.color = kToColor(kRound);
+  document.getElementById('kName').textContent = sceneName(kRound);
+
+  // Tape cursor
+  document.getElementById('tapeCursor').style.left = kToPercent(kRound) + '%';
+
+  // Sample patch
+  document.getElementById('samplePatch').style.background =
+    `rgb(${Math.round(rr)},${Math.round(gg)},${Math.round(bb)})`;
+
+  // Gain corrections
+  const { rg, bg } = gainCorrections(rr, gg, bb);
+  const rGainEl = document.getElementById('rGain');
+  const bGainEl = document.getElementById('bGain');
+  rGainEl.textContent = (rg >= 0 ? '+' : '') + rg;
+  rGainEl.className = 'metric-value' + (rg > 5 ? ' positive' : rg < -5 ? ' negative' : '');
+  bGainEl.textContent = (bg >= 0 ? '+' : '') + bg;
+  bGainEl.className = 'metric-value' + (bg > 5 ? ' positive' : bg < -5 ? ' negative' : '');
+
+  // MG shift
+  const mg = mgShift(rr, gg, bb);
+  const mgEl = document.getElementById('mgShift');
+  mgEl.textContent = (mg >= 0 ? 'G +' : 'M ') + Math.abs(mg);
+  mgEl.className = 'metric-value' + (mg > 3 ? ' positive' : mg < -3 ? ' negative' : '');
+
+  // Scene
+  document.getElementById('sceneType').textContent = sceneName(kRound);
+
+  // RGB bars
+  const max = Math.max(rr, gg, bb, 1);
+  document.getElementById('rBar').style.width = (rr / 255 * 100) + '%';
+  document.getElementById('gBar').style.width = (gg / 255 * 100) + '%';
+  document.getElementById('bBar').style.width = (bb / 255 * 100) + '%';
+  document.getElementById('rVal').textContent = Math.round(rr);
+  document.getElementById('gVal').textContent = Math.round(gg);
+  document.getElementById('bVal').textContent = Math.round(bb);
+
+  // Filters
+  const filters = filterRec(kRound);
+  const fl = document.getElementById('filterList');
+  fl.innerHTML = filters.map((f, i) =>
+    `<span class="filter-tag${i === 0 ? ' primary' : ''}">${f}</span>`
+  ).join('');
+}
+
+// ─── Render Loop ─────────────────────────────────────────
+function renderLoop() {
+  if (!frozen && video.readyState >= 2) {
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    ctx.drawImage(video, 0, 0);
+    const { r, g, b } = sampleCenter();
+    updateUI(r, g, b);
+  }
+  rafId = requestAnimationFrame(renderLoop);
+}
+
+// ─── Camera Start ────────────────────────────────────────
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    });
+    video.srcObject = stream;
+    await video.play();
+    document.getElementById('statusDot').classList.add('active');
+    document.getElementById('overlay').classList.add('hidden');
+    renderLoop();
+  } catch (e) {
+    alert('カメラへのアクセスが必要です: ' + e.message);
+  }
+}
+
+// ─── Freeze ──────────────────────────────────────────────
+document.getElementById('freezeBtn').addEventListener('click', () => {
+  frozen = !frozen;
+  const btn = document.getElementById('freezeBtn');
+  btn.textContent = frozen ? 'LIVE' : 'FREEZE';
+  btn.className = frozen ? 'btn frozen' : 'btn primary';
+  document.getElementById('statusDot').style.background = frozen ? '#ff4444' : '#00ff88';
+});
+
+// ─── Copy ────────────────────────────────────────────────
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const k = Math.round(lastK / 50) * 50;
+  const { rg, bg } = gainCorrections(lastRGB.r, lastRGB.g, lastRGB.b);
+  const mg = mgShift(lastRGB.r, lastRGB.g, lastRGB.b);
+  const filters = filterRec(k);
+  const text = `CCT: ${k}K | ${sceneName(k)}\nR GAIN: ${rg>0?'+':''}${rg}  B GAIN: ${bg>0?'+':''}${bg}\nMG SHIFT: ${mg>=0?'G +':'M '}${Math.abs(mg)}\nFILTER: ${filters[0]}\nRGB: ${Math.round(lastRGB.r)}/${Math.round(lastRGB.g)}/${Math.round(lastRGB.b)}`;
+  navigator.clipboard?.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'COPIED';
+    setTimeout(() => { btn.textContent = 'COPY'; }, 1500);
+  });
+});
+
+// ─── Start ───────────────────────────────────────────────
+document.getElementById('startBtn').addEventListener('click', startCamera);
+</script>
+</body>
+</html>
