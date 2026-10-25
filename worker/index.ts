@@ -3,7 +3,8 @@ import { Hono } from "hono";
 
 type Env = {
   ASSETS: Fetcher;
-  EMAIL: { send(msg: { to: string; from: string; subject: string; text: string; replyTo?: string }): Promise<unknown> };
+  // メール送信のつなぎ込み。ドメインが Cloudflare に移るまでは無い（段階2で wrangler.jsonc に足す）
+  EMAIL?: { send(msg: { to: string; from: string; subject: string; text: string; replyTo?: string }): Promise<unknown> };
   CONTACT_LIMIT?: { limit(o: { key: string }): Promise<{ success: boolean }> };
   CONTACT_TO: string;
   CONTACT_FROM: string;
@@ -62,6 +63,10 @@ app.post("/api/contact", async (c) => {
     `受付: ${new Date().toISOString()}`,
   ].join("\n");
 
+  if (!c.env.EMAIL) {
+    console.error("EMAIL binding is not set yet");
+    return c.json({ ok: false, error: "send" }, 503);
+  }
   try {
     await c.env.EMAIL.send({
       to: c.env.CONTACT_TO,
